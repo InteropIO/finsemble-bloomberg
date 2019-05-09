@@ -16,3 +16,7 @@
     3. Windowless component converts `Symbol` to Bloomberg format
     4. Windowless component composes the appropriate Terminal command
     5. This terminal command is sent to Panel 1 only
+* Follow up questions:
+    * What's the translation spec going to look like?
+    * How are we going to infer the commands needed for BLP Terminal?
+    * How do we determine which Terminal receives which command on the fly?
