@@ -23,7 +23,7 @@
             <Finsemble:WPFWindowTitleBar x:Name="FinsembleHeader" Height="25" Margin="0,0,0.2,0" VerticalAlignment="Top"/>
             <Label x:Name="BLP_cmd" Margin="0,54,0,-39">Command:</Label>
             <Label x:Name="BLP_security" Margin="0,81,0,-51">Security:</Label>
-            <TextBox Text="DES" x:Name="DataToSend" HorizontalAlignment="Left" Height="23" Margin="74,58,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="175" Panel.ZIndex="1"/>
+            <TextBox Text="DES" x:Name="DataToSend" HorizontalAlignment="Left" Height="23" Margin="73,58,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="175" Panel.ZIndex="1"/>
             <Label x:Name="Scrim" Margin="0,25,0,0" AllowDrop="True" Visibility="Hidden"  Panel.ZIndex="1000" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
             <Label x:Name="DroppedData" Margin="0" HorizontalContentAlignment="Center" FontSize="50" VerticalAlignment="Center"/>
             <TextBox Text="IBM US Equity" x:Name="SecurityToSend" HorizontalAlignment="Left" Height="23" Margin="73,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="175" Panel.ZIndex="1"/>
