@@ -24,10 +24,20 @@ namespace WindowlessCommander
 #endif
 
             // Initialize Finsemble
-            FSBL = new Finsemble(args, null);
-            FSBL.Connected += OnConnected;
-            FSBL.Disconnected += OnShutdown;
-            FSBL.Connect();
+            try
+            {
+                FSBL = new Finsemble(args, null);
+                FSBL.Connected += OnConnected;
+                FSBL.Disconnected += OnShutdown;
+                FSBL.Connect();
+            } catch (Exception err)
+            {
+                FSBL.RPC("Logger.log", new List<JToken>
+               {
+                   "Exception thrown: ", err.Message
+               });
+            }
+
 
             // Block main thread until worker is finished.
             autoEvent.WaitOne();
@@ -37,30 +47,60 @@ namespace WindowlessCommander
         {
             
             FSBL.RPC("Logger.log", new List<JToken> { "Windowless example connected to Finsemble." });
-            // Subscribe to Finsemble Linker Channels
-            FSBL.LinkerClient.LinkToChannel("group1", null, (s, a) => { });
-            BlpApi.Register();
-            //FSBL.RPC("LinkerClient.subscribe", new List<JToken>(), (error, response) =>
-            //{
-            //    FSBL.RPC("Logger.log", new List<JToken>
-            //    {
-            //        "Here's the response", response
-            //    });
-
-            //    RunBLPCommand(response);
-            //});
             try
             {
+                BlpApi.Register();
+            } catch (Exception err)
+            {
+                FSBL.RPC("Logger.log", new List<JToken>
+                {
+                    "Exception thrown: ", err.Message
+                });
+                FSBL.RPC("Logger.log", new List<JToken>
+                {
+                    "Do you have your Bloomberg Terminal running and are you signed in to them?"
+                });
+            }
+            try
+            {   /* TODO: Uncomment this when Bloomberg specific wiring is set up.
+                    Currently there are no widgets that publish "BBG_symbol" so the following block will never execute.
+                */
+
+                //FSBL.RouterClient.AddListener("BBG_symbol", (fsbl_sender, data) =>
+                //{
+                //    string symbol = (string)data.response["data"];
+                //    if (!_symbol.Equals(symbol))
+                //    {
+                //        RunBLPCommand(symbol);
+                //        _symbol = symbol;
+                //    }
+                //});
+
+                // These linker client methods are a workaround because the standard widgets don't publish to "symbol" via the Router
+                // This will need to be adjusted in every Bloomberg component integration unfortunately.
+                FSBL.LinkerClient.LinkToChannel("group1", null, (s, a) => { });
                 FSBL.LinkerClient.Subscribe("symbol", (fsbl_sender, data) =>
                 {
+                    FSBL.RouterClient.Transmit("symbol", data.response["data"]);
+                });
+
+                FSBL.RouterClient.AddListener("symbol", (fsbl_sender, data) =>
+                {
+
                     string symbol = (string)data.response["data"];
                     if (!_symbol.Equals(symbol))
                     {
+                        
+                        FSBL.RPC("Logger.log", new List<JToken>
+                        {
+                            "Sending BLP command with symbol: ", symbol
+                        });
                         RunBLPCommand(symbol);
                         _symbol = symbol;
+                    } else
+                    {
+                        return;
                     }
-                    
-                    
                 });
             } catch (Exception err)
             {
@@ -74,10 +114,8 @@ namespace WindowlessCommander
         {
             JTokenReader reader = new JTokenReader(response);
             string security = (string)response;
-            //string security = (string)response["data"];
             security += " US Equity";
             var enumSecurity = new string[1] { security };
-            //List<string> test = security.Split(' ').ToList();
             string command = "DES";
             string panel = "1";
             FSBL.RPC("Logger.log", new List<JToken>
@@ -86,14 +124,12 @@ namespace WindowlessCommander
                 });
             try
             {
-                //BlpTerminal.RunFunction(command, panel, enumSecurity, null);
                 BlpTerminal.BeginRunFunction(command, panel, enumSecurity, null, OnRunFunctionComplete, null);
             } catch (Exception e)
             {
                 Console.WriteLine(e);
             }
 
-            //throw new NotImplementedException();
         }
 
         private static void OnRunFunctionComplete(IAsyncResult ar)
@@ -118,6 +154,7 @@ namespace WindowlessCommander
                         finally
                         {
                             FSBL = null;
+                            Environment.Exit(0);
                         }
                     }
 
@@ -126,11 +163,7 @@ namespace WindowlessCommander
 
             // Release main thread so application can exit.
             autoEvent.Set();
+            
         }
     }
 }
-
-/*
- * 
-            
- */
