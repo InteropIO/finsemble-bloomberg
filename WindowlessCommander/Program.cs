@@ -8,18 +8,6 @@ using Bloomberglp.Blpapi;
 using Bloomberglp.TerminalApiEx;
 using ChartIQ.Finsemble;
 using Newtonsoft.Json.Linq;
-using Service = Bloomberglp.Blpapi.Service;
-using Session = Bloomberglp.Blpapi.Session;
-using Name = Bloomberglp.Blpapi.Name;
-using Event = Bloomberglp.Blpapi.Event;
-using Message = Bloomberglp.Blpapi.Message;
-using Identity = Bloomberglp.Blpapi.Identity;
-using Request = Bloomberglp.Blpapi.Request;
-using Element = Bloomberglp.Blpapi.Element;
-using EventHandler = Bloomberglp.Blpapi.EventHandler;
-using SessionOptions = Bloomberglp.Blpapi.SessionOptions;
-using CorrrelationID = Bloomberglp.Blpapi.CorrelationID;
-using EventQueue = Bloomberglp.Blpapi.EventQueue;
 
 namespace WindowlessCommander
 {
@@ -46,7 +34,7 @@ namespace WindowlessCommander
                 FSBL.Connect();
             } catch (Exception err)
             {
-                FSBL.RPC("Logger.log", new List<JToken>
+                FSBL.RPC("Logger.error", new List<JToken>
                {
                    "Exception thrown: ", err.Message
                });
@@ -66,13 +54,13 @@ namespace WindowlessCommander
                 BlpApi.Register();
             } catch (Exception err)
             {
-                FSBL.RPC("Logger.log", new List<JToken>
+                FSBL.RPC("Logger.error", new List<JToken>
                 {
                     "Exception thrown: ", err.Message
                 });
-                FSBL.RPC("Logger.log", new List<JToken>
+                FSBL.RPC("Logger.error", new List<JToken>
                 {
-                    "Do you have your Bloomberg Terminal running and are you signed in to them?"
+                    "Do you have your Bloomberg Terminal running and are you signed in?"
                 });
             }
             try
@@ -92,9 +80,6 @@ namespace WindowlessCommander
 
                 // These linker client methods are a workaround because the standard widgets don't publish to "symbol" via the Router
                 // This will need to be adjusted in every Bloomberg component integration unfortunately.
-
-                //secFinder = new SecurityLookup();
-                //secFinder.Init();
                 FSBL.LinkerClient.LinkToChannel("group1", null, (s, a) => { });
                 FSBL.LinkerClient.Subscribe("symbol", (fsbl_sender, data) =>
                 {

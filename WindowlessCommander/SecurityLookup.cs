@@ -188,18 +188,7 @@ namespace WindowlessCommander
         private void ProcessInstrumentListResponse(Message msg)
         {
             Element results = msg.GetElement(RESULTS_ELEMENT);
-            // Console.WriteLine("Processing " + numResults + " results:");
             BLP_ticker = results.GetValueAsElement(0).GetElementAsString(SECURITY_ELEMENT);
-            // return string result = results.GetValueAsElement(0).GetElementAsString(SECURITY_ELEMENT);
-            //for (int i = 0; i < numResults; ++i)
-            //{
-            //    Element result = results.GetValueAsElement(i);
-            //    Console.WriteLine(
-            //            "\t{0} {1} - {2}",
-            //            i + 1,
-            //            result.GetElementAsString(SECURITY_ELEMENT),
-            //            result.GetElementAsString(DESCRIPTION_ELEMENT));
-            //}
         }
 
         private void ProcessCurveListResponse(Message msg)
@@ -385,9 +374,6 @@ namespace WindowlessCommander
                     throw new Exception(
                         string.Format("Failed to open: {0}", INSTRUMENT_SERVICE));
                 }
-
-                //SendRequest(session, identity);
-                //EventLoop(session);
             }
             catch (Exception e)
             {
