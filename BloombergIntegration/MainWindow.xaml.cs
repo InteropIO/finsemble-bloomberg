@@ -51,6 +51,9 @@ namespace WPFExample
         /// <param name="args"></param>
         public MainWindow(string[] args)
         {
+#if DEBUG
+            System.Diagnostics.Debugger.Launch();
+#endif
             // Trigger actions on close when requested by Finsemble, e.g.:
             this.Closing += MainWindow_Closing;
 
@@ -68,6 +71,7 @@ namespace WPFExample
                 FinsembleHeader.SetBridge(FSBL); // The Header Control needs a connected finsemble instance
 
                 BlpApi.Register();
+
                 //Styling the Finsemble Header
                 /*
                 FinsembleHeader.SetActiveBackground(new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3C4C58")));
