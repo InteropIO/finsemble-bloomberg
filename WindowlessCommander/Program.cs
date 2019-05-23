@@ -24,7 +24,6 @@ namespace WindowlessCommander
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
 #endif
-
             // Initialize Finsemble
             try
             {
@@ -39,8 +38,6 @@ namespace WindowlessCommander
                    "Exception thrown: ", err.Message
                });
             }
-
-
             // Block main thread until worker is finished.
             autoEvent.WaitOne();
         }
@@ -122,6 +119,23 @@ namespace WindowlessCommander
         {
             BlpTerminal.SetGroupContext(groupName, security);
         }
+        private static void GrabTestSecurities()
+        {
+            var allWorksheets = BlpTerminal.GetAllWorksheets();
+            BlpWorksheet test;
+            foreach(BlpWorksheet sheet in allWorksheets)
+            {
+                if (sheet.Name == "Test Sheet 2")
+                {
+                    test = sheet;
+                    var securities = test.GetSecurities();
+                    foreach(string security in securities)
+                    {
+                        Console.Write(security);
+                    }
+                }
+            }
+        }
 
         private static void GrabWorksheetSecurities(BlpWorksheet worksheet)
         {
@@ -151,17 +165,54 @@ namespace WindowlessCommander
             var enumSecurity = new string[1] { security };
             BlpTerminal.RunFunction(command, panel, enumSecurity);
         }
+
+        private static void ReplaceSecuritiesOnWorksheet()
+        {
+            var worksheets = BlpTerminal.GetAllWorksheets();
+            BlpWorksheet testSheet = null;
+            BlpWorksheet replaceSheet = null;
+            foreach(BlpWorksheet sheet in worksheets)
+            {
+                if (sheet.Name == "TestSheet1")
+                {
+                    testSheet = sheet;
+                }
+                if (sheet.Name == "Basic Last, Net")
+                {
+                    replaceSheet = sheet;
+                }
+            }
+            if (testSheet == null || replaceSheet == null)
+            {   // Just in case things went awry
+                return;
+            }
+            GrabWorksheetSecurities(replaceSheet);
+            var replaceSecurities = replaceSheet.GetSecurities();
+            testSheet.ReplaceSecurities(replaceSecurities);
+
+        }
+
         private static void RunBLPCommand(JToken response)
         {
             JTokenReader reader = new JTokenReader(response);
             string security = (string)response;
             var testSecurity = security + " US Equity";
             var enumSecurity = new string[1] { testSecurity };
+            var allWorksheets = BlpTerminal.GetAllWorksheets();
+            BlpWorksheet testWorksheet = null;
+
+            foreach(BlpWorksheet sheet in allWorksheets)
+            {
+                if (sheet.Name == "Test Sheet 2")
+                {
+                    testWorksheet = sheet;
+                }
+            }
 
             try
             {
                 /*
-                 * Send (hardcoded) command to terminal from finsemble component 
+                 * Send (hardcoded equity) command to terminal from finsemble component 
                  */
                 DefaultCommandMockSecurity(security);
 
@@ -170,7 +221,7 @@ namespace WindowlessCommander
                  * BLP security lookup to get the correct format 
                  * (as opposed to us appending the instrument type)
                  */
-                DefaultCommandWithSecurityLookup(security);
+                //DefaultCommandWithSecurityLookup(security);
 
                 var groups = BlpTerminal.GetAllGroups();
                 if (groups.Count > 0)
@@ -185,6 +236,21 @@ namespace WindowlessCommander
                  * Pass a security, create new worksheet with that security (securities)
                  */
                 CreateBLPWorksheet(enumSecurity);
+
+                /*
+                 * Replace worksheet securities with other securities
+                 */
+                ReplaceSecuritiesOnWorksheet();
+
+                /*
+                 * Grab test securities from "Test Sheet 2" for debugging purposes
+                 */
+                GrabTestSecurities();
+
+                /*
+                 * Add searched security to test worksheet
+                 */
+                AddSecurityToWorksheet(testWorksheet, enumSecurity);
 
             } catch (Exception e)
             {
