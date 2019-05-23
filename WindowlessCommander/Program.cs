@@ -109,27 +109,83 @@ namespace WindowlessCommander
                 Console.WriteLine(err);
             }
 
-
         }
 
+
+        private static void CreateBLPWorksheet(IList<string> securities)
+        {
+            var worksheet = BlpTerminal.CreateWorksheet("TestSheet1", securities);
+            var allWorksheets = BlpTerminal.GetAllWorksheets();
+        }
+
+        private static void ChangeGroupSecurity(string groupName, string security)
+        {
+            BlpTerminal.SetGroupContext(groupName, security);
+        }
+
+        private static void GrabWorksheetSecurities(BlpWorksheet worksheet)
+        {
+            var securityList = worksheet.GetSecurities();
+            Console.Write(securityList);
+        }
+
+        private static void AddSecurityToWorksheet(BlpWorksheet worksheet, IList<string> securities)
+        {
+            worksheet.AppendSecurities(securities);
+        }
+
+        private static void DefaultCommandMockSecurity(string security)
+        {
+            string command = "DES";
+            string panel = "1";
+            security += " US Equity";
+            var enumSecurity = new string[1] { security };
+            BlpTerminal.RunFunction(command, panel, enumSecurity);
+        }
+
+        private static void DefaultCommandWithSecurityLookup(string security)
+        {
+            string BLP_security = SecurityLookup(security);
+            string command = "DES";
+            string panel = "2";
+            var enumSecurity = new string[1] { security };
+            BlpTerminal.RunFunction(command, panel, enumSecurity);
+        }
         private static void RunBLPCommand(JToken response)
         {
             JTokenReader reader = new JTokenReader(response);
             string security = (string)response;
-            string BLP_security = SecurityLookup(security);
-            //security += " US Equity";
-            //var enumSecurity = new string[1] { security };
-            var enumSecurity = new string[1] { BLP_security };
-            string command = "DES";
-            string panel = "1";
-            FSBL.RPC("Logger.log", new List<JToken>
-                {
-                    "Here's the command:", command, panel, BLP_security
-                });
+            var testSecurity = security + " US Equity";
+            var enumSecurity = new string[1] { testSecurity };
+
             try
             {
-                //BlpTerminal.BeginRunFunction(command, panel, enumSecurity, null, OnRunFunctionComplete, null);
-                BlpTerminal.RunFunction(command, panel, enumSecurity, "");
+                /*
+                 * Send (hardcoded) command to terminal from finsemble component 
+                 */
+                DefaultCommandMockSecurity(security);
+
+                /*
+                 * Send (hardcoded) command to terminal from finsemble component but use
+                 * BLP security lookup to get the correct format 
+                 * (as opposed to us appending the instrument type)
+                 */
+                DefaultCommandWithSecurityLookup(security);
+
+                var groups = BlpTerminal.GetAllGroups();
+                if (groups.Count > 0)
+                {
+                    /*
+                     * Communicate with Launchpad groups (and linked components in those groups)
+                     */
+                    ChangeGroupSecurity(groups[0].Name, security);
+                }
+
+                /*
+                 * Pass a security, create new worksheet with that security (securities)
+                 */
+                CreateBLPWorksheet(enumSecurity);
+
             } catch (Exception e)
             {
                 Console.WriteLine(e);
