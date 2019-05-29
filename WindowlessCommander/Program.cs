@@ -90,6 +90,7 @@ namespace WindowlessCommander
                 {
 
                     string symbol = (string)data.response["data"];
+                    symbol = symbol.Trim();
                     if (!_symbol.Equals(symbol))
                     {
                         
@@ -141,10 +142,12 @@ namespace WindowlessCommander
                 {
                     test = sheet;
                     var securities = test.GetSecurities();
+                    Console.WriteLine("Securities in Test Sheet 2");
                     foreach(string security in securities)
                     {
                         Console.WriteLine(security);
                     }
+                    Console.WriteLine("End of Test Sheet 2 securities");
                 }
             }
         }
@@ -152,10 +155,12 @@ namespace WindowlessCommander
         private static void GrabWorksheetSecurities(BlpWorksheet worksheet)
         {
             var securityList = worksheet.GetSecurities();
+            Console.WriteLine("Securities in Worksheet: " + worksheet.Name);
             foreach(string security in securityList)
             {
                 Console.WriteLine(security);
             }
+            Console.WriteLine("End of worksheet: " + worksheet.Name);
         }
 
         private static void AddSecurityToWorksheet(BlpWorksheet worksheet, IList<string> securities)
@@ -217,7 +222,7 @@ namespace WindowlessCommander
         private static void DefaultCommandWithTails(string security)
         {
             string command = "DES";
-            string panel = "1";
+            string panel = "2";
             security += " US Equity";
             var enumSecurity = new string[1] { security };
             BlpTerminal.RunFunction(command, panel, enumSecurity, "4");
@@ -265,7 +270,7 @@ namespace WindowlessCommander
                 }
 
                 /*
-                 * Pass a security, create new worksheet (if it doesn't exist) with that security (securities)
+                 * Pass a security, create new worksheet (if it doesn't exist) with that security or securities
                  */
                 CreateBLPWorksheet(enumSecurity);
 
@@ -321,7 +326,7 @@ namespace WindowlessCommander
                 var tickerChangeArray = tickerChange.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
                 foreach(string a in tickerChangeArray)
                 {
-                    Console.WriteLine(a);
+                    Console.WriteLine("BLP context changed to " + a);
                 }
                 var symbolToSend = tickerChangeArray[0];
                 if (!_symbol.Equals(symbolToSend))
