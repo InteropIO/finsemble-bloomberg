@@ -19,6 +19,7 @@ namespace WindowlessCommander
         private static SecurityLookup secFinder = null;
 
         private static Finsemble FSBL = null;
+        private static List<string> securities = null;
         static void Main(string[] args)
         {
 #if DEBUG
@@ -49,6 +50,21 @@ namespace WindowlessCommander
             try
             {
                 BlpApi.Register();
+                FSBL.RouterClient.AddResponder("BBG_ready", (error, queryMessage) =>
+                {
+                    //if (error)
+                    //{
+                    //    FSBL.RPC("Logger.error", new List<JToken>
+                    //    {
+                    //        "Add responder failed " + error
+                    //    });
+                    //}
+                    //else
+                    //{
+                        var response = true;
+                        queryMessage.sendQueryMessage(response);
+                    //}
+                });
             } catch (Exception err)
             {
                 FSBL.RPC("Logger.error", new List<JToken>
@@ -62,7 +78,7 @@ namespace WindowlessCommander
             }
             try
             {
-                UpdateFinsembleWithNewContext();
+                //UpdateFinsembleWithNewContext();
                 /* TODO: Uncomment this when Bloomberg specific wiring is set up.
                     Currently there are no widgets that publish "BBG_symbol" so the following block will never execute.
                 */
@@ -83,27 +99,36 @@ namespace WindowlessCommander
                 FSBL.LinkerClient.LinkToChannel("group1", null, (s, a) => { });
                 FSBL.LinkerClient.Subscribe("symbol", (fsbl_sender, data) =>
                 {
-                    FSBL.RouterClient.Transmit("symbol", data.response["data"]);
+                    FSBL.RouterClient.Transmit("BBG_symbol", data.response["data"]);
                 });
 
-                FSBL.RouterClient.AddListener("symbol", (fsbl_sender, data) =>
+                FSBL.RouterClient.AddListener("BBG_symbol", (fsbl_sender, data) =>
                 {
+                    var response = data.response["data"];
+                    AGGridRequest a = new AGGridRequest(response);
 
-                    string symbol = (string)data.response["data"];
-                    symbol = symbol.Trim();
-                    if (!_symbol.Equals(symbol))
+                    Console.WriteLine(a);
+                    for (int i = 0; i < response.Count(); i++)
                     {
-                        
-                        FSBL.RPC("Logger.log", new List<JToken>
-                        {
-                            "Sending BLP command with symbol: ", symbol
-                        });
-                        RunBLPCommand(symbol);
-                        _symbol = symbol;
-                    } else
-                    {
-                        return;
+                        Console.WriteLine(response[i]["security"]);
                     }
+                    
+                    //string symbol = (string)data.response["data"];
+                    //symbol = symbol.Trim();
+                    //if (!_symbol.Equals(symbol))
+                    //{
+                        
+                    //    FSBL.RPC("Logger.log", new List<JToken>
+                    //    {
+                    //        "Sending BLP command with symbol: ", symbol
+                    //    });
+                    //    RunBLPCommand(symbol);
+                    //    _symbol = symbol;
+                    //}
+                    //else
+                    //{
+                    //    return;
+                    //}
                 });
             } catch (Exception err)
             {
@@ -188,7 +213,7 @@ namespace WindowlessCommander
         {
             string BLP_security = SecurityLookup(security);
             string command = "DES";
-            string panel = "2";
+            string panel = "1";
             var enumSecurity = new string[1] { security };
             BlpTerminal.RunFunction(command, panel, enumSecurity);
         }
@@ -210,10 +235,10 @@ namespace WindowlessCommander
                 }
             }
             if (testSheet == null || replaceSheet == null)
-            {   // Just in case things went awry
+            {
                 return;
             }
-            GrabWorksheetSecurities(replaceSheet);
+            //GrabWorksheetSecurities(replaceSheet);
             var replaceSecurities = replaceSheet.GetSecurities();
             testSheet.ReplaceSecurities(replaceSecurities);
 
@@ -250,7 +275,7 @@ namespace WindowlessCommander
                 /*
                  * Send (hardcoded equity) command to terminal from finsemble component 
                  */
-                DefaultCommandMockEquity(security);
+                //DefaultCommandMockEquity(security);
 
                 /*
                  * Send (hardcoded) command to terminal from finsemble component but use
@@ -266,33 +291,33 @@ namespace WindowlessCommander
                      * Communicate with Launchpad groups (and linked components in those groups)
                      * and change linked security
                      */
-                    ChangeGroupSecurity(groups[0].Name, security);
+                    //ChangeGroupSecurity(groups[0].Name, security);
                 }
 
                 /*
                  * Pass a security, create new worksheet (if it doesn't exist) with that security or securities
                  */
-                CreateBLPWorksheet(enumSecurity);
+                //CreateBLPWorksheet(enumSecurity);
 
                 /*
                  * Replace worksheet securities with other securities
                  */
-                ReplaceSecuritiesOnWorksheet();
+                //ReplaceSecuritiesOnWorksheet();
 
                 /*
                  * Grab test securities from "Test Sheet 2" for debugging purposes
                  */
-                GrabTestSecurities();
+                //GrabTestSecurities();
 
                 /*
                  * Add searched security to test worksheet
                  */
-                AddSecurityToWorksheet(testWorksheet, enumSecurity);
+                //AddSecurityToWorksheet(testWorksheet, enumSecurity);
 
                 /*
                  * Run hardcoded command with preset tail
                  */
-                DefaultCommandWithTails(security);
+                //DefaultCommandWithTails(security);
 
                 /*
                  * Change Finsemble context based on launch pad context change
@@ -321,13 +346,12 @@ namespace WindowlessCommander
             {
                 BlpGroupContextChangedEventArgs context = (BlpGroupContextChangedEventArgs)e;
                 var tickerChange = context.Group.Value;
-                Console.WriteLine("Component group event:" + context.GetType().FullName);
                 string[] splitter = { "US Equity" };
                 var tickerChangeArray = tickerChange.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
-                foreach(string a in tickerChangeArray)
-                {
-                    Console.WriteLine("BLP context changed to " + a);
-                }
+                //foreach(string a in tickerChangeArray)
+                //{
+                //    Console.WriteLine("BLP context changed to " + a);
+                //}
                 var symbolToSend = tickerChangeArray[0];
                 if (!_symbol.Equals(symbolToSend))
                 {
