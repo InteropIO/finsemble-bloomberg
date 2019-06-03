@@ -25,6 +25,7 @@ namespace WindowlessCommander
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
 #endif
+            Console.SetWindowSize(40, 30);
             // Initialize Finsemble
             try
             {
@@ -50,21 +51,13 @@ namespace WindowlessCommander
             try
             {
                 BlpApi.Register();
-                FSBL.RouterClient.AddResponder("BBG_ready", (error, queryMessage) =>
+                FSBL.RouterClient.AddResponder("BBG_ready", (fsbl_sender, queryMessage) =>
                 {
-                    //if (error)
-                    //{
-                    //    FSBL.RPC("Logger.error", new List<JToken>
-                    //    {
-                    //        "Add responder failed " + error
-                    //    });
-                    //}
-                    //else
-                    //{
-                        var response = true;
-                        queryMessage.sendQueryMessage(response);
-                    //}
+                    FSBL.RouterClient.Transmit("BBG_ready", true);
+                    Console.WriteLine("Responded to BBG_ready query");
+                    queryMessage.sendQueryMessage(true);
                 });
+                FSBL.RouterClient.Transmit("BBG_ready", true);
             } catch (Exception err)
             {
                 FSBL.RPC("Logger.error", new List<JToken>
@@ -78,57 +71,24 @@ namespace WindowlessCommander
             }
             try
             {
-                //UpdateFinsembleWithNewContext();
-                /* TODO: Uncomment this when Bloomberg specific wiring is set up.
-                    Currently there are no widgets that publish "BBG_symbol" so the following block will never execute.
-                */
-
-                //FSBL.RouterClient.AddListener("BBG_symbol", (fsbl_sender, data) =>
-                //{
-                //    string symbol = (string)data.response["data"];
-                //    if (!_symbol.Equals(symbol))
-                //    {
-                //        RunBLPCommand(symbol);
-                //        _symbol = symbol;
-                //    }
-                //});
-
-                // These linker client methods are a workaround because the standard widgets don't publish to "symbol" via the Router
-                // This will need to be adjusted in every Bloomberg component integration unfortunately.
-
-                FSBL.LinkerClient.LinkToChannel("group1", null, (s, a) => { });
-                FSBL.LinkerClient.Subscribe("symbol", (fsbl_sender, data) =>
-                {
-                    FSBL.RouterClient.Transmit("BBG_symbol", data.response["data"]);
-                });
-
                 FSBL.RouterClient.AddListener("BBG_symbol", (fsbl_sender, data) =>
                 {
                     var response = data.response["data"];
-                    AGGridRequest a = new AGGridRequest(response);
-
-                    Console.WriteLine(a);
-                    for (int i = 0; i < response.Count(); i++)
+                    securities = new List<string>();
+                    foreach(string a in response)
                     {
-                        Console.WriteLine(response[i]["security"]);
+                        securities.Add(a + " Equity");
                     }
-                    
-                    //string symbol = (string)data.response["data"];
-                    //symbol = symbol.Trim();
-                    //if (!_symbol.Equals(symbol))
-                    //{
-                        
-                    //    FSBL.RPC("Logger.log", new List<JToken>
-                    //    {
-                    //        "Sending BLP command with symbol: ", symbol
-                    //    });
-                    //    RunBLPCommand(symbol);
-                    //    _symbol = symbol;
-                    //}
-                    //else
-                    //{
-                    //    return;
-                    //}
+                    ReplaceSecuritiesOnWorksheet(securities, "Demo sheet");
+                });
+                FSBL.RouterClient.AddListener("BBG_des_symbol", (fsbl_sender, data) =>
+                {
+                    var response = data.response["data"];
+                    //string test = response.Value<string>("data");
+                    //test += " Equity";
+                    //List<string> testList = new List<string>();
+                    //testList.Add(test);
+                    //BlpTerminal.RunFunction("DES", test, testList, "1");
                 });
             } catch (Exception err)
             {
@@ -136,7 +96,6 @@ namespace WindowlessCommander
             }
 
         }
-
 
         private static void CreateBLPWorksheet(IList<string> securities)
         {
@@ -242,6 +201,18 @@ namespace WindowlessCommander
             var replaceSecurities = replaceSheet.GetSecurities();
             testSheet.ReplaceSecurities(replaceSecurities);
 
+        }
+        private static void ReplaceSecuritiesOnWorksheet(IList<string> securities, string worksheetName)
+        {
+            var worksheets = BlpTerminal.GetAllWorksheets();
+            foreach(BlpWorksheet sheet in worksheets)
+            {
+                if (sheet.Name == worksheetName)
+                {
+                    sheet.ReplaceSecurities(securities);
+                    return;
+                }
+            }
         }
 
         private static void DefaultCommandWithTails(string security)
@@ -388,7 +359,8 @@ namespace WindowlessCommander
         }
 
         private static void OnShutdown(object sender, EventArgs e)
-        {
+        { // Need to dispose of window correctly. I guess this wouldn't be a problem in the windowless form.
+
             if (FSBL != null)
             {
                 lock (lockObj)
@@ -397,6 +369,15 @@ namespace WindowlessCommander
                     {
                         try
                         {
+                            FSBL.RouterClient.RemoveResponder("BBG_ready");
+                            FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
+                            {
+                                Console.WriteLine(response);
+                            });
+                            FSBL.RouterClient.RemoveListener("BBG_des_symbol", (fsbl_sender, response) =>
+                            {
+                                Console.WriteLine(response);
+                            });
                             // Dispose of Finsemble.
                             FSBL.Dispose();
                         }

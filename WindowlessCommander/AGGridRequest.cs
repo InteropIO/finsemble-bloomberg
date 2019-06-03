@@ -14,6 +14,8 @@ namespace WindowlessCommander
         {
             for (int i = 0; i < args.Count(); i++)
             {
+                var test = args[i];
+                Console.WriteLine(test["security"]);
                 Securities.Add((string)args[i]["security"]);
             }
         }  
