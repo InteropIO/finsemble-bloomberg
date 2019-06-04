@@ -66,14 +66,9 @@ namespace WindowlessCommander
             System.Diagnostics.Debugger.Launch();
 #endif
             Process[] processes = Process.GetProcessesByName("WindowlessCommander");
-            if (processes.Length > 0)
+            if (processes.Length > 1)
             {
-                for (int i = 0; i < processes.Length; i++)
-                {
-                    processes[i].CloseMainWindow();
-                    processes[i].Close();
-                    
-                }
+                processes[0].Kill();
             }
             _handler += new EventHandler(Handler);
             //SetConsoleCtrlHandler(_handler, true);
@@ -467,8 +462,7 @@ namespace WindowlessCommander
                             {
                                 for (int i = 0; i < processes.Length; i++)
                                 {
-                                    processes[i].CloseMainWindow();
-                                    processes[i].Close();
+                                    processes[i].Kill();
                                 }
                             }
                             // Dispose of Finsemble.
