@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,15 +22,68 @@ namespace WindowlessCommander
 
         private static Finsemble FSBL = null;
         private static List<string> securities = null;
+
+        static bool exitSystem = false;
+
+        [DllImport("Kernel32")]
+        private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
+        private delegate bool EventHandler(CtrlType sig);
+        static EventHandler _handler;
+
+        enum CtrlType
+        {
+            CTRL_C_EVENT = 0,
+            CTRL_BREAK_EVENT = 1,
+            CTRL_CLOSE_EVENT = 2,
+            CTRL_LOGOFF_EVENT = 5,
+            CTRL_SHUTDOWN_EVENT = 6
+        }
+        private static bool Handler(CtrlType sig)
+        {
+            FSBL.RouterClient.RemoveResponder("BBG_ready");
+            FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
+            {
+                Console.WriteLine(response);
+            });
+            FSBL.RouterClient.RemoveListener("BBG_des_symbol", (fsbl_sender, response) =>
+            {
+                Console.WriteLine(response);
+            });
+
+            //allow main to run off
+            exitSystem = true;
+
+            //shutdown right away so there are no lingering threads
+            Environment.Exit(-1);
+
+            return true;
+        }
+
+
         static void Main(string[] args)
         {
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
 #endif
-            Console.SetWindowSize(40, 30);
+            Process[] processes = Process.GetProcessesByName("WindowlessCommander");
+            if (processes.Length > 0)
+            {
+                for (int i = 0; i < processes.Length; i++)
+                {
+                    processes[i].CloseMainWindow();
+                    processes[i].Close();
+                    
+                }
+            }
+            _handler += new EventHandler(Handler);
+            //SetConsoleCtrlHandler(_handler, true);
+            //Console.SetWindowSize(40, 30);
+            AppDomain.CurrentDomain.ProcessExit += new System.EventHandler(CurrentDomain_ProcessExit);
+            
             // Initialize Finsemble
             try
             {
+
                 FSBL = new Finsemble(args, null);
                 FSBL.Connected += OnConnected;
                 FSBL.Disconnected += OnShutdown;
@@ -44,6 +99,19 @@ namespace WindowlessCommander
             autoEvent.WaitOne();
         }
 
+        private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        {
+            FSBL.RouterClient.RemoveResponder("BBG_ready");
+            FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
+            {
+                Console.WriteLine(response);
+            });
+            FSBL.RouterClient.RemoveListener("BBG_des_symbol", (fsbl_sender, response) =>
+            {
+                Console.WriteLine(response);
+            });
+        }
+
         private static void OnConnected(object sender, EventArgs e)
         {
             
@@ -53,7 +121,6 @@ namespace WindowlessCommander
                 BlpApi.Register();
                 FSBL.RouterClient.AddResponder("BBG_ready", (fsbl_sender, queryMessage) =>
                 {
-                    FSBL.RouterClient.Transmit("BBG_ready", true);
                     Console.WriteLine("Responded to BBG_ready query");
                     queryMessage.sendQueryMessage(true);
                 });
@@ -83,13 +150,35 @@ namespace WindowlessCommander
                 });
                 FSBL.RouterClient.AddListener("BBG_des_symbol", (fsbl_sender, data) =>
                 {
+                    var BBG_groups = BlpTerminal.GetAllGroups();
+                    List<string> list_BBG_groups = new List<string>();
+                    foreach(BlpGroup item in BBG_groups)
+                    {
+                        list_BBG_groups.Add(item.Name);
+                    }
                     var response = data.response["data"];
-                    //string test = response.Value<string>("data");
-                    //test += " Equity";
-                    //List<string> testList = new List<string>();
-                    //testList.Add(test);
-                    //BlpTerminal.RunFunction("DES", test, testList, "1");
+                    var symbol = response.Value<string>("symbol");
+                    List<string> groups = new List<string>();
+                    for (int i = 0; i < response["groups"].Count(); i++)
+                    {
+                        groups.Add((string)response["groups"][i]);
+                    }
+                    response += " Equity";
+                    List<string> testList = new List<string>();
+                    testList.Add(symbol);
+                    BlpTerminal.RunFunction("DES", "1", testList, "1");
+                    foreach(string group in groups)
+                    {
+                        if(list_BBG_groups.Contains(group))
+                        {
+                            BlpTerminal.SetGroupContext(group, symbol);
+                        }
+                    }
+                    
                 });
+                UpdateFinsembleWithNewContext();
+                //var groups = BlpTerminal.GetAllGroups();
+                //Console.WriteLine(groups);
             } catch (Exception err)
             {
                 Console.WriteLine(err);
@@ -319,20 +408,25 @@ namespace WindowlessCommander
                 var tickerChange = context.Group.Value;
                 string[] splitter = { "US Equity" };
                 var tickerChangeArray = tickerChange.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
-                //foreach(string a in tickerChangeArray)
-                //{
-                //    Console.WriteLine("BLP context changed to " + a);
-                //}
                 var symbolToSend = tickerChangeArray[0];
-                if (!_symbol.Equals(symbolToSend))
+
+                //FSBL.RouterClient.Transmit("symbol", symbolToSend.Trim());
+                JObject test = new JObject
                 {
-                    _symbol = symbolToSend;
-                    //FSBL.RouterClient.Transmit("symbol", _symbol);
-                    JObject test = new JObject();
-                    test.Add("dataType", "symbol");
-                    test.Add("data", _symbol);
-                    FSBL.LinkerClient.Publish(test);
-                }
+                    { "dataType", "symbol" },
+                    { "data", symbolToSend.Trim() }
+                };
+                FSBL.LinkerClient.PublishToChannel(context.Group.Name, test);
+                //if (!_symbol.Equals(symbolToSend))
+                //{
+                //    //_symbol = symbolToSend;
+                    
+                //    JObject test = new JObject();
+                //    test.Add("dataType", "symbol");
+                //    test.Add("data", _symbol);
+                    
+                //    //FSBL.LinkerClient.Publish(test);
+                //}
 
             }
             
@@ -359,8 +453,7 @@ namespace WindowlessCommander
         }
 
         private static void OnShutdown(object sender, EventArgs e)
-        { // Need to dispose of window correctly. I guess this wouldn't be a problem in the windowless form.
-
+        { 
             if (FSBL != null)
             {
                 lock (lockObj)
@@ -369,15 +462,15 @@ namespace WindowlessCommander
                     {
                         try
                         {
-                            FSBL.RouterClient.RemoveResponder("BBG_ready");
-                            FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
+                            Process[] processes = Process.GetProcessesByName("WindowlessCommander");
+                            if (processes.Length > 0)
                             {
-                                Console.WriteLine(response);
-                            });
-                            FSBL.RouterClient.RemoveListener("BBG_des_symbol", (fsbl_sender, response) =>
-                            {
-                                Console.WriteLine(response);
-                            });
+                                for (int i = 0; i < processes.Length; i++)
+                                {
+                                    processes[i].CloseMainWindow();
+                                    processes[i].Close();
+                                }
+                            }
                             // Dispose of Finsemble.
                             FSBL.Dispose();
                         }
@@ -396,6 +489,8 @@ namespace WindowlessCommander
             autoEvent.Set();
             
         }
+
+        
     }
 
 }
