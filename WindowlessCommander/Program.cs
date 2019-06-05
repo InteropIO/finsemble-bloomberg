@@ -65,11 +65,6 @@ namespace WindowlessCommander
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
 #endif
-            Process[] processes = Process.GetProcessesByName("WindowlessCommander");
-            if (processes.Length > 1)
-            {
-                processes[0].Kill();
-            }
             _handler += new EventHandler(Handler);
             //SetConsoleCtrlHandler(_handler, true);
             //Console.SetWindowSize(40, 30);
@@ -97,6 +92,7 @@ namespace WindowlessCommander
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             FSBL.RouterClient.RemoveResponder("BBG_ready");
+            FSBL.RouterClient.Transmit("BBG_ready", false);
             FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
             {
                 Console.WriteLine(response);
@@ -109,11 +105,27 @@ namespace WindowlessCommander
 
         private static void OnConnected(object sender, EventArgs e)
         {
-            
+            Process[] processes = Process.GetProcessesByName("WindowlessCommander");
+            if (processes.Length > 1)
+            {
+                FSBL.RouterClient.RemoveResponder("BBG_ready");
+                FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
+                {
+                    Console.WriteLine(response);
+                });
+                FSBL.RouterClient.RemoveListener("BBG_des_symbol", (fsbl_sender, response) =>
+                {
+                    Console.WriteLine(response);
+                });
+                FSBL.RouterClient.Transmit("BBG_ready", false);
+                processes[0].Kill();
+            }
+
             FSBL.RPC("Logger.log", new List<JToken> { "Windowless example connected to Finsemble." });
             try
             {
                 BlpApi.Register();
+                BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
                 FSBL.RouterClient.AddResponder("BBG_ready", (fsbl_sender, queryMessage) =>
                 {
                     Console.WriteLine("Responded to BBG_ready query");
@@ -179,6 +191,11 @@ namespace WindowlessCommander
                 Console.WriteLine(err);
             }
 
+        }
+
+        private static void BlpApi_Disconnected(object sender, EventArgs e)
+        {
+            FSBL.RouterClient.Transmit("BBG_ready", false);
         }
 
         private static void CreateBLPWorksheet(IList<string> securities)
