@@ -62,18 +62,28 @@ namespace WindowlessCommander
 
         static void Main(string[] args)
         {
-#if DEBUG
-            System.Diagnostics.Debugger.Launch();
-#endif
-            _handler += new EventHandler(Handler);
-            //SetConsoleCtrlHandler(_handler, true);
-            //Console.SetWindowSize(40, 30);
-            AppDomain.CurrentDomain.ProcessExit += new System.EventHandler(CurrentDomain_ProcessExit);
+//#if DEBUG
+//            System.Diagnostics.Debugger.Launch();
+//#endif
+            lock(lockObj)
+            {
+                _handler += new EventHandler(Handler);
+                //SetConsoleCtrlHandler(_handler, true);
+                //Console.SetWindowSize(40, 30);
+                AppDomain.CurrentDomain.ProcessExit += new System.EventHandler(CurrentDomain_ProcessExit);
+                Process[] processes = Process.GetProcessesByName("WindowlessCommander");
+                if (processes.Length > 1)
+                {
+                    processes[0].Close();
+                    //processes[0].Kill();
+                }
+            }
             
+
+
             // Initialize Finsemble
             try
             {
-
                 FSBL = new Finsemble(args, null);
                 FSBL.Connected += OnConnected;
                 FSBL.Disconnected += OnShutdown;
@@ -87,6 +97,7 @@ namespace WindowlessCommander
             }
             // Block main thread until worker is finished.
             autoEvent.WaitOne();
+            
         }
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
@@ -105,35 +116,31 @@ namespace WindowlessCommander
 
         private static void OnConnected(object sender, EventArgs e)
         {
-            Process[] processes = Process.GetProcessesByName("WindowlessCommander");
-            if (processes.Length > 1)
-            {
-                FSBL.RouterClient.RemoveResponder("BBG_ready");
-                FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
-                {
-                    Console.WriteLine(response);
-                });
-                FSBL.RouterClient.RemoveListener("BBG_des_symbol", (fsbl_sender, response) =>
-                {
-                    Console.WriteLine(response);
-                });
-                FSBL.RouterClient.Transmit("BBG_ready", false);
-                processes[0].Kill();
-            }
+
 
             FSBL.RPC("Logger.log", new List<JToken> { "Windowless example connected to Finsemble." });
             try
             {
                 BlpApi.Register();
                 BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
+                FSBL.RouterClient.RemoveResponder("BBG_ready");
                 FSBL.RouterClient.AddResponder("BBG_ready", (fsbl_sender, queryMessage) =>
                 {
                     Console.WriteLine("Responded to BBG_ready query");
-                    queryMessage.sendQueryMessage(true);
+                    JObject test = new JObject
+                    {
+                        { "response", true },
+                    };
+                    queryMessage.sendQueryMessage(test);
+                    var a = queryMessage.response;
+                    var b = queryMessage.ToString();
+                    FSBL.RPC("Logger.log", new List<JToken> { a });
+                    FSBL.RPC("Logger.log", new List<JToken> { b });
                 });
                 FSBL.RouterClient.Transmit("BBG_ready", true);
             } catch (Exception err)
             {
+                FSBL.RouterClient.Transmit("BBG_ready", false);
                 FSBL.RPC("Logger.error", new List<JToken>
                 {
                     "Exception thrown: ", err.Message
