@@ -62,10 +62,10 @@ namespace WindowlessCommander
 
         static void Main(string[] args)
         {
-//#if DEBUG
-//            System.Diagnostics.Debugger.Launch();
-//#endif
-            lock(lockObj)
+#if DEBUG
+            System.Diagnostics.Debugger.Launch();
+#endif
+            lock (lockObj)
             {
                 _handler += new EventHandler(Handler);
                 //SetConsoleCtrlHandler(_handler, true);
@@ -119,35 +119,45 @@ namespace WindowlessCommander
 
 
             FSBL.RPC("Logger.log", new List<JToken> { "Windowless example connected to Finsemble." });
-            try
+
+            bool isBloombergConnected = false;
+            while(!isBloombergConnected)
             {
-                BlpApi.Register();
-                BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
-                FSBL.RouterClient.RemoveResponder("BBG_ready");
-                FSBL.RouterClient.AddResponder("BBG_ready", (fsbl_sender, queryMessage) =>
+                try
                 {
-                    Console.WriteLine("Responded to BBG_ready query");
-                    JObject test = new JObject
-                    {
-                        { "response", true },
-                    };
-                    queryMessage.sendQueryMessage(test);
-                    var a = queryMessage.response;
-                    var b = queryMessage.ToString();
-                    FSBL.RPC("Logger.log", new List<JToken> { a });
-                    FSBL.RPC("Logger.log", new List<JToken> { b });
-                });
-                FSBL.RouterClient.Transmit("BBG_ready", true);
-            } catch (Exception err)
-            {
-                FSBL.RouterClient.Transmit("BBG_ready", false);
-                FSBL.RPC("Logger.error", new List<JToken>
+                    Thread.Sleep(5000);
+                    BlpApi.Register();
+                    BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
+                    isBloombergConnected = true;
+                    FSBL.RouterClient.Transmit("BBG_ready", true);
+                } catch (Exception err)
+                {
+
+                    FSBL.RouterClient.Transmit("BBG_ready", false);
+                    FSBL.RPC("Logger.error", new List<JToken>
                 {
                     "Exception thrown: ", err.Message
                 });
-                FSBL.RPC("Logger.error", new List<JToken>
+                    FSBL.RPC("Logger.error", new List<JToken>
                 {
                     "Do you have your Bloomberg Terminal running and are you signed in?"
+                });
+                }
+            }
+            try
+            {
+                FSBL.RouterClient.RemoveResponder("BBG_ready", true);
+                FSBL.RouterClient.AddResponder("BBG_ready", (fsbl_sender, queryMessage) =>
+                {
+                    Console.WriteLine("Responded to BBG_ready query");
+                    queryMessage.sendQueryMessage(true);
+                });
+                
+            } catch (Exception err)
+            {
+                FSBL.RPC("Logger.error", new List<JToken>
+                {
+                    "Exception thrown: ", err.Message
                 });
             }
             try
