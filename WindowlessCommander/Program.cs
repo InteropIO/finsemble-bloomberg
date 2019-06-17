@@ -126,22 +126,22 @@ namespace WindowlessCommander
                 try
                 {
                     Thread.Sleep(5000);
-                    BlpApi.Register();
-                    BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
+                    //BlpApi.Register();
+                    //BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
                     isBloombergConnected = true;
                     FSBL.RouterClient.Transmit("BBG_ready", true);
                 } catch (Exception err)
                 {
 
                     FSBL.RouterClient.Transmit("BBG_ready", false);
-                    FSBL.RPC("Logger.error", new List<JToken>
-                {
-                    "Exception thrown: ", err.Message
-                });
-                    FSBL.RPC("Logger.error", new List<JToken>
-                {
-                    "Do you have your Bloomberg Terminal running and are you signed in?"
-                });
+                    //FSBL.RPC("Logger.error", new List<JToken>
+                    //{
+                    //    "Exception thrown: ", err.Message
+                    //});
+                    //    FSBL.RPC("Logger.error", new List<JToken>
+                    //{
+                    //    "Do you have your Bloomberg Terminal running and are you signed in?"
+                    //});
                 }
             }
             try
@@ -200,9 +200,7 @@ namespace WindowlessCommander
                     }
                     
                 });
-                UpdateFinsembleWithNewContext();
-                //var groups = BlpTerminal.GetAllGroups();
-                //Console.WriteLine(groups);
+                //UpdateFinsembleWithNewContext();
             } catch (Exception err)
             {
                 Console.WriteLine(err);
