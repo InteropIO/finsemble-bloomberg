@@ -125,23 +125,20 @@ namespace WindowlessCommander
             {
                 try
                 {
-                    Thread.Sleep(5000);
-                    //BlpApi.Register();
-                    //BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
+                    
+                    BlpApi.Register();
+                    BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
                     isBloombergConnected = true;
                     FSBL.RouterClient.Transmit("BBG_ready", true);
                 } catch (Exception err)
                 {
-
+                    
                     FSBL.RouterClient.Transmit("BBG_ready", false);
-                    //FSBL.RPC("Logger.error", new List<JToken>
-                    //{
-                    //    "Exception thrown: ", err.Message
-                    //});
-                    //    FSBL.RPC("Logger.error", new List<JToken>
-                    //{
-                    //    "Do you have your Bloomberg Terminal running and are you signed in?"
-                    //});
+                    FSBL.RPC("Logger.log", new List<JToken>
+                    {
+                        "Do you have your Bloomberg Terminal running and are you signed in? Trying again in 10 seconds"
+                    });
+                    Thread.Sleep(10000);
                 }
             }
             try
@@ -174,33 +171,64 @@ namespace WindowlessCommander
                 });
                 FSBL.RouterClient.AddListener("BBG_des_symbol", (fsbl_sender, data) =>
                 {
-                    var BBG_groups = BlpTerminal.GetAllGroups();
-                    List<string> list_BBG_groups = new List<string>();
-                    foreach(BlpGroup item in BBG_groups)
-                    {
-                        list_BBG_groups.Add(item.Name);
-                    }
+
                     var response = data.response["data"];
                     var symbol = response.Value<string>("symbol");
-                    List<string> groups = new List<string>();
-                    for (int i = 0; i < response["groups"].Count(); i++)
+                    symbol += " Equity";
+                    List<string> testList = new List<string>
                     {
-                        groups.Add((string)response["groups"][i]);
-                    }
-                    response += " Equity";
-                    List<string> testList = new List<string>();
-                    testList.Add(symbol);
-                    BlpTerminal.RunFunction("DES", "1", testList, "1");
-                    foreach(string group in groups)
+                        symbol
+                    };
+                    if (response["groups"] == null)
                     {
-                        if(list_BBG_groups.Contains(group))
+                        BlpTerminal.RunFunction("DES", "1", testList, "1");
+                    } else
+                    {
+                        List<string> groups = new List<string>();
+                        for (int i = 0; i < response["groups"].Count(); i++)
                         {
-                            BlpTerminal.SetGroupContext(group, symbol);
+                            groups.Add((string)response["groups"][i]);
+                        }
+                        var BBG_groups = BlpTerminal.GetAllGroups();
+                        List<string> list_BBG_groups = new List<string>();
+                        foreach (BlpGroup item in BBG_groups)
+                        {
+                            list_BBG_groups.Add(item.Name);
+                        }
+                        BlpTerminal.RunFunction("DES", "1", testList, "1");
+                        foreach (string group in groups)
+                        {
+                            if (list_BBG_groups.Contains(group))
+                            {
+                                BlpTerminal.SetGroupContext(group, symbol);
+                            }
                         }
                     }
-                    
                 });
-                //UpdateFinsembleWithNewContext();
+
+                FSBL.RouterClient.AddListener("BBG_run_function", (fsbl_sender, data) =>
+                {
+                    var response = data.response["data"];
+                    if (response["function"] != null && response["symbol"] != null)
+                    {
+                        var BBG_function = response.Value<string>("function");
+                        var symbol = response.Value<string>("symbol");
+                        symbol += " Equity";
+                        List<string> securityList = new List<string>
+                        {
+                            symbol
+                        };
+                        if (response["tails"] != null)
+                        {
+                            var tails = response.Value<string>("tails");
+                            BlpTerminal.RunFunction(BBG_function, "1", securityList, tails);
+                        } else
+                        {
+                            BlpTerminal.RunFunction(BBG_function, "1", securityList);
+                        }
+                    }
+                });
+                UpdateFinsembleWithNewContext();
             } catch (Exception err)
             {
                 Console.WriteLine(err);
