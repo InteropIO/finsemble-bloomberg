@@ -104,7 +104,7 @@ namespace WindowlessCommander
         {
             FSBL.RouterClient.RemoveResponder("BBG_ready");
             FSBL.RouterClient.Transmit("BBG_ready", false);
-            FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
+            FSBL.RouterClient.RemoveListener("BBG_symbol_list", (fsbl_sender, response) =>
             {
                 Console.WriteLine(response);
             });
@@ -116,8 +116,6 @@ namespace WindowlessCommander
 
         private static void OnConnected(object sender, EventArgs e)
         {
-
-
             FSBL.RPC("Logger.log", new List<JToken> { "Windowless example connected to Finsemble." });
 
             bool isBloombergConnected = false;
@@ -159,15 +157,26 @@ namespace WindowlessCommander
             }
             try
             {
-                FSBL.RouterClient.AddListener("BBG_symbol", (fsbl_sender, data) =>
+                FSBL.RouterClient.AddListener("BBG_symbol_list", (fsbl_sender, data) =>
                 {
                     var response = data.response["data"];
+
                     securities = new List<string>();
-                    foreach(string a in response)
+                    if (response["securities"] != null)
                     {
-                        securities.Add(a + " Equity");
+                        foreach (string a in response["securities"])
+                        {
+                            securities.Add(a + " Equity");
+                        }
+                        if (response["worksheet"] == null)
+                        {
+                           // do nothing? 
+                           // It will be 1000x easier to implement the dialog window on the JS side versus .NET side.
+                        } else
+                        {
+                            ReplaceSecuritiesOnWorksheet(securities, "Demo sheet");
+                        }
                     }
-                    ReplaceSecuritiesOnWorksheet(securities, "Demo sheet");
                 });
                 FSBL.RouterClient.AddListener("BBG_des_symbol", (fsbl_sender, data) =>
                 {
@@ -227,6 +236,12 @@ namespace WindowlessCommander
                             BlpTerminal.RunFunction(BBG_function, "1", securityList);
                         }
                     }
+                });
+
+                FSBL.RouterClient.AddListener("BBG_worksheet", (fsbl_sender, data) =>
+                {
+                    var response = data.response["data"];
+
                 });
                 UpdateFinsembleWithNewContext();
             } catch (Exception err)
