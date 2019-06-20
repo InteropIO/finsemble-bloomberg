@@ -78,7 +78,7 @@ namespace WindowlessCommander
                     //processes[0].Kill();
                 }
             }
-            
+
 
 
             // Initialize Finsemble
@@ -88,7 +88,8 @@ namespace WindowlessCommander
                 FSBL.Connected += OnConnected;
                 FSBL.Disconnected += OnShutdown;
                 FSBL.Connect();
-            } catch (Exception err)
+            }
+            catch (Exception err)
             {
                 FSBL.RPC("Logger.error", new List<JToken>
                {
@@ -97,7 +98,7 @@ namespace WindowlessCommander
             }
             // Block main thread until worker is finished.
             autoEvent.WaitOne();
-            
+
         }
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
@@ -119,18 +120,19 @@ namespace WindowlessCommander
             FSBL.RPC("Logger.log", new List<JToken> { "Windowless example connected to Finsemble." });
 
             bool isBloombergConnected = false;
-            while(!isBloombergConnected)
+            while (!isBloombergConnected)
             {
                 try
                 {
-                    
+
                     BlpApi.Register();
                     BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
                     isBloombergConnected = true;
                     FSBL.RouterClient.Transmit("BBG_ready", true);
-                } catch (Exception err)
+                }
+                catch (Exception err)
                 {
-                    
+
                     FSBL.RouterClient.Transmit("BBG_ready", false);
                     FSBL.RPC("Logger.log", new List<JToken>
                     {
@@ -147,12 +149,13 @@ namespace WindowlessCommander
                     Console.WriteLine("Responded to BBG_ready query");
                     queryMessage.sendQueryMessage(true);
                 });
-                
-            } catch (Exception err)
+
+            }
+            catch (Exception err)
             {
                 FSBL.RPC("Logger.error", new List<JToken>
                 {
-                    "Exception thrown: ", err.Message
+                    "Exception thrown: " + err.Message
                 });
             }
             try
@@ -168,11 +171,14 @@ namespace WindowlessCommander
                         {
                             securities.Add(a + " Equity");
                         }
-                        if (response["worksheet"] == null)
+                        if (response["worksheet"] != null)
                         {
-                           // do nothing? 
-                           // It will be 1000x easier to implement the dialog window on the JS side versus .NET side.
-                        } else
+                            // do nothing? 
+                            // It will be 1000x easier to implement the dialog window on the JS side versus .NET side.
+                            var worksheetCast = response["worksheet"].ToString();
+                            ReplaceSecuritiesOnWorksheet(securities,worksheetCast);
+                        }
+                        else
                         {
                             ReplaceSecuritiesOnWorksheet(securities, "Demo sheet");
                         }
@@ -191,7 +197,8 @@ namespace WindowlessCommander
                     if (response["groups"] == null)
                     {
                         BlpTerminal.RunFunction("DES", "1", testList, "1");
-                    } else
+                    }
+                    else
                     {
                         List<string> groups = new List<string>();
                         for (int i = 0; i < response["groups"].Count(); i++)
@@ -231,20 +238,51 @@ namespace WindowlessCommander
                         {
                             var tails = response.Value<string>("tails");
                             BlpTerminal.RunFunction(BBG_function, "1", securityList, tails);
-                        } else
+                        }
+                        else
                         {
                             BlpTerminal.RunFunction(BBG_function, "1", securityList);
                         }
                     }
                 });
 
-                FSBL.RouterClient.AddListener("BBG_worksheet", (fsbl_sender, data) =>
+                FSBL.RouterClient.AddResponder("BBG_worksheets", (fsbl_sender, queryMessage) =>
                 {
-                    var response = data.response["data"];
+                    Console.WriteLine("Responded to BBG_worksheets query");
+                    var worksheets = BlpTerminal.GetAllWorksheets();
+                    JArray worksheetsResponse = new JArray();
+                    foreach (BlpWorksheet sheet in worksheets)
+                    {
+                        worksheetsResponse.Add(sheet.Name);
+                    }
+                    
+                    queryMessage.sendQueryMessage(worksheetsResponse);
+                });
 
+                FSBL.RouterClient.AddResponder("BBG_worksheet_request", (fsbl_sender, queryMessage) =>
+                {
+                    var response = queryMessage.response["data"];
+                    var requestedWorksheet = response.Value<string>("worksheet");
+                    var allWorksheets = BlpTerminal.GetAllWorksheets();
+                    foreach(BlpWorksheet sheet in allWorksheets)
+                    {
+                        if (sheet.Name.Equals(requestedWorksheet))
+                        {
+                            requestedWorksheet = sheet.Id;
+                            break;
+                        }
+                    }
+                    var securities = BlpTerminal.GetWorksheet(requestedWorksheet).GetSecurities();
+                    JArray securitiesResponse = new JArray();
+                    foreach(string a in securities)
+                    {
+                        securitiesResponse.Add(a);
+                    }
+                    queryMessage.sendQueryMessage(securitiesResponse);
                 });
                 UpdateFinsembleWithNewContext();
-            } catch (Exception err)
+            }
+            catch (Exception err)
             {
                 Console.WriteLine(err);
             }
@@ -259,7 +297,7 @@ namespace WindowlessCommander
         private static void CreateBLPWorksheet(IList<string> securities)
         {
             var allWorksheets = BlpTerminal.GetAllWorksheets();
-            foreach(BlpWorksheet sheet in allWorksheets)
+            foreach (BlpWorksheet sheet in allWorksheets)
             {
                 if (sheet.Name == "TestSheet1")
                 {
@@ -268,7 +306,7 @@ namespace WindowlessCommander
                 }
             }
             var worksheet = BlpTerminal.CreateWorksheet("TestSheet1", securities);
-            
+
         }
 
         private static void ChangeGroupSecurity(string groupName, string security)
@@ -279,14 +317,14 @@ namespace WindowlessCommander
         {
             var allWorksheets = BlpTerminal.GetAllWorksheets();
             BlpWorksheet test;
-            foreach(BlpWorksheet sheet in allWorksheets)
+            foreach (BlpWorksheet sheet in allWorksheets)
             {
                 if (sheet.Name == "Test Sheet 2")
                 {
                     test = sheet;
                     var securities = test.GetSecurities();
                     Console.WriteLine("Securities in Test Sheet 2");
-                    foreach(string security in securities)
+                    foreach (string security in securities)
                     {
                         Console.WriteLine(security);
                     }
@@ -299,7 +337,7 @@ namespace WindowlessCommander
         {
             var securityList = worksheet.GetSecurities();
             Console.WriteLine("Securities in Worksheet: " + worksheet.Name);
-            foreach(string security in securityList)
+            foreach (string security in securityList)
             {
                 Console.WriteLine(security);
             }
@@ -309,7 +347,7 @@ namespace WindowlessCommander
         private static void AddSecurityToWorksheet(BlpWorksheet worksheet, IList<string> securities)
         {
             var sheetSecurities = worksheet.GetSecurities();
-            foreach(string sec in securities)
+            foreach (string sec in securities)
             {
                 if (!sheetSecurities.Contains(sec))
                 {
@@ -341,7 +379,7 @@ namespace WindowlessCommander
             var worksheets = BlpTerminal.GetAllWorksheets();
             BlpWorksheet testSheet = null;
             BlpWorksheet replaceSheet = null;
-            foreach(BlpWorksheet sheet in worksheets)
+            foreach (BlpWorksheet sheet in worksheets)
             {
                 if (sheet.Name == "TestSheet1")
                 {
@@ -364,7 +402,7 @@ namespace WindowlessCommander
         private static void ReplaceSecuritiesOnWorksheet(IList<string> securities, string worksheetName)
         {
             var worksheets = BlpTerminal.GetAllWorksheets();
-            foreach(BlpWorksheet sheet in worksheets)
+            foreach (BlpWorksheet sheet in worksheets)
             {
                 if (sheet.Name == worksheetName)
                 {
@@ -392,7 +430,7 @@ namespace WindowlessCommander
             var allWorksheets = BlpTerminal.GetAllWorksheets();
             BlpWorksheet testWorksheet = null;
 
-            foreach(BlpWorksheet sheet in allWorksheets)
+            foreach (BlpWorksheet sheet in allWorksheets)
             {
                 if (sheet.Name == "Test Sheet 2")
                 {
@@ -454,7 +492,8 @@ namespace WindowlessCommander
                  */
                 //UpdateFinsembleWithNewContext();
 
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e);
                 FSBL.RPC("Logger.error", new List<JToken>
@@ -490,16 +529,16 @@ namespace WindowlessCommander
                 //if (!_symbol.Equals(symbolToSend))
                 //{
                 //    //_symbol = symbolToSend;
-                    
+
                 //    JObject test = new JObject();
                 //    test.Add("dataType", "symbol");
                 //    test.Add("data", _symbol);
-                    
+
                 //    //FSBL.LinkerClient.Publish(test);
                 //}
 
             }
-            
+
         }
 
         private static string SecurityLookup(string security)
@@ -523,7 +562,7 @@ namespace WindowlessCommander
         }
 
         private static void OnShutdown(object sender, EventArgs e)
-        { 
+        {
             if (FSBL != null)
             {
                 lock (lockObj)
@@ -556,10 +595,10 @@ namespace WindowlessCommander
 
             // Release main thread so application can exit.
             autoEvent.Set();
-            
+
         }
 
-        
+
     }
 
 }
