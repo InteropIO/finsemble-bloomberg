@@ -124,7 +124,7 @@ namespace WindowlessCommander
             {
                 try
                 {
-
+                    // Note for overhead of polling
                     BlpApi.Register();
                     BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
                     isBloombergConnected = true;
@@ -173,20 +173,108 @@ namespace WindowlessCommander
                         }
                         if (response["worksheet"] != null)
                         {
-                            // do nothing? 
-                            // It will be 1000x easier to implement the dialog window on the JS side versus .NET side.
+                            // worksheet name should always be valid
                             var worksheetCast = response["worksheet"].ToString();
                             ReplaceSecuritiesOnWorksheet(securities,worksheetCast);
                         }
                         else
                         {
+                            // Finsemble sales demo default worksheet 
                             ReplaceSecuritiesOnWorksheet(securities, "Demo sheet");
                         }
                     }
                 });
+
+                FSBL.RouterClient.AddListener("BBG_run_function", (fsbl_sender, data) =>
+                {
+                    var response = data.response["data"];
+                    if (response["mnemonic"] != null && response["symbol"] != null)
+                    {
+                        var BBG_mnemonic = response.Value<string>("mnemonic");
+                        var symbol = response.Value<string>("symbol");
+                        symbol += " Equity";
+                        List<string> securityList = new List<string>
+                        {
+                            symbol
+                        };
+                        var tails = "1";
+                        var panel = "1";
+                        if (response["tails"] != null)
+                        {
+                            tails = response.Value<string>("tails");
+                        }
+                        if (response["panel"] != null)
+                        {
+                            panel = response.Value<string>("panel");
+                        }
+                        BlpTerminal.RunFunction(BBG_mnemonic, panel, tails);
+
+                    }
+                });
+                // Populates worksheet selection modal
+                // Returns worksheet name
+                FSBL.RouterClient.AddResponder("BBG_worksheets", (fsbl_sender, queryMessage) =>
+                {
+                    Console.WriteLine("Responded to BBG_worksheets query");
+                    var worksheets = BlpTerminal.GetAllWorksheets();
+                    JArray worksheetsResponse = new JArray();
+                    foreach (BlpWorksheet sheet in worksheets)
+                    {
+                        worksheetsResponse.Add(sheet.Name);
+                    }
+                    
+                    queryMessage.sendQueryMessage(worksheetsResponse);
+                });
+
+                FSBL.RouterClient.AddResponder("BBG_worksheet_request", (fsbl_sender, queryMessage) =>
+                {
+                    var response = queryMessage.response["data"];
+                    var requestedWorksheet = response.Value<string>("worksheet");
+                    var allWorksheets = BlpTerminal.GetAllWorksheets();
+                    foreach(BlpWorksheet sheet in allWorksheets)
+                    {
+                        if (sheet.Name.Equals(requestedWorksheet))
+                        {
+                            requestedWorksheet = sheet.Id;
+                            break;
+                        }
+                    }
+                    var securities = BlpTerminal.GetWorksheet(requestedWorksheet).GetSecurities();
+                    JArray securitiesResponse = new JArray();
+                    JObject obj = new JObject();
+                    foreach(string a in securities)
+                    {
+                        securitiesResponse.Add(a);
+                    }
+                    obj.Add("securities", securitiesResponse);
+                    queryMessage.sendQueryMessage(obj);
+                });
+
+                FSBL.RouterClient.AddListener("BBG_create_worksheet", (fsbl_sender, data) =>
+                {
+                    var response = data.response["data"];
+                    if (response != null)
+                    {
+                        var _securities = new List<string>();
+                        if (response["securities"] != null)
+                        {
+                            foreach (string a in response["securities"])
+                            {
+                                _securities.Add(a + " Equity");
+                            }
+                            if (response["worksheet"] != null)
+                            {
+                                // worksheet name should always be valid
+                                var worksheetCast = response["worksheet"].ToString();
+                                BlpTerminal.CreateWorksheet(worksheetCast, _securities);
+                            }
+                        }
+                    }
+                });
+
                 FSBL.RouterClient.AddListener("BBG_des_symbol", (fsbl_sender, data) =>
                 {
-
+                    // Specific AG-grid implementation on double-click
                     var response = data.response["data"];
                     var symbol = response.Value<string>("symbol");
                     symbol += " Equity";
@@ -220,65 +308,6 @@ namespace WindowlessCommander
                             }
                         }
                     }
-                });
-
-                FSBL.RouterClient.AddListener("BBG_run_function", (fsbl_sender, data) =>
-                {
-                    var response = data.response["data"];
-                    if (response["function"] != null && response["symbol"] != null)
-                    {
-                        var BBG_function = response.Value<string>("function");
-                        var symbol = response.Value<string>("symbol");
-                        symbol += " Equity";
-                        List<string> securityList = new List<string>
-                        {
-                            symbol
-                        };
-                        if (response["tails"] != null)
-                        {
-                            var tails = response.Value<string>("tails");
-                            BlpTerminal.RunFunction(BBG_function, "1", securityList, tails);
-                        }
-                        else
-                        {
-                            BlpTerminal.RunFunction(BBG_function, "1", securityList);
-                        }
-                    }
-                });
-
-                FSBL.RouterClient.AddResponder("BBG_worksheets", (fsbl_sender, queryMessage) =>
-                {
-                    Console.WriteLine("Responded to BBG_worksheets query");
-                    var worksheets = BlpTerminal.GetAllWorksheets();
-                    JArray worksheetsResponse = new JArray();
-                    foreach (BlpWorksheet sheet in worksheets)
-                    {
-                        worksheetsResponse.Add(sheet.Name);
-                    }
-                    
-                    queryMessage.sendQueryMessage(worksheetsResponse);
-                });
-
-                FSBL.RouterClient.AddResponder("BBG_worksheet_request", (fsbl_sender, queryMessage) =>
-                {
-                    var response = queryMessage.response["data"];
-                    var requestedWorksheet = response.Value<string>("worksheet");
-                    var allWorksheets = BlpTerminal.GetAllWorksheets();
-                    foreach(BlpWorksheet sheet in allWorksheets)
-                    {
-                        if (sheet.Name.Equals(requestedWorksheet))
-                        {
-                            requestedWorksheet = sheet.Id;
-                            break;
-                        }
-                    }
-                    var securities = BlpTerminal.GetWorksheet(requestedWorksheet).GetSecurities();
-                    JArray securitiesResponse = new JArray();
-                    foreach(string a in securities)
-                    {
-                        securitiesResponse.Add(a);
-                    }
-                    queryMessage.sendQueryMessage(securitiesResponse);
                 });
                 UpdateFinsembleWithNewContext();
             }
