@@ -62,9 +62,9 @@ namespace WindowlessCommander
 
         static void Main(string[] args)
         {
-#if DEBUG
-            System.Diagnostics.Debugger.Launch();
-#endif
+//#if DEBUG
+//            System.Diagnostics.Debugger.Launch();
+//#endif
             lock (lockObj)
             {
                 _handler += new EventHandler(Handler);
@@ -207,7 +207,7 @@ namespace WindowlessCommander
                         {
                             panel = response.Value<string>("panel");
                         }
-                        BlpTerminal.RunFunction(BBG_mnemonic, panel, tails);
+                        BlpTerminal.RunFunction(BBG_mnemonic, panel, securityList, tails);
 
                     }
                 });
@@ -544,6 +544,11 @@ namespace WindowlessCommander
             {
                 BlpGroupContextChangedEventArgs context = (BlpGroupContextChangedEventArgs)e;
                 var tickerChange = context.Group.Value;
+                if (tickerChange.Contains("List"))
+                {   // Context change that occurs from changing a component's group.
+                    // Doesn't contain any data that we would want to send across the wire
+                    return;
+                }
                 string[] splitter = { "US Equity" };
                 var tickerChangeArray = tickerChange.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
                 var symbolToSend = tickerChangeArray[0];
