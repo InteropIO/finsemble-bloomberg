@@ -62,14 +62,9 @@ namespace WindowlessCommander
 
         static void Main(string[] args)
         {
-//#if DEBUG
-//            System.Diagnostics.Debugger.Launch();
-//#endif
             lock (lockObj)
             {
                 _handler += new EventHandler(Handler);
-                //SetConsoleCtrlHandler(_handler, true);
-                //Console.SetWindowSize(40, 30);
                 AppDomain.CurrentDomain.ProcessExit += new System.EventHandler(CurrentDomain_ProcessExit);
                 Process[] processes = Process.GetProcessesByName("WindowlessCommander");
                 if (processes.Length > 1)
@@ -100,7 +95,11 @@ namespace WindowlessCommander
             autoEvent.WaitOne();
 
         }
-
+        /// <summary>
+        /// Handles when the middleware exits.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             FSBL.RouterClient.RemoveResponder("BBG_ready");
@@ -114,7 +113,12 @@ namespace WindowlessCommander
                 Console.WriteLine(response);
             });
         }
-
+        /// <summary>
+        /// Function that fires when this component successfully connects to Finsemble.
+        /// In our case, we want to check if the Bloomberg Terminal Connect API is available to be used
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private static void OnConnected(object sender, EventArgs e)
         {
             FSBL.RPC("Logger.log", new List<JToken> { "Windowless example connected to Finsemble." });
@@ -159,7 +163,7 @@ namespace WindowlessCommander
                 });
             }
             try
-            {
+            {   
                 FSBL.RouterClient.AddListener("BBG_symbol_list", (fsbl_sender, data) =>
                 {
                     var response = data.response["data"];
@@ -184,7 +188,16 @@ namespace WindowlessCommander
                         }
                     }
                 });
-
+                /// <summary>
+                /// Runs an arbitrary Bloomberg function
+                /// </summary>
+                /// <param name="fsbl_sender"></param>
+                /// <param name="data">
+                /// Data that must have fields of: 
+                /// mnemonic, symbol
+                /// Optional fields of:
+                /// tails, panel
+                /// </param>
                 FSBL.RouterClient.AddListener("BBG_run_function", (fsbl_sender, data) =>
                 {
                     var response = data.response["data"];
@@ -213,6 +226,8 @@ namespace WindowlessCommander
                 });
                 // Populates worksheet selection modal
                 // Returns worksheet name
+                // TODO: Update channel name cause semantics
+                // Get_Worksheets_of_user or something
                 FSBL.RouterClient.AddResponder("BBG_worksheets", (fsbl_sender, queryMessage) =>
                 {
                     Console.WriteLine("Responded to BBG_worksheets query");
@@ -225,7 +240,8 @@ namespace WindowlessCommander
                     
                     queryMessage.sendQueryMessage(worksheetsResponse);
                 });
-
+                // TODO: Update name of channel to more semantic meaning
+                // Get_Securities_From_BBG_Worksheet or something
                 FSBL.RouterClient.AddResponder("BBG_worksheet_request", (fsbl_sender, queryMessage) =>
                 {
                     var response = queryMessage.response["data"];
@@ -249,7 +265,8 @@ namespace WindowlessCommander
                     obj.Add("securities", securitiesResponse);
                     queryMessage.sendQueryMessage(obj);
                 });
-
+                // TODO: Update channel name cause semantics
+                // Create_BBG_Worksheet ?
                 FSBL.RouterClient.AddListener("BBG_create_worksheet", (fsbl_sender, data) =>
                 {
                     var response = data.response["data"];
@@ -271,7 +288,8 @@ namespace WindowlessCommander
                         }
                     }
                 });
-
+                // TODO: update channel name
+                // Execute_DES_and_update_context ?
                 FSBL.RouterClient.AddListener("BBG_des_symbol", (fsbl_sender, data) =>
                 {
                     // Specific AG-grid implementation on double-click
@@ -317,7 +335,12 @@ namespace WindowlessCommander
             }
 
         }
-
+        /// <summary>
+        /// Function that fires when the Terminal Connect API disconnects.
+        /// </summary>
+        /// <remarks>This block should contain error handling code</remarks>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private static void BlpApi_Disconnected(object sender, EventArgs e)
         {
             FSBL.RouterClient.Transmit("BBG_ready", false);
@@ -337,11 +360,18 @@ namespace WindowlessCommander
             var worksheet = BlpTerminal.CreateWorksheet("TestSheet1", securities);
 
         }
-
+        /// <summary>
+        /// Helper function to update Bloomberg group(s) context
+        /// </summary>
+        /// <param name="groupName">The Bloomberg Group identifier ("Group-A")</param>
+        /// <param name="security">Example: "TSLA Equity"</param>
         private static void ChangeGroupSecurity(string groupName, string security)
         {
             BlpTerminal.SetGroupContext(groupName, security);
         }
+        /// <summary>
+        /// Helper function to grab a list of securities from a preset worksheet
+        /// </summary>
         private static void GrabTestSecurities()
         {
             var allWorksheets = BlpTerminal.GetAllWorksheets();
@@ -361,7 +391,10 @@ namespace WindowlessCommander
                 }
             }
         }
-
+        /// <summary>
+        /// Writes out a list of securities based on the worksheet parameter
+        /// </summary>
+        /// <param name="worksheet">Bloomberg Worksheet object</param>
         private static void GrabWorksheetSecurities(BlpWorksheet worksheet)
         {
             var securityList = worksheet.GetSecurities();
@@ -372,7 +405,11 @@ namespace WindowlessCommander
             }
             Console.WriteLine("End of worksheet: " + worksheet.Name);
         }
-
+        /// <summary>
+        /// Appends a list of securities to the parameter worksheet
+        /// </summary>
+        /// <param name="worksheet"></param>
+        /// <param name="securities"></param>
         private static void AddSecurityToWorksheet(BlpWorksheet worksheet, IList<string> securities)
         {
             var sheetSecurities = worksheet.GetSecurities();
