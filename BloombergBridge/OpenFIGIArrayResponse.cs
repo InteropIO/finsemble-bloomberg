@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace WindowlessCommander
+namespace BloombergBridge
 {
     internal class OpenFIGIArrayResponse
     {

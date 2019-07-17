@@ -11,7 +11,7 @@ using Bloomberglp.TerminalApiEx;
 using ChartIQ.Finsemble;
 using Newtonsoft.Json.Linq;
 
-namespace WindowlessCommander
+namespace BloombergBridge
 {
     class Program
     {
@@ -66,7 +66,7 @@ namespace WindowlessCommander
             {
                 _handler += new EventHandler(Handler);
                 AppDomain.CurrentDomain.ProcessExit += new System.EventHandler(CurrentDomain_ProcessExit);
-                Process[] processes = Process.GetProcessesByName("WindowlessCommander");
+                Process[] processes = Process.GetProcessesByName("BloombergBridge");
                 if (processes.Length > 1)
                 {
                     processes[0].Close();
@@ -642,7 +642,7 @@ namespace WindowlessCommander
                     {
                         try
                         {
-                            Process[] processes = Process.GetProcessesByName("WindowlessCommander");
+                            Process[] processes = Process.GetProcessesByName("BloombergBridge");
                             if (processes.Length > 0)
                             {
                                 for (int i = 0; i < processes.Length; i++)

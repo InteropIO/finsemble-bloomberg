@@ -17,7 +17,7 @@ using CorrrelationID = Bloomberglp.Blpapi.CorrelationID;
 using EventQueue = Bloomberglp.Blpapi.EventQueue;
 using Bloomberglp.Blpapi;
 
-namespace WindowlessCommander
+namespace BloombergBridge
 {
     internal class SecurityLookup
     {

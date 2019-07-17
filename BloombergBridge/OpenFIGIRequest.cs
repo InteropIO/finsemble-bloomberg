@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
-namespace WindowlessCommander
+namespace BloombergBridge
 {
     public class OpenFIGIRequest
     {

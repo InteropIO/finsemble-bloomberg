@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace WindowlessCommander
+namespace BloombergBridge
 {
     internal class AGGridRequest
     {
