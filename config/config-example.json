@@ -4,7 +4,7 @@
             "window": {
                 "id": "Bloomberg Integration Example",
                 "windowType": "native",
-                "path": "C:\\Users\\ecosy\\Desktop\\Repos\\fpe-bloomberg\\BloombergIntegration\\bin\\Debug\\BloombergIntegration.exe",
+                "path": "$fpe-bloombergRoot/BloombergBridge/bin/Debug/BloombergBridge.exe",
                 "arguments": "",
                 "autoShow": true,
                 "alwaysOnTop": false,

@@ -62,6 +62,9 @@ namespace BloombergBridge
 
         static void Main(string[] args)
         {
+#if DEBUG
+            System.Diagnostics.Debugger.Launch();
+#endif
             lock (lockObj)
             {
                 _handler += new EventHandler(Handler);
