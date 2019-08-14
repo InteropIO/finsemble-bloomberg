@@ -1,0 +1,19 @@
+{
+  "BloombergBridge": "BloombergBridge.yml",
+  "BloombergBridge.Program": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.BBG_CreateWorksheet(ChartIQ.Finsemble.FinsembleEventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.BBG_GetSecuritiesFromWorksheet(ChartIQ.Finsemble.FinsembleQueryArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.BBG_GetUserWorksheets(ChartIQ.Finsemble.FinsembleQueryArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.BBG_RunDESAndUpdateContext(ChartIQ.Finsemble.FinsembleEventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.BBG_RunFunction(ChartIQ.Finsemble.FinsembleEventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.BBG_SymbolList(ChartIQ.Finsemble.FinsembleEventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.BlpApi_Disconnected(System.Object,System.EventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.BlpTerminal_ComponentGroupEvent(System.Object,Bloomberglp.TerminalApiEx.BlpGroupEventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.CurrentDomain_ProcessExit(System.Object,System.EventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.Main(System.String[])": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.OnConnected(System.Object,System.EventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.OnRunFunctionComplete(System.IAsyncResult)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.OnShutdown(System.Object,System.EventArgs)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.ReplaceSecuritiesOnWorksheet(System.Collections.Generic.IList{System.String},System.String)": "BloombergBridge.Program.yml",
+  "BloombergBridge.Program.UpdateFinsembleWithNewContext": "BloombergBridge.Program.yml"
+}

@@ -1,0 +1,22 @@
+### YamlMime:ManagedReference
+items:
+- uid: BloombergBridge
+  commentId: N:BloombergBridge
+  id: BloombergBridge
+  children:
+  - BloombergBridge.Program
+  langs:
+  - csharp
+  - vb
+  name: BloombergBridge
+  nameWithType: BloombergBridge
+  fullName: BloombergBridge
+  type: Namespace
+  assemblies:
+  - BloombergBridge
+references:
+- uid: BloombergBridge.Program
+  commentId: T:BloombergBridge.Program
+  name: Program
+  nameWithType: Program
+  fullName: BloombergBridge.Program
