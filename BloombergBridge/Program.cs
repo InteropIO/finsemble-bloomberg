@@ -22,7 +22,6 @@ namespace BloombergBridge
         private static readonly object lockObj = new object();
         private static Finsemble FSBL = null;
         private static List<string> securities = null;
-        private static bool exitSystem = false;
 
         [DllImport("Kernel32")]
         private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
@@ -48,9 +47,6 @@ namespace BloombergBridge
             {
                 Console.WriteLine(response);
             });
-
-            //allow main to run off
-            exitSystem = true;
 
             //shutdown right away so there are no lingering threads
             Environment.Exit(-1);
