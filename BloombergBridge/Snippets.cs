@@ -8,10 +8,16 @@ using System.Threading.Tasks;
 using ChartIQ.Finsemble;
 
 namespace BloombergBridge
-{
-    class Snippets
+{   /// <summary>
+    /// Represents some helpful snippets when implementing a Bloomberg integration
+    /// </summary>
+    public class Snippets
     {
-        private static void CreateBLPWorksheet(IList<string> securities)
+        /// <summary>
+        /// Example function for testing if a worksheet exists and creating it, if it does not exist
+        /// </summary>
+        /// <param name="securities">A list of securities to be passed into the newly created worksheet</param>
+        public static void CreateBLPWorksheet(IList<string> securities)
         {
             var allWorksheets = BlpTerminal.GetAllWorksheets();
             foreach (BlpWorksheet sheet in allWorksheets)
@@ -23,23 +29,22 @@ namespace BloombergBridge
                 }
             }
             var worksheet = BlpTerminal.CreateWorksheet("TestSheet1", securities);
-
         }
 
         /// <summary>
-        /// Helper function to update Bloomberg group(s) context
+        /// Example function to update a Bloomberg group's context
         /// </summary>
         /// <param name="groupName">The Bloomberg Group identifier ("Group-A")</param>
-        /// <param name="security">Example: "TSLA Equity"</param>
-        private static void ChangeGroupSecurity(string groupName, string security)
+        /// <param name="security">A string representing an equity. E.g. "TSLA Equity"</param>
+        public static void ChangeGroupSecurity(string groupName, string security)
         {
             BlpTerminal.SetGroupContext(groupName, security);
         }
 
         /// <summary>
-        /// Helper function to grab a list of securities from a preset worksheet
+        /// Example function to grab a list of securities from a preset worksheet
         /// </summary>
-        private static void GrabTestSecurities()
+        public static void GrabTestSecurities()
         {
             var allWorksheets = BlpTerminal.GetAllWorksheets();
             BlpWorksheet test;
@@ -63,7 +68,7 @@ namespace BloombergBridge
         /// Writes out a list of securities based on the worksheet parameter
         /// </summary>
         /// <param name="worksheet">Bloomberg Worksheet object</param>
-        private static void GrabWorksheetSecurities(BlpWorksheet worksheet)
+        public static void GrabWorksheetSecurities(BlpWorksheet worksheet)
         {
             var securityList = worksheet.GetSecurities();
             Console.WriteLine("Securities in Worksheet: " + worksheet.Name);
@@ -77,9 +82,9 @@ namespace BloombergBridge
         /// <summary>
         /// Appends a list of securities to the parameter worksheet
         /// </summary>
-        /// <param name="worksheet"></param>
-        /// <param name="securities"></param>
-        private static void AddSecurityToWorksheet(BlpWorksheet worksheet, IList<string> securities)
+        /// <param name="worksheet">Bloomberg Worksheet object</param>
+        /// <param name="securities">A list of securities</param>
+        public static void AddSecurityToWorksheet(BlpWorksheet worksheet, IList<string> securities)
         {
             var sheetSecurities = worksheet.GetSecurities();
             foreach (string sec in securities)
@@ -90,8 +95,11 @@ namespace BloombergBridge
                 }
             }
         }
-
-        private static void DefaultCommandMockEquity(string security)
+        /// <summary>
+        /// Example function for running a DES command on a preset panel
+        /// </summary>
+        /// <param name="security">A security that DES will run against</param>
+        public static void DefaultCommandMockEquity(string security)
         {
             string command = "DES";
             string panel = "1";
@@ -99,8 +107,11 @@ namespace BloombergBridge
             var enumSecurity = new string[1] { security };
             BlpTerminal.RunFunction(command, panel, enumSecurity);
         }
-
-        private static void DefaultCommandWithSecurityLookup(string security)
+        /// <summary>
+        /// Example function for using the SECF functionality of a Bloomberg Terminal
+        /// </summary>
+        /// <param name="security">A security to search for</param>
+        public static void DefaultCommandWithSecurityLookup(string security)
         {
             string BLP_security = SecurityLookup(security);
             string command = "DES";
@@ -108,7 +119,12 @@ namespace BloombergBridge
             var enumSecurity = new string[1] { security };
             BlpTerminal.RunFunction(command, panel, enumSecurity);
         }
-        private static string SecurityLookup(string security)
+        /// <summary>
+        /// Helper function to parse the results of running the SECF API call
+        /// </summary>
+        /// <param name="security">A security to search for</param>
+        /// <returns></returns>
+        public static string SecurityLookup(string security)
         {
             var secFinder = new SecurityLookup();
             secFinder.Init();
@@ -119,8 +135,13 @@ namespace BloombergBridge
             secFinder = null;
             return BLP_security;
         }
-
-        private static void ReplaceSecuritiesOnWorksheet()
+        /// <summary>
+        /// Example function for replacing securities on a worksheet
+        /// </summary>
+        /// <remark>
+        /// Test remark
+        /// </remark>
+        public static void ReplaceSecuritiesOnWorksheet()
         {
             var worksheets = BlpTerminal.GetAllWorksheets();
             BlpWorksheet testSheet = null;
@@ -145,7 +166,11 @@ namespace BloombergBridge
             testSheet.ReplaceSecurities(replaceSecurities);
 
         }
-        private static void DefaultCommandWithTails(string security)
+        /// <summary>
+        /// Example function for running some Bloomberg Terminal command with tails
+        /// </summary>
+        /// <param name="security">A security to run DES against</param>
+        public static void DefaultCommandWithTails(string security)
         {
             string command = "DES";
             string panel = "2";
@@ -153,7 +178,11 @@ namespace BloombergBridge
             var enumSecurity = new string[1] { security };
             BlpTerminal.RunFunction(command, panel, enumSecurity, "4");
         }
-        private static void RunBLPCommand(JToken response)
+        /// <summary>
+        /// Example function that shows a breadth of Bloomberg commands available for use
+        /// </summary>
+        /// <param name="response">A JSON object containing a security to be used for interal function calls</param>
+        public static void RunBLPCommand(JToken response)
         {
             JTokenReader reader = new JTokenReader(response);
             string security = (string)response;
