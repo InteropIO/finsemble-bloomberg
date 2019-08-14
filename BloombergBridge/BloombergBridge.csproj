@@ -162,7 +162,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="docfx_project\api\index.md" />
+    <None Include="docfx_project\api\toc.yml" />
+    <None Include="docfx_project\articles\intro.md" />
+    <None Include="docfx_project\articles\toc.yml" />
+    <None Include="docfx_project\docfx.json" />
+    <None Include="docfx_project\index.md" />
+    <None Include="docfx_project\toc.yml" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="docfx_project\.gitignore" />
+    <Content Include="docfx_project\api\.gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="docfx_project\apidoc\" />
+    <Folder Include="docfx_project\images\" />
+    <Folder Include="docfx_project\src\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
