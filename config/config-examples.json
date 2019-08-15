@@ -4,7 +4,7 @@
             "window": {
                 "id": "Bloomberg Integration Example",
                 "windowType": "native",
-                "path": "$fpe-bloombergRoot/BloombergBridge/bin/Debug/BloombergBridge.exe",
+                "path": "$fpe-bloombergRoot/src/components/BloombergBridge/bin/Debug/BloombergBridge.exe",
                 "arguments": "",
                 "autoShow": true,
                 "alwaysOnTop": false,
