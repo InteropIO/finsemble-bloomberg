@@ -61,6 +61,18 @@
             "version": "3.6.0e",
             "alias": "assimilation",
             "target": "assimilationMain.exe"
+        },
+        {
+            "src": "http://localhost:8000/Release/BloombergBridge.zip",
+            "version": "0.0.1",
+            "alias": "BloombergBridgeRelease",
+            "target": "Release/BloombergBridge.exe"
+        },
+        {
+            "src": "http://localhost:8000/Debug/BloombergBridge.zip",
+            "version": "0.0.1",
+            "alias": "BloombergBridgeDebug",
+            "target": "Debug/BloombergBridge.exe"
         }
     ],
     "finsemble": {
