@@ -1,10 +1,49 @@
 {
     "components": {
-        "Bloomberg Integration Example": {
+        "Bloomberg Integration Example Debug": {
             "window": {
-                "id": "Bloomberg Integration Example",
+                "id": "Bloomberg Integration Example Debug",
                 "windowType": "native",
-                "path": "$fpe-bloombergRoot/src/components/BloombergBridge/bin/Debug/BloombergBridge.exe",
+                "alias": "BloombergBridgeDebug",
+                "arguments": "",
+                "autoShow": true,
+                "alwaysOnTop": false,
+                "resizable": true,
+                "showTaskbarIcon": true,
+                "addToWorkspace": true,
+                "height": 250,
+                "width": 300
+            },
+            "component": {
+                "inject": false
+            },
+            "foreign": {
+                "services": {
+                    "workspaceService": {
+                        "canGroup": true,
+                        "isArrangable": true
+                    }
+                },
+                "components": {
+                    "App Launcher": {
+                        "launchableByUser": true
+                    },
+                    "Window Manager": {
+                        "persistWindowState": false,
+                        "FSBLHeader": true,
+                        "showLinker": true
+                    },
+                    "Toolbar": {
+                        "iconClass": "ff-component"
+                    }
+                }
+            }
+        },
+        "Bloomberg Integration Example Release": {
+            "window": {
+                "id": "Bloomberg Integration Example Release",
+                "windowType": "native",
+                "alias": "BloombergBridgeRelease",
                 "arguments": "",
                 "autoShow": true,
                 "alwaysOnTop": false,
