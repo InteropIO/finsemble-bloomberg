@@ -4,43 +4,11 @@
     "description": "",
     "main": "",
     "scripts": {
-        "clean": "rimraf dist",
-        "prebuild": "npm run clean",
-        "build": "webpack --mode=development --config=./build/webpack/webpack.config.js",
-        "build:dev": "webpack --mode=development --watch",
-        "prestart": "npm run build",
-        "start": "webpack-dev-server --mode=development --config=./build/webpack/webpack.config.js"
     },
     "author": "",
     "license": "ISC",
-    "optionalDependencies": {
-        "@chartiq/e2o": "latest",
-        "openfin-launcher": "^1.4.8"
-    },
     "dependencies": {
-        "@chartiq/finsemble": "^3.10.0"
-    },
-    "devDependencies": {
-        "@babel/core": "^7.4.0",
-        "@babel/plugin-proposal-class-properties": "^7.4.0",
-        "@babel/plugin-transform-async-to-generator": "7.4.0",
-        "@babel/polyfill": "7.4.3",
-        "@babel/preset-env": "^7.4.2",
-        "@babel/preset-react": "^7.0.0",
-        "babel-loader": "^8.0.5",
-        "babel-preset-es2015": "^6.24.1",
-        "copy-webpack-plugin": "^4.5.1",
-        "css-loader": "^3.0.0",
-        "file-loader": "^1.1.11",
-        "hard-source-webpack-plugin": "^0.6.4",
-        "html-loader": "^0.5.5",
-        "uglifyjs-webpack-plugin": "^1.2.3",
-        "url-join": "^2.0.2",
-        "url-loader": "^0.6.2",
-        "webpack": "^4.29.0",
-        "webpack-cli": "^3.2.3",
-        "webpack-dev-middleware": "^1.12.0",
-        "webpack-dev-server": "^3.1.14",
-        "webpack-glob-entries": "^1.0.1"
+        "express": "4.17.1",
+        "cors": "2.8.5"
     }
 }
