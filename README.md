@@ -1,22 +1,26 @@
 # fpe-bloomberg
+# Introduction
+The Finsemble Bloomberg integration utilizes the .NET API exposed by Bloomberg Terminal Connect, enabling data synchronicity between the Bloomberg Terminal and applications running in Finsemble. 
 
-## 1st Iteration
-* WPF component that sends free form commands to Terminal Connect API
-* Has a box for Command, Security, and Panel
-* Since the Terminal API expects a Panel number (1-4, can be identified by Bloomberg window), this raises the first workflow question: **What terminal (panel) should receive context?**
+For more information on Terminal Connect, run TMCT<GO> in your terminal.
 
-## 2nd Iteration
-* Windowless .NET component that receives a `Symbol` from some other linked component
-* This windowless component then translates the `Symbol` to a string that the Bloomberg Terminal would understand
-    * For example Tesla's ticker is `TSLA` but BLP expects `TSLA US Equity` (case-sensitive)
-* To simplify scope: We will limit the Terminal command to `DES`, securities to `US Equity`, and panel to 1.
-* Ideal outcome:
-    1. News component links to windowless component
-    2. User selects some article which has a `Symbol`
-    3. Windowless component converts `Symbol` to Bloomberg format
-    4. Windowless component composes the appropriate Terminal command
-    5. This terminal command is sent to Panel 1 only
-* Follow up questions:
-    * What's the translation spec going to look like?
-    * How are we going to infer the commands needed for BLP Terminal?
-    * How do we determine which Terminal receives which command on the fly?
+For a brief video demonstration of the types of context sharing that are possible between Finsemble and Bloomberg, please see [Finsemble Bloomberg Integration](https://chartiq.wistia.com/projects/9zacla7xfo). 
+
+For additional support, please contact your ChartIQ Client Support specialist.
+
+# Technical prerequisites for this integration
+* Finsemble.dll
+    * Located in the `FinsembleResources` folder in each sample project
+    * Can be installed via NuGet as well
+* Bloomberglp.TerminalApiEx.dll
+    * Download from Bloomberg Terminal
+        1. Run `TMCT <GO>`
+        2. Click `Software Downloads`
+        3. Follow `To install` instructions in the Terminal
+    * Add as reference to your integration's project
+* Bloomberglp.Blpapi.dll
+    * Download from [Bloomberg](https://www.bloomberg.com/professional/support/api-library/)
+    * Add as reference to your integration's project
+# How to view documentation
+This project uses [docfx](https://dotnet.github.io/docfx/) to generate source code documentation.
+The [docfx getting started](https://dotnet.github.io/docfx/tutorial/docfx_getting_started.html) gives helpful examples for different workflows to generate this documentation.

@@ -1,0 +1,15 @@
+{
+    "name": "fpe-bloomberg",
+    "version": "2.6.11",
+    "description": "",
+    "main": "",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "express": "4.17.1",
+        "cors": "2.8.5"
+    }
+}

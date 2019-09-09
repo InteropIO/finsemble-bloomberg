@@ -2,9 +2,9 @@
     "devtools_port": 9090,
     "startup_app": {
         "name": "ChartIQ Bloomberg",
-        "url": "http://fpe.finsemble.com/finsemble/components/system/serviceManager/serviceManager.html",
+        "url": "http://fpe-staging.finsemble.com/ecosystem/finsemble/components/system/serviceManager/serviceManager.html",
         "uuid": "Finsemble",
-        "applicationIcon": "http://fpe.finsemble.com/assets/img/Finsemble_Taskbar_Icon.png",
+        "applicationIcon": "http://fpe-staging.finsemble.com/ecosystem/assets/img/Finsemble_Taskbar_Icon.png",
         "defaultTop": 0,
         "defaultLeft": 0,
         "showTaskbarIcon": true,
@@ -20,7 +20,7 @@
         },
         "alwaysOnTop": false
     },
-    "splashScreenImage": "http://fpe.finsemble.com/assets/img/FinsembleSplash.png",
+    "splashScreenImage": "http://fpe-staging.finsemble.com/ecosystem/assets/img/FinsembleSplash.png",
     "runtime": {
         "arguments": "--noerrdialogs  --v=4 --no-sandbox  --enable-crash-reporting --framestrategy=frames --winhttp-proxy-resolver",
         "version": "8.56.28.36",
@@ -32,7 +32,7 @@
     "shortcut": {
         "company": "ChartIQ",
         "description": "ChartIQ Bloomberg",
-        "icon": "http://fpe.finsemble.com/assets/img/Finsemble_Taskbar_Icon.ico",
+        "icon": "http://fpe-staging.finsemble.com/ecosystem/assets/img/Finsemble_Taskbar_Icon.ico",
         "name": "ChartIQ - LOCAL",
         "target": [
             "desktop",
@@ -42,7 +42,7 @@
         "startMenuRootFolder": "ChartIQ Local"
     },
     "dialogSettings": {
-        "logo": "http://fpe.finsemble.com/assets/img/ciq-banner-100x25.png",
+        "logo": "http://fpe-staging.finsemble.com/ecosystem/assets/img/ciq-banner-100x25.png",
         "bgColor": 4280109424,
         "textColor": 4293521652,
         "progressBarBgColor": 4294967295,
@@ -61,17 +61,32 @@
             "version": "3.6.0e",
             "alias": "assimilation",
             "target": "assimilationMain.exe"
+        },
+        {
+            "src": "http://localhost:8000/Release/BloombergBridge.zip",
+            "version": "0.0.1",
+            "alias": "BloombergBridgeRelease",
+            "target": "Release/BloombergBridge.exe"
+        },
+        {
+            "src": "http://localhost:8000/Debug/BloombergBridge.zip",
+            "version": "0.0.1",
+            "alias": "BloombergBridgeDebug",
+            "target": "Debug/BloombergBridge.exe"
         }
     ],
     "finsemble": {
-        "applicationRoot": "http://fpe.finsemble.com",
+        "applicationRoot": "http://fpe-staging.finsemble.com/ecosystem",
         "moduleRoot": "$applicationRoot/finsemble",
         "servicesRoot": "$applicationRoot/finsemble/services",
         "notificationURL": "$applicationRoot/components/notification/notification.html",
-        "fpe-bloombergRoot": "~/Desktop/Repos/fpe-bloomberg",
+        "fpe-bloombergRoot": "http://localhost:8000",
         "importConfig": [
             "$applicationRoot/configs/application/config.json",
-            "$fpe-bloombergRoot/config/config-examples.json"
-        ]
+            "$fpe-bloombergRoot/config-examples.json"
+        ],
+        "IAC": {
+            "serverAddress": "wss://localhost.chartiq.com:3376"
+        }
     }
 }

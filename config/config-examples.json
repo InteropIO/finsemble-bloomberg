@@ -1,0 +1,118 @@
+{
+    "components": {
+        "Bloomberg Integration Example Debug": {
+            "window": {
+                "id": "Bloomberg Integration Example Debug",
+                "windowType": "native",
+                "alias": "BloombergBridgeDebug",
+                "arguments": "",
+                "autoShow": true,
+                "alwaysOnTop": false,
+                "resizable": true,
+                "showTaskbarIcon": true,
+                "addToWorkspace": true,
+                "height": 250,
+                "width": 300
+            },
+            "component": {
+                "inject": false
+            },
+            "foreign": {
+                "services": {
+                    "workspaceService": {
+                        "canGroup": true,
+                        "isArrangable": true
+                    }
+                },
+                "components": {
+                    "App Launcher": {
+                        "launchableByUser": true
+                    },
+                    "Window Manager": {
+                        "persistWindowState": false,
+                        "FSBLHeader": true,
+                        "showLinker": true
+                    },
+                    "Toolbar": {
+                        "iconClass": "ff-component"
+                    }
+                }
+            }
+        },
+        "Bloomberg Integration Example Release": {
+            "window": {
+                "id": "Bloomberg Integration Example Release",
+                "windowType": "native",
+                "alias": "BloombergBridgeRelease",
+                "arguments": "",
+                "autoShow": true,
+                "alwaysOnTop": false,
+                "resizable": true,
+                "showTaskbarIcon": true,
+                "addToWorkspace": true,
+                "height": 250,
+                "width": 300
+            },
+            "component": {
+                "inject": false
+            },
+            "foreign": {
+                "services": {
+                    "workspaceService": {
+                        "canGroup": true,
+                        "isArrangable": true
+                    }
+                },
+                "components": {
+                    "App Launcher": {
+                        "launchableByUser": true
+                    },
+                    "Window Manager": {
+                        "persistWindowState": false,
+                        "FSBLHeader": true,
+                        "showLinker": true
+                    },
+                    "Toolbar": {
+                        "iconClass": "ff-component"
+                    }
+                }
+            }
+        },
+        "Bloomberg Terminal": {
+            "window": {
+                "id": "Bloomberg Terminal",
+                "name": "Bloomberg Terminal",
+                "windowType": "assimilation",
+                "path": "C:\\blp\\Wintrv\\wintrv.exe",
+                "options": {
+                    "autoShow": true
+                },
+                "addToWorkspace": true
+            },
+            "component": {
+                "inject": false
+            },
+            "foreign": {
+                "services": {
+                    "workspaceService": {
+                        "canGroup": true,
+                        "isArrangable": true
+                    }
+                },
+                "components": {
+                    "App Launcher": {
+                        "launchableByUser": true
+                    },
+                    "Window Manager": {
+                        "persistWindowState": false,
+                        "FSBLHeader": true,
+                        "showLinker": true
+                    },
+                    "Toolbar": {
+                        "iconClass": "ff-component"
+                    }
+                }
+            }
+        }
+    }
+}
