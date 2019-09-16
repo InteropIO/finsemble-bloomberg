@@ -9,6 +9,7 @@ For a brief video demonstration of the types of context sharing that are possibl
 For additional support, please contact your ChartIQ Client Support specialist.
 
 # Technical prerequisites for this integration
+* Node 8 or greater
 * Finsemble.dll
     * Located in the `FinsembleResources` folder in each sample project
     * Can be installed via NuGet as well
@@ -21,6 +22,16 @@ For additional support, please contact your ChartIQ Client Support specialist.
 * Bloomberglp.Blpapi.dll
     * Download from [Bloomberg](https://www.bloomberg.com/professional/support/api-library/)
     * Add as reference to your integration's project
+
+# How to run
+* Confirm project dependencies have been installed
+* Build `BloombergIntegration.sln`
+* `npm install`
+* `npm run start`
+* Launch local Finsemble
+    * Assuming that the local Finsemble is searching for a manifest at `http://localhost:8000`
+* Confirm that your integration appears in the `Apps` menu in the Finsemble toolbar.
+
 # How to view documentation
 This project uses [docfx](https://dotnet.github.io/docfx/) to generate source code documentation.
 The [docfx getting started](https://dotnet.github.io/docfx/tutorial/docfx_getting_started.html) gives helpful examples for different workflows to generate this documentation.
