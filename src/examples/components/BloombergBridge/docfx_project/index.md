@@ -10,4 +10,4 @@
 1. Make sure you have the Terminal Connect API SDK
     * Run `TMCT <GO>` in your Bloomberg Terminal for more information about this
 2. Make sure your Finsemble environment is up to date
-3. Refer to [Articles](/articles/intro.html)
+3. Refer to [Articles](articles/intro.html) or [API Documentation](xref:BloombergBridge)
