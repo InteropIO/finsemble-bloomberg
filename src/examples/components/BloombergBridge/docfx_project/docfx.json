@@ -6,7 +6,7 @@
           "files": [
             "**/BloombergBridge.csproj"
           ],
-          "src" : "../"
+          "src": "../"
         }
       ],
       "dest": "api",
@@ -38,6 +38,10 @@
         ]
       }
     ],
+    "globalMetadata": {
+      "_appFaviconPath": "images/favicon.ico",
+      "_appLogoPath": "images/logo.svg"
+    },
     "overwrite": [
       {
         "files": [
