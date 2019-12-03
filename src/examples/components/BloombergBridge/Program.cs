@@ -55,7 +55,7 @@ namespace BloombergBridge
         }
 
         /// <summary>
-        /// Executes Finsemble and Bloomberg integration
+        /// Main runner for Finsemble and Bloomberg integration
         /// </summary>
         /// <param name="args">Arguments used to initialize Finsemble</param>
         public static void Main(string[] args)
@@ -94,7 +94,7 @@ namespace BloombergBridge
 
         }
         /// <summary>
-        /// Handler for when the Bloomberg bridge process is terminated
+        /// Handler for when the Bloomberg Bridge process is terminated
         /// </summary>
         /// <param name="sender">Object</param>
         /// <param name="e">EventArgs</param>
@@ -140,10 +140,10 @@ namespace BloombergBridge
         }
 
         /// <summary>
-        /// Function that fires when this component successfully connects to Finsemble.
+        /// Function that fires when the Bloomberg Bridge successfully connects to Finsemble.
         /// </summary>
         /// <remarks>
-        /// In our case, we want to check if the Bloomberg Terminal Connect API is available to be used
+        /// In our case, we want to check if the Bloomberg Terminal Connect API is available to be used.
         /// </remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -347,7 +347,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="data">
         /// Data that must have fields of: 
-        /// mnemonic, symbol
+        /// mnemonic, symbol.
         /// Optional fields of:
         /// tails, panel
         /// </param>
@@ -404,7 +404,7 @@ namespace BloombergBridge
             }
         }
         /// <summary>
-        /// Sets BlpTerminal.GroupEvent with Finsemble handlers
+        /// Adds Finsemble handlers to BlpTerminal.GroupEvent
         /// </summary>
         public static void UpdateFinsembleWithNewContext()
         {

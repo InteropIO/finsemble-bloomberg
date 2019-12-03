@@ -138,9 +138,6 @@ namespace BloombergBridge
         /// <summary>
         /// Example function for replacing securities on a worksheet
         /// </summary>
-        /// <remark>
-        /// Test remark
-        /// </remark>
         public static void ReplaceSecuritiesOnWorksheet()
         {
             var worksheets = BlpTerminal.GetAllWorksheets();
