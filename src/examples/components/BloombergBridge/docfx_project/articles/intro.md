@@ -25,5 +25,5 @@
 * Confirm that your integration appears in the `Apps` menu in the Finsemble toolbar.
 
 # Helpful snippets and examples
-* Snippets can be seen in the `Snippets.cs` file or [Snippets API reference](/api/BloombergBridge.Snippets.html)
-* A proof of concept example can be seen in the `Program.cs` file or [Program API reference](/api/BloombergBridge.Program.html)
+* Snippets can be seen in the `Snippets.cs` file or [Snippets API reference](xref:BloombergBridge.Snippets)
+* A proof of concept example can be seen in the `Program.cs` file or [Program API reference](xref:BloombergBridge.Program)
