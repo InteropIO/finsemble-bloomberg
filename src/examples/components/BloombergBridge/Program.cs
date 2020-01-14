@@ -397,6 +397,8 @@ namespace BloombergBridge
         // ! Client agnostic function
         public static void BlpApi_Disconnected(object sender, EventArgs e)
         {
+            // TODO: Add logic to wait for new BBG terminal instance to come online
+            // ? should we just call OnConnected again?
             FSBL.RouterClient.Transmit("BBG_ready", false);
         }
         /// <summary>
