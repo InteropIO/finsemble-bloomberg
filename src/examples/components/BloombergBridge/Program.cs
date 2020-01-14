@@ -433,13 +433,6 @@ namespace BloombergBridge
                 string[] splitter = { "US Equity" };
                 var tickerChangeArray = tickerChange.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
                 var symbolToSend = tickerChangeArray[0];
-
-                //JObject symbol = new JObject
-                //{
-                //    { "dataType", "symbol" },
-                //    { "data", symbolToSend.Trim() }
-                //};
-                //FSBL.LinkerClient.PublishToChannel(context.Group.Name, symbol);
                 var _data = new
                 {
                    id = new
