@@ -23,6 +23,7 @@ namespace BloombergBridge
         private static readonly object lockObj = new object();
         private static Finsemble FSBL = null;
         private static List<string> securities = null;
+        private static string globalSymbol;
 
         [DllImport("Kernel32")]
         private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
@@ -225,6 +226,10 @@ namespace BloombergBridge
                 {
                     BBG_RunDESAndUpdateContext(data);
                 });
+                FSBL.RouterClient.AddListener("BBG_update_context", (fsbl_sender, data) =>
+                {
+                    BBG_UpdateContext(data);
+                });
                 UpdateFinsembleWithNewContext();
             }
             catch (Exception err)
@@ -232,6 +237,50 @@ namespace BloombergBridge
                 Console.WriteLine(err);
             }
 
+        }
+        /// <summary>
+        /// Function to update context based on FDC3 instrument. Instrument may be a ticker or fixed income asset.
+        /// </summary>
+        /// <remarks>
+        /// In our case, we want to check if the Bloomberg Terminal Connect API is available to be used.
+        /// </remarks>
+        /// <param name="data">JSON containing a FDC3 instrument</param>
+        // ! Client agnostic function
+        public static void BBG_UpdateContext(FinsembleEventArgs data)
+        {
+            if (data.response != null)
+            {
+                List<string> groups = new List<string>();
+                var response = data.response["data"];
+                if (response.Type is JTokenType.String)
+                {
+                    response = JObject.Parse(response.Value<String>());
+                }
+                var instrument = response["fdc3.instrument"];
+                if (instrument != null)
+                {
+                    var symbol = (string)instrument.SelectToken("id.ticker");
+                    if (instrument.SelectToken("id.coupon") != null)
+                    {
+                        var coupon = instrument.SelectToken("id.coupon");
+                        var maturityDate = instrument.SelectToken("id.maturityDate");
+                        var _symbol = symbol;
+                        symbol = _symbol + " " + coupon + " " + maturityDate + " Corp";
+                        globalSymbol = symbol;
+                    }
+                    else
+                    {
+                        globalSymbol = symbol + " Equity";
+                    }
+
+                    var BBG_groups = BlpTerminal.GetAllGroups();
+                    foreach (BlpGroup item in BBG_groups)
+                    {
+                        BlpTerminal.SetGroupContext(item.Name, symbol);
+                    }
+                }
+
+            }
         }
         /// <summary>
         /// Runs a DES command and updates BBG group context
@@ -450,10 +499,10 @@ namespace BloombergBridge
                 var symbolToSend = tickerChangeArray[0];
                 var _data = new
                 {
-                   id = new
-                   {
-                       ticker = symbolToSend.Trim()
-                   }
+                    id = new
+                    {
+                        ticker = symbolToSend.Trim()
+                    }
                 };
                 var data = JsonConvert.SerializeObject(_data, Formatting.Indented);
                 JObject fdc3_instrument = new JObject
