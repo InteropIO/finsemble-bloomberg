@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Bloomberglp.Blpapi;
 using Bloomberglp.TerminalApiEx;
 using ChartIQ.Finsemble;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace BloombergBridge
@@ -237,7 +238,8 @@ namespace BloombergBridge
         {
             // Specific AG-grid implementation on double-click
             var response = data.response["data"];
-            var symbol = response.Value<string>("symbol");
+            var instrument = response["fdc3.instrument"];
+            var symbol = (string)instrument.SelectToken("id.ticker");
             symbol += " Equity";
             List<string> testList = new List<string>
                     {
@@ -354,10 +356,11 @@ namespace BloombergBridge
         public static void BBG_RunFunction(FinsembleEventArgs data)
         {
             var response = data.response["data"];
-            if (response["mnemonic"] != null && response["symbol"] != null)
+            if (response["mnemonic"] != null && response["fdc3.instrument"] != null)
             {
                 var BBG_mnemonic = response.Value<string>("mnemonic");
-                var symbol = response.Value<string>("symbol");
+                var instrument = response["fdc3.instrument"];
+                var symbol = (string)instrument.SelectToken("id.ticker");
                 symbol += " Equity";
                 List<string> securityList = new List<string>
                         {
@@ -431,12 +434,25 @@ namespace BloombergBridge
                 var tickerChangeArray = tickerChange.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
                 var symbolToSend = tickerChangeArray[0];
 
-                JObject symbol = new JObject
+                //JObject symbol = new JObject
+                //{
+                //    { "dataType", "symbol" },
+                //    { "data", symbolToSend.Trim() }
+                //};
+                //FSBL.LinkerClient.PublishToChannel(context.Group.Name, symbol);
+                var _data = new
                 {
-                    { "dataType", "symbol" },
-                    { "data", symbolToSend.Trim() }
+                   id = new
+                   {
+                       ticker = symbolToSend.Trim()
+                   }
                 };
-                FSBL.LinkerClient.PublishToChannel(context.Group.Name, symbol);
+                var data = JsonConvert.SerializeObject(_data, Formatting.Indented);
+                JObject fdc3_instrument = new JObject
+                {
+                    { "dataType", "fdc3.instrument" },
+                    { "data", data }
+                };
 
             }
 
