@@ -17,6 +17,7 @@ namespace BloombergBridge
         /// Example function for testing if a worksheet exists and creating it, if it does not exist
         /// </summary>
         /// <param name="securities">A list of securities to be passed into the newly created worksheet</param>
+        // ! Client specific
         public static void CreateBLPWorksheet(IList<string> securities)
         {
             var allWorksheets = BlpTerminal.GetAllWorksheets();
@@ -36,6 +37,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="groupName">The Bloomberg Group identifier ("Group-A")</param>
         /// <param name="security">A string representing an equity. E.g. "TSLA Equity"</param>
+        // ! Client specific
         public static void ChangeGroupSecurity(string groupName, string security)
         {
             BlpTerminal.SetGroupContext(groupName, security);
@@ -44,6 +46,7 @@ namespace BloombergBridge
         /// <summary>
         /// Example function to grab a list of securities from a preset worksheet
         /// </summary>
+        // ! Client specific
         public static void GrabTestSecurities()
         {
             var allWorksheets = BlpTerminal.GetAllWorksheets();
@@ -68,6 +71,7 @@ namespace BloombergBridge
         /// Writes out a list of securities based on the worksheet parameter
         /// </summary>
         /// <param name="worksheet">Bloomberg Worksheet object</param>
+        // ! Client specific
         public static void GrabWorksheetSecurities(BlpWorksheet worksheet)
         {
             var securityList = worksheet.GetSecurities();
@@ -84,6 +88,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="worksheet">Bloomberg Worksheet object</param>
         /// <param name="securities">A list of securities</param>
+        // ! Client specific
         public static void AddSecurityToWorksheet(BlpWorksheet worksheet, IList<string> securities)
         {
             var sheetSecurities = worksheet.GetSecurities();
@@ -99,6 +104,7 @@ namespace BloombergBridge
         /// Example function for running a DES command on a preset panel
         /// </summary>
         /// <param name="security">A security that DES will run against</param>
+        // ! Client specific
         public static void DefaultCommandMockEquity(string security)
         {
             string command = "DES";
@@ -111,6 +117,7 @@ namespace BloombergBridge
         /// Example function for using the SECF functionality of a Bloomberg Terminal
         /// </summary>
         /// <param name="security">A security to search for</param>
+        // ! Client specific
         public static void DefaultCommandWithSecurityLookup(string security)
         {
             string BLP_security = SecurityLookup(security);
@@ -124,6 +131,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="security">A security to search for</param>
         /// <returns></returns>
+        // ! Client agnostic, requires BLP API to be referenced in project
         public static string SecurityLookup(string security)
         {
             var secFinder = new SecurityLookup();
@@ -138,6 +146,7 @@ namespace BloombergBridge
         /// <summary>
         /// Example function for replacing securities on a worksheet
         /// </summary>
+        // ! Client specific
         public static void ReplaceSecuritiesOnWorksheet()
         {
             var worksheets = BlpTerminal.GetAllWorksheets();
@@ -167,6 +176,7 @@ namespace BloombergBridge
         /// Example function for running some Bloomberg Terminal command with tails
         /// </summary>
         /// <param name="security">A security to run DES against</param>
+        // ! Client specific
         public static void DefaultCommandWithTails(string security)
         {
             string command = "DES";
@@ -179,6 +189,7 @@ namespace BloombergBridge
         /// Example function that shows a breadth of Bloomberg commands available for use
         /// </summary>
         /// <param name="response">A JSON object containing a security to be used for interal function calls</param>
+        // ! Client specific
         public static void RunBLPCommand(JToken response)
         {
             JTokenReader reader = new JTokenReader(response);

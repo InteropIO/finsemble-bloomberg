@@ -18,7 +18,7 @@ using EventQueue = Bloomberglp.Blpapi.EventQueue;
 using Bloomberglp.Blpapi;
 
 namespace BloombergBridge
-{
+{   // ! Example code from BLP API (not Terminal Connect API) to find a security through Bloomberg
     internal class SecurityLookup
     {
         private static readonly Name SESSION_TERMINATED = Name.GetName("SessionTerminated");

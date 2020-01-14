@@ -59,6 +59,7 @@ namespace BloombergBridge
         /// Main runner for Finsemble and Bloomberg integration
         /// </summary>
         /// <param name="args">Arguments used to initialize Finsemble</param>
+        // ! Should be client agnostic
         public static void Main(string[] args)
         {
 #if DEBUG
@@ -95,10 +96,11 @@ namespace BloombergBridge
 
         }
         /// <summary>
-        /// Handler for when the Bloomberg Bridge process is terminated
+        /// Handler for when the Bloomberg Bridge process is terminated.
         /// </summary>
         /// <param name="sender">Object</param>
         /// <param name="e">EventArgs</param>
+        // ! Should be client agnostic
         public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             FSBL.RouterClient.RemoveResponder("BBG_ready");
@@ -116,6 +118,7 @@ namespace BloombergBridge
         /// Replaces securities on a given worksheet with given securities
         /// </summary>
         /// <param name="args">JSON object with a list of securities and a worksheet name</param>
+        // ! Client specific function
         public static void BBG_SymbolList(FinsembleEventArgs args)
         {
             var response = args.response["data"];
@@ -148,6 +151,7 @@ namespace BloombergBridge
         /// </remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        // ! Client agnostic function
         public static void OnConnected(object sender, EventArgs e)
         {
             FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg bridge connected to Finsemble." });
@@ -192,7 +196,7 @@ namespace BloombergBridge
                 });
             }
             try
-            {   
+            {   // ! This is where all client specific functions are called so the FSBL router can set up the appropriate handlers
                 FSBL.RouterClient.AddListener("BBG_symbol_list", (fsbl_sender, data) =>
                 {
                     BBG_SymbolList(data);
@@ -234,6 +238,7 @@ namespace BloombergBridge
         /// </summary>
         /// <remarks>This is an ag-grid specific function</remarks>
         /// <param name="data"></param>
+        // ! Client specific and component specific function
         public static void BBG_RunDESAndUpdateContext(FinsembleEventArgs data)
         {
             // Specific AG-grid implementation on double-click
@@ -277,6 +282,7 @@ namespace BloombergBridge
         /// Creates a BBG worksheet with the specified securities
         /// </summary>
         /// <param name="data"></param>
+        // ! Client specific function
         public static void BBG_CreateWorksheet(FinsembleEventArgs data)
         {
             var response = data.response["data"];
@@ -303,6 +309,7 @@ namespace BloombergBridge
         /// Transmits a list of securities from a specified worksheet on the "BBG_Get_Securities_From_Worksheet" channel
         /// </summary>
         /// <param name="queryMessage">Object that contains a field for "worksheet"</param>
+        // ! Client specific function
         public static void BBG_GetSecuritiesFromWorksheet(FinsembleQueryArgs queryMessage)
         {
             var response = queryMessage.response["data"];
@@ -331,6 +338,7 @@ namespace BloombergBridge
         /// Transmits a list of worksheets for the active Bloomberg user on the "BBG_get_worksheets_of_user" channel
         /// </summary>
         /// <param name="queryMessage"></param>
+        // ! Client specific function
         public static void BBG_GetUserWorksheets(FinsembleQueryArgs queryMessage)
         {
             Console.WriteLine("Responded to BBG_get_worksheets_of_user query");
@@ -353,6 +361,7 @@ namespace BloombergBridge
         /// Optional fields of:
         /// tails, panel
         /// </param>
+        // ! Client specific function in regards to the default values
         public static void BBG_RunFunction(FinsembleEventArgs data)
         {
             var response = data.response["data"];
@@ -385,6 +394,7 @@ namespace BloombergBridge
         /// <remarks>This block should contain error handling code</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        // ! Client agnostic function
         public static void BlpApi_Disconnected(object sender, EventArgs e)
         {
             FSBL.RouterClient.Transmit("BBG_ready", false);
@@ -394,6 +404,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="securities">List of securities</param>
         /// <param name="worksheetName">BBG worksheet name</param>
+        // ! Client specific function
         public static void ReplaceSecuritiesOnWorksheet(IList<string> securities, string worksheetName)
         {
             var worksheets = BlpTerminal.GetAllWorksheets();
@@ -409,6 +420,7 @@ namespace BloombergBridge
         /// <summary>
         /// Adds Finsemble handlers to BlpTerminal.GroupEvent
         /// </summary>
+        // ! Client agnostic function for context sharing
         public static void UpdateFinsembleWithNewContext()
         {
             BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
@@ -418,6 +430,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        // ! Client specific function for setting up context sharing
         public static void BlpTerminal_ComponentGroupEvent(object sender, BlpGroupEventArgs e)
         {
             var type = e.GetType();
@@ -450,7 +463,6 @@ namespace BloombergBridge
             }
 
         }
-
         public static void OnRunFunctionComplete(IAsyncResult ar)
         {
             BlpTerminal.EndRunFunction(ar);
@@ -460,6 +472,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        // ! Client agnostic function
         public static void OnShutdown(object sender, EventArgs e)
         {
             if (FSBL != null)
