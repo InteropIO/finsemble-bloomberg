@@ -241,9 +241,6 @@ namespace BloombergBridge
         /// <summary>
         /// Function to update context based on FDC3 instrument. Instrument may be a ticker or fixed income asset.
         /// </summary>
-        /// <remarks>
-        /// In our case, we want to check if the Bloomberg Terminal Connect API is available to be used.
-        /// </remarks>
         /// <param name="data">JSON containing a FDC3 instrument</param>
         // ! Client agnostic function
         public static void BBG_UpdateContext(FinsembleEventArgs data)
