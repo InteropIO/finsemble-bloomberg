@@ -11,8 +11,37 @@ The first approach, hosting a completed integration on a server accessible to al
 In the `finsemble-seed`, you will need to modify the `manifest-local.json`.
 In this file, look for the `"finsemble"` key.
 You will need to add two lines, one under the `"finsemble"` key and one under the `"importConfig"` key.
-Under `"finsemble"` add: `"fpe-bloombergRoot": "the server address for the completed integration"`.
-Then under `"importConfig"` add: `"$fpe-bloombergRoot/config-examples.json"`.
+Under `"finsemble"` add:
+>`"fpe-bloombergRoot": "the server address for the completed integration".`
+
+Then under `"importConfig"` add:
+>`"$fpe-bloombergRoot/config-examples.json"`.
+
+Your manifest after adding these lines should look something like the following:
+
+```json
+    ...
+    ...
+    ...
+    "finsemble": {
+        "applicationRoot": "http://localhost:3375",
+        "moduleRoot": "$applicationRoot/finsemble",
+        "servicesRoot": "$applicationRoot/finsemble/services",
+        "notificationURL": "$applicationRoot/components/notification/notification.html",
+        "fpe-bloombergRoot": "https://some-server/place-where-the-integration-is-hosted/",
+        "importConfig": [
+            "$applicationRoot/configs/application/config.json",
+            "$fpe-bloombergRoot/config-examples.json"
+        ],
+        "IAC": {
+            "serverAddress": "ws://127.0.0.1:3376"
+        }
+    ...
+    ...
+    ...
+    }
+```
+
 These two lines will allow Finsemble to pull in the Bloomberg integration to your users' apps menu.
 
 After updating the configuration, an administrator will need to package and release a new version of Finsemble to use.
