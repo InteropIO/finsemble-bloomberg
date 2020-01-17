@@ -64,4 +64,3 @@ Each LaunchPad window can run a Bloomberg command and update if the connected co
 LaunchPad allows a user to fine tune their visual layout, as well as have more than four commands running at the same time.
 
 By utilizing both Finsemble and Bloomberg, a user can have all the relevant data and components at their fingertips immediately.
-
