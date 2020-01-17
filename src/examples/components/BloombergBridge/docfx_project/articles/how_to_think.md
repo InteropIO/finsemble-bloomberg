@@ -13,7 +13,7 @@ However, we do have some sample use cases to spark inspiration:
      This will allow a user to view and use the Trade Order Management System inside of Bloomberg.
     * E.g. A worksheet in Finsemble displays multiple bonds.
       A user select a bond from this worksheet and sends it to Bloomberg through this integration.
-      The integration then sends a DES, YAS, QMGR, and TOMS command to each of the Bloomberg Terminal panels and/or LaunchPad components.
+      The integration then sends a `DES`, `YAS`, `QMGR`, and `TOMS` command to each of the Bloomberg Terminal panels and/or LaunchPad components.
       Additionally, the integration could send separate tails on each of the previous Bloomberg functions to deliver the exact information a user needs.
 * Two way data synchronization between Bloomberg LaunchPad components/groups and Finsemble components/groups.
   * E.g. A user has multiple charts and other components in Finsemble linked on the same color channel.
