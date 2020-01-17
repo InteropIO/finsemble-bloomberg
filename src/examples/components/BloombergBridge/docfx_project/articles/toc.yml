@@ -1,6 +1,6 @@
 - name: Introduction
   href: intro.md
-- name: How To Think About This Integration
+- name: How To Think About Implementation
   href: how_to_think.md
-- name: How To Deliver This Integration
+- name: How To Deliver
   href: how_to_deliver.md
