@@ -16,7 +16,7 @@ Then under `"importConfig"` add: `"$fpe-bloombergRoot/config-examples.json"`.
 These two lines will allow Finsemble to pull in the Bloomberg integration to your users' apps menu.
 
 After updating the configuration, an administrator will need to package and release a new version of Finsemble to use.
-The `finsemble-seed` a NPM script for creating a Finsemble installer to hand off to users.
+The `finsemble-seed` has a NPM script for creating a Finsemble installer to hand off to users.
 This script is `npm run makeInstaller:prod`.
 The installers also take advantage of Electron's updating functionality, where an administrator can push new versions of an application and users can choose when they want to update.
 Some other applications that use this update functionality are Slack, Spotify, and VS Code.
