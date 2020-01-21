@@ -1,0 +1,100 @@
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
+trigger:
+- azure_pipelines
+- pr
+- develop
+- staging
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  devFolder: '/srv/fpe-dev.finsemble.com/htdocs/ecosystem/additions/components/fpe-bloomberg'
+  devDocs: '/srv/fpe-dev.finsemble.com/htdocs/fpe-bloomberg'
+  stagingDocs: '/srv/fpe-staging.finsemble.com/htdocs/fpe-bloomberg'
+  masterDocs: '/srv/fpe.finsemble.com/htdocs/fpe-bloomberg'
+  stagingFolder: '/srv/fpe-staging.finsemble.com/htdocs/ecosystem/additions/components/fpe-bloomberg'
+  masterFolder: '/srv/fpe.finsemble.com/htdocs/ecosystem/additions/components/fpe-bloomberg'
+
+steps:
+- task: NuGetToolInstaller@0
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.15.3'
+  displayName: 'Install Node.js'
+
+- task: Npm@1
+  inputs:
+    command: 'install'
+    workingDir: '.'
+    customEndpoint: 'npm-ciq'
+
+- script: npm run build
+  displayName: 'Run build'
+
+- powershell: |
+    choco install docfx -y
+    docfx src/examples/components/BloombergBridge/docfx_project/docfx.json
+    if ($lastexitcode -ne 0) {
+      throw ("Error generating document")
+    }
+  displayName: "docfx build"
+
+- task: CopyFilesOverSSH@0
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  inputs:
+    sshEndpoint: 'Azure Connect7'
+    contents: 'dist/*'
+    targetFolder: '$(devFolder)'
+
+- task: CopyFilesOverSSH@0
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/staging'))
+  inputs:
+    sshEndpoint: 'Azure Connect7'
+    contents: 'dist/*'
+    targetFolder: '$(stagingFolder)'
+
+- task: CopyFilesOverSSH@0
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  inputs:
+    sshEndpoint: 'Azure Connect7'
+    contents: 'dist/*'
+    targetFolder: '$(masterFolder)'
+
+- task: CopyFilesOverSSH@0
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  inputs:
+    sshEndpoint: 'Azure Connect7'
+    contents: 'src/examples/components/BloombergBridge/docfx_project/fpe-bloomberg/*'
+    targetFolder: '$(devDocs)'
+
+- task: CopyFilesOverSSH@0
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/staging'))
+  inputs:
+    sshEndpoint: 'Azure Connect7'
+    contents: 'src/examples/components/BloombergBridge/docfx_project/fpe-bloomberg/*'
+    targetFolder: '$(stagingDocs)'
+
+- task: CopyFilesOverSSH@0
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  inputs:
+    sshEndpoint: 'Azure Connect7'
+    contents: 'src/examples/components/BloombergBridge/docfx_project/fpe-bloomberg/*'
+    targetFolder: '$(masterDocs)'
