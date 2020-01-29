@@ -25,37 +25,6 @@ namespace BloombergBridge
         private static List<string> securities = null;
         private static string globalSymbol;
 
-        [DllImport("Kernel32")]
-        private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
-        private delegate bool EventHandler(CtrlType sig);
-        static EventHandler _handler;
-
-        enum CtrlType
-        {
-            CTRL_C_EVENT = 0,
-            CTRL_BREAK_EVENT = 1,
-            CTRL_CLOSE_EVENT = 2,
-            CTRL_LOGOFF_EVENT = 5,
-            CTRL_SHUTDOWN_EVENT = 6
-        }
-        private static bool Handler(CtrlType sig)
-        {
-            FSBL.RouterClient.RemoveResponder("BBG_ready");
-            FSBL.RouterClient.RemoveListener("BBG_symbol", (fsbl_sender, response) =>
-            {
-                Console.WriteLine(response);
-            });
-            FSBL.RouterClient.RemoveListener("BBG_des_symbol", (fsbl_sender, response) =>
-            {
-                Console.WriteLine(response);
-            });
-
-            //shutdown right away so there are no lingering threads
-            Environment.Exit(-1);
-
-            return true;
-        }
-
         /// <summary>
         /// Main runner for Finsemble and Bloomberg integration
         /// </summary>
@@ -68,13 +37,7 @@ namespace BloombergBridge
 #endif
             lock (lockObj)
             {
-                _handler += new EventHandler(Handler);
                 AppDomain.CurrentDomain.ProcessExit += new System.EventHandler(CurrentDomain_ProcessExit);
-                Process[] processes = Process.GetProcessesByName("BloombergBridge");
-                if (processes.Length > 1)
-                {
-                    processes[0].Close();
-                }
             }
 
             // Initialize Finsemble
@@ -115,34 +78,7 @@ namespace BloombergBridge
                 Console.WriteLine(response);
             });
         }
-        /// <summary>
-        /// Replaces securities on a given worksheet with given securities
-        /// </summary>
-        /// <param name="args">JSON object with a list of securities and a worksheet name</param>
-        // ! Client specific function
-        public static void BBG_SymbolList(FinsembleEventArgs args)
-        {
-            var response = args.response["data"];
-            securities = new List<string>();
-            if (response["securities"] != null)
-            {
-                foreach (string a in response["securities"])
-                {
-                    securities.Add(a + " Equity");
-                }
-                if (response["worksheet"] != null)
-                {
-                    // worksheet name should always be valid
-                    var worksheetCast = response["worksheet"].ToString();
-                    ReplaceSecuritiesOnWorksheet(securities, worksheetCast);
-                }
-                else
-                {
-                    // Finsemble sales demo default worksheet 
-                    ReplaceSecuritiesOnWorksheet(securities, "Demo sheet");
-                }
-            }
-        }
+
 
         /// <summary>
         /// Function that fires when the Bloomberg Bridge successfully connects to Finsemble.
@@ -238,11 +174,77 @@ namespace BloombergBridge
             }
 
         }
+
+        /// <summary>
+        /// Handles Finsemble shutdown event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        // ! Client agnostic function
+        public static void OnShutdown(object sender, EventArgs e)
+        {
+            if (FSBL != null)
+            {
+                lock (lockObj)
+                {
+                    if (FSBL != null)
+                    {
+                        try
+                        {
+                            Process[] processes = Process.GetProcessesByName("BloombergBridge");
+                            if (processes.Length > 0)
+                            {
+                                for (int i = 0; i < processes.Length; i++)
+                                {
+                                    processes[i].Kill();
+                                }
+                            }
+                            // Dispose of Finsemble.
+                            FSBL.Dispose();
+                        }
+                        catch { }
+                        finally
+                        {
+                            FSBL = null;
+                            Environment.Exit(0);
+                        }
+                    }
+
+                }
+            }
+            // Release main thread so application can exit.
+            autoEvent.Set();
+
+        }
+
+        /// <summary>
+        /// Function that fires when the Terminal Connect API disconnects.
+        /// </summary>
+        /// <remarks>This block should contain error handling code</remarks>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        // ! Client agnostic function
+        public static void BlpApi_Disconnected(object sender, EventArgs e)
+        {
+            // TODO: Add logic to wait for new BBG terminal instance to come online
+            // ? should we just call OnConnected again?
+            FSBL.RouterClient.Transmit("BBG_ready", false);
+        }
+
+        /// <summary>
+        /// Adds Finsemble handlers to BlpTerminal.GroupEvent
+        /// </summary>
+        // ! Client agnostic function for context sharing
+        public static void UpdateFinsembleWithNewContext()
+        {
+            BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
+        }
+
         /// <summary>
         /// Function to update context based on FDC3 instrument. Instrument may be a ticker or fixed income asset.
         /// </summary>
         /// <param name="data">JSON containing a FDC3 instrument</param>
-        // ! Client agnostic function
+        // ! Client specific function
         public static void BBG_UpdateContext(FinsembleEventArgs data)
         {
             if (data.response != null)
@@ -320,6 +322,35 @@ namespace BloombergBridge
                     {
                         BlpTerminal.SetGroupContext(group, symbol);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Replaces securities on a given worksheet with given securities
+        /// </summary>
+        /// <param name="args">JSON object with a list of securities and a worksheet name</param>
+        // ! Client specific function
+        public static void BBG_SymbolList(FinsembleEventArgs args)
+        {
+            var response = args.response["data"];
+            securities = new List<string>();
+            if (response["securities"] != null)
+            {
+                foreach (string a in response["securities"])
+                {
+                    securities.Add(a + " Equity");
+                }
+                if (response["worksheet"] != null)
+                {
+                    // worksheet name should always be valid
+                    var worksheetCast = response["worksheet"].ToString();
+                    ReplaceSecuritiesOnWorksheet(securities, worksheetCast);
+                }
+                else
+                {
+                    // Finsemble sales demo default worksheet 
+                    ReplaceSecuritiesOnWorksheet(securities, "Demo sheet");
                 }
             }
         }
@@ -435,19 +466,6 @@ namespace BloombergBridge
             }
         }
         /// <summary>
-        /// Function that fires when the Terminal Connect API disconnects.
-        /// </summary>
-        /// <remarks>This block should contain error handling code</remarks>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // ! Client agnostic function
-        public static void BlpApi_Disconnected(object sender, EventArgs e)
-        {
-            // TODO: Add logic to wait for new BBG terminal instance to come online
-            // ? should we just call OnConnected again?
-            FSBL.RouterClient.Transmit("BBG_ready", false);
-        }
-        /// <summary>
         /// Replaces securities on a BBG worksheet
         /// </summary>
         /// <param name="securities">List of securities</param>
@@ -465,14 +483,7 @@ namespace BloombergBridge
                 }
             }
         }
-        /// <summary>
-        /// Adds Finsemble handlers to BlpTerminal.GroupEvent
-        /// </summary>
-        // ! Client agnostic function for context sharing
-        public static void UpdateFinsembleWithNewContext()
-        {
-            BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
-        }
+
         /// <summary>
         /// Updates linked Finsemble components when BBG context changes
         /// </summary>
@@ -511,53 +522,5 @@ namespace BloombergBridge
             }
 
         }
-        public static void OnRunFunctionComplete(IAsyncResult ar)
-        {
-            BlpTerminal.EndRunFunction(ar);
-        }
-        /// <summary>
-        /// Handles Finsemble shutdown event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // ! Client agnostic function
-        public static void OnShutdown(object sender, EventArgs e)
-        {
-            if (FSBL != null)
-            {
-                lock (lockObj)
-                {
-                    if (FSBL != null)
-                    {
-                        try
-                        {
-                            Process[] processes = Process.GetProcessesByName("BloombergBridge");
-                            if (processes.Length > 0)
-                            {
-                                for (int i = 0; i < processes.Length; i++)
-                                {
-                                    processes[i].Kill();
-                                }
-                            }
-                            // Dispose of Finsemble.
-                            FSBL.Dispose();
-                        }
-                        catch { }
-                        finally
-                        {
-                            FSBL = null;
-                            Environment.Exit(0);
-                        }
-                    }
-
-                }
-            }
-
-            // Release main thread so application can exit.
-            autoEvent.Set();
-
-        }
-
     }
-
 }
