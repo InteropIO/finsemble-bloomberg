@@ -115,6 +115,53 @@ namespace BloombergBridge
         private Session session;
         private Identity identity;
 
+        public void Run(string ticker)
+        {
+            d_queryString = ticker;
+            SendRequest(session, identity);
+            EventLoop(session);
+        }
+        public string GetSecurity()
+        {
+            return BLP_ticker;
+        }
+        public void Init()
+        {
+            try
+            {
+                SessionOptions sessionOptions = new SessionOptions();
+                sessionOptions.ServerHost = d_host;
+                sessionOptions.ServerPort = d_port;
+                sessionOptions.AuthenticationOptions = d_authOptions;
+                Console.WriteLine("Connecting to {0}:{1}", d_host, d_port);
+                session = new Session(sessionOptions);
+                if (!session.Start())
+                {
+                    throw new Exception("Failed to start session");
+                }
+                identity = null;
+                if (d_authOptions != null)
+                {
+                    Authorize(out identity, session);
+                }
+                if (!session.OpenService(INSTRUMENT_SERVICE))
+                {
+                    throw new Exception(
+                        string.Format("Failed to open: {0}", INSTRUMENT_SERVICE));
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(string.Format("Exception: {0}", e.Message));
+                Console.WriteLine();
+            }
+        }
+        public void Dispose()
+        {
+            session.Stop();
+            session = null;
+        }
+
         // Authorize should be called before any requests are sent.
         private static void Authorize(out Identity identity, Session session)
         {
@@ -338,53 +385,6 @@ namespace BloombergBridge
             request.Print(Console.Out);
             Console.WriteLine();
             session.SendRequest(request, identity, null);
-        }
-
-        public void Run(string ticker)
-        {
-            d_queryString = ticker;
-            SendRequest(session, identity);
-            EventLoop(session);
-        }
-        public string GetSecurity()
-        {
-            return BLP_ticker;
-        }
-        public void Init()
-        {
-            try
-            {
-                SessionOptions sessionOptions = new SessionOptions();
-                sessionOptions.ServerHost = d_host;
-                sessionOptions.ServerPort = d_port;
-                sessionOptions.AuthenticationOptions = d_authOptions;
-                Console.WriteLine("Connecting to {0}:{1}", d_host, d_port);
-                session = new Session(sessionOptions);
-                if (!session.Start())
-                {
-                    throw new Exception("Failed to start session");
-                }
-                identity = null;
-                if (d_authOptions != null)
-                {
-                    Authorize(out identity, session);
-                }
-                if (!session.OpenService(INSTRUMENT_SERVICE))
-                {
-                    throw new Exception(
-                        string.Format("Failed to open: {0}", INSTRUMENT_SERVICE));
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(string.Format("Exception: {0}", e.Message));
-                Console.WriteLine();
-            }
-        }
-        public void Dispose()
-        {
-            session.Stop();
-            session = null;
         }
 
     }
