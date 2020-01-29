@@ -65,7 +65,7 @@ namespace BloombergBridge
         /// <param name="sender">Object</param>
         /// <param name="e">EventArgs</param>
         // ! Should be client agnostic
-        public static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             FSBL.RouterClient.RemoveResponder("BBG_ready");
             FSBL.RouterClient.Transmit("BBG_ready", false);
@@ -89,7 +89,7 @@ namespace BloombergBridge
         /// <param name="sender"></param>
         /// <param name="e"></param>
         // ! Client agnostic function
-        public static void OnConnected(object sender, EventArgs e)
+        private static void OnConnected(object sender, EventArgs e)
         {
             FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg bridge connected to Finsemble." });
 
@@ -181,7 +181,7 @@ namespace BloombergBridge
         /// <param name="sender"></param>
         /// <param name="e"></param>
         // ! Client agnostic function
-        public static void OnShutdown(object sender, EventArgs e)
+        private static void OnShutdown(object sender, EventArgs e)
         {
             if (FSBL != null)
             {
@@ -224,7 +224,7 @@ namespace BloombergBridge
         /// <param name="sender"></param>
         /// <param name="e"></param>
         // ! Client agnostic function
-        public static void BlpApi_Disconnected(object sender, EventArgs e)
+        private static void BlpApi_Disconnected(object sender, EventArgs e)
         {
             // TODO: Add logic to wait for new BBG terminal instance to come online
             // ? should we just call OnConnected again?
@@ -235,7 +235,7 @@ namespace BloombergBridge
         /// Adds Finsemble handlers to BlpTerminal.GroupEvent
         /// </summary>
         // ! Client agnostic function for context sharing
-        public static void UpdateFinsembleWithNewContext()
+        private static void UpdateFinsembleWithNewContext()
         {
             BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
         }
@@ -245,7 +245,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="data">JSON containing a FDC3 instrument</param>
         // ! Client specific function
-        public static void BBG_UpdateContext(FinsembleEventArgs data)
+        private static void BBG_UpdateContext(FinsembleEventArgs data)
         {
             if (data.response != null)
             {
@@ -253,7 +253,7 @@ namespace BloombergBridge
                 var response = data.response["data"];
                 if (response.Type is JTokenType.String)
                 {
-                    response = JObject.Parse(response.Value<String>());
+                    response = JObject.Parse(response.Value<string>());
                 }
                 var instrument = response["fdc3.instrument"];
                 if (instrument != null)
@@ -287,7 +287,7 @@ namespace BloombergBridge
         /// <remarks>This is an ag-grid specific function</remarks>
         /// <param name="data"></param>
         // ! Client specific and component specific function
-        public static void BBG_RunDESAndUpdateContext(FinsembleEventArgs data)
+        private static void BBG_RunDESAndUpdateContext(FinsembleEventArgs data)
         {
             // Specific AG-grid implementation on double-click
             var response = data.response["data"];
@@ -331,7 +331,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="args">JSON object with a list of securities and a worksheet name</param>
         // ! Client specific function
-        public static void BBG_SymbolList(FinsembleEventArgs args)
+        private static void BBG_SymbolList(FinsembleEventArgs args)
         {
             var response = args.response["data"];
             securities = new List<string>();
@@ -360,7 +360,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="data"></param>
         // ! Client specific function
-        public static void BBG_CreateWorksheet(FinsembleEventArgs data)
+        private static void BBG_CreateWorksheet(FinsembleEventArgs data)
         {
             var response = data.response["data"];
             if (response != null)
@@ -387,7 +387,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="queryMessage">Object that contains a field for "worksheet"</param>
         // ! Client specific function
-        public static void BBG_GetSecuritiesFromWorksheet(FinsembleQueryArgs queryMessage)
+        private static void BBG_GetSecuritiesFromWorksheet(FinsembleQueryArgs queryMessage)
         {
             var response = queryMessage.response["data"];
             var requestedWorksheet = response.Value<string>("worksheet");
@@ -416,7 +416,7 @@ namespace BloombergBridge
         /// </summary>
         /// <param name="queryMessage"></param>
         // ! Client specific function
-        public static void BBG_GetUserWorksheets(FinsembleQueryArgs queryMessage)
+        private static void BBG_GetUserWorksheets(FinsembleQueryArgs queryMessage)
         {
             Console.WriteLine("Responded to BBG_get_worksheets_of_user query");
             var worksheets = BlpTerminal.GetAllWorksheets();
@@ -439,7 +439,7 @@ namespace BloombergBridge
         /// tails, panel
         /// </param>
         // ! Client specific function in regards to the default values
-        public static void BBG_RunFunction(FinsembleEventArgs data)
+        private static void BBG_RunFunction(FinsembleEventArgs data)
         {
             var response = data.response["data"];
             if (response["mnemonic"] != null && response["fdc3.instrument"] != null)
@@ -471,7 +471,7 @@ namespace BloombergBridge
         /// <param name="securities">List of securities</param>
         /// <param name="worksheetName">BBG worksheet name</param>
         // ! Client specific function
-        public static void ReplaceSecuritiesOnWorksheet(IList<string> securities, string worksheetName)
+        private static void ReplaceSecuritiesOnWorksheet(IList<string> securities, string worksheetName)
         {
             var worksheets = BlpTerminal.GetAllWorksheets();
             foreach (BlpWorksheet sheet in worksheets)
@@ -490,7 +490,7 @@ namespace BloombergBridge
         /// <param name="sender"></param>
         /// <param name="e"></param>
         // ! Client specific function for setting up context sharing
-        public static void BlpTerminal_ComponentGroupEvent(object sender, BlpGroupEventArgs e)
+        private static void BlpTerminal_ComponentGroupEvent(object sender, BlpGroupEventArgs e)
         {
             var type = e.GetType();
             if (type == typeof(BlpGroupContextChangedEventArgs))
