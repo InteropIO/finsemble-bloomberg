@@ -126,23 +126,7 @@ namespace BloombergBridge
             var enumSecurity = new string[1] { security };
             BlpTerminal.RunFunction(command, panel, enumSecurity);
         }
-        /// <summary>
-        /// Helper function to parse the results of running the SECF API call
-        /// </summary>
-        /// <param name="security">A security to search for</param>
-        /// <returns></returns>
-        // ! Client agnostic, requires BLP API to be referenced in project
-        public static string SecurityLookup(string security)
-        {
-            var secFinder = new SecurityLookup();
-            secFinder.Init();
-            secFinder.Run(security);
-            string BLP_security = secFinder.getSecurity();
-            BLP_security = BLP_security.Replace('<', ' ').Replace('>', ' ');
-            secFinder.Dispose();
-            secFinder = null;
-            return BLP_security;
-        }
+
         /// <summary>
         /// Example function for replacing securities on a worksheet
         /// </summary>
@@ -271,6 +255,24 @@ namespace BloombergBridge
                 //});
             }
 
+        }
+
+        /// <summary>
+        /// Helper function to parse the results of running the SECF API call
+        /// </summary>
+        /// <param name="security">A security to search for</param>
+        /// <returns></returns>
+        // ! Client agnostic, requires BLP API to be referenced in project
+        public static string SecurityLookup(string security)
+        {
+            var secFinder = new SecurityLookup();
+            secFinder.Init();
+            secFinder.Run(security);
+            string BLP_security = secFinder.GetSecurity();
+            BLP_security = BLP_security.Replace('<', ' ').Replace('>', ' ');
+            secFinder.Dispose();
+            secFinder = null;
+            return BLP_security;
         }
 
     }

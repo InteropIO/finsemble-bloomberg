@@ -116,7 +116,7 @@ namespace BloombergBridge
         private Identity identity;
 
         // Authorize should be called before any requests are sent.
-        public static void Authorize(out Identity identity, Session session)
+        private static void Authorize(out Identity identity, Session session)
         {
             identity = session.CreateIdentity();
             if (!session.OpenService(AUTH_SERVICE))
@@ -346,7 +346,7 @@ namespace BloombergBridge
             SendRequest(session, identity);
             EventLoop(session);
         }
-        public string getSecurity()
+        public string GetSecurity()
         {
             return BLP_ticker;
         }
