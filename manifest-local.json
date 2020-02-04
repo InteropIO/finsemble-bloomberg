@@ -2,7 +2,7 @@
     "devtools_port": 9090,
     "startup_app": {
         "name": "ChartIQ Bloomberg",
-        "url": "http://fpe-staging.finsemble.com/ecosystem/finsemble/components/system/serviceManager/serviceManager.html",
+        "url": "http://fpe-staging.finsemble.com/ecosystem/finsemble/services/systemManager/systemManager.html",
         "uuid": "Finsemble",
         "applicationIcon": "http://fpe-staging.finsemble.com/ecosystem/assets/img/Finsemble_Taskbar_Icon.png",
         "defaultTop": 0,
@@ -57,10 +57,10 @@
     "fileName": "ChartIQ-local-installer",
     "appAssets": [
         {
-            "src": "http://connect2.chartiq.com/finsemble/Assimilation_3_6_0e.zip",
-            "version": "3.6.0e",
+            "src": "https://assets.finsemble.com/assimilation/assimilation_4.0.0.0.zip",
+            "version": "4.0.0",
             "alias": "assimilation",
-            "target": "assimilationMain.exe"
+            "target": "AssimilationMain.exe"
         },
         {
             "src": "http://localhost:8000/Release/BloombergBridge.zip",
@@ -85,8 +85,13 @@
             "$applicationRoot/configs/application/config.json",
             "$fpe-bloombergRoot/config-examples.json"
         ],
-        "IAC": {
-            "serverAddress": "wss://localhost.chartiq.com:3376"
+        "router": {
+            "crossDomainTransport": "IPCBus",
+            "transportSettings": {
+                "FinsembleTransport": {
+                    "serverAddress": "ws://127.0.0.1:3376"
+                }
+            }
         }
     }
 }
