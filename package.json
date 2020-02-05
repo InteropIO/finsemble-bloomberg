@@ -5,10 +5,10 @@
     "main": "",
     "scripts": {
         "start": "node server.js",
-        "watch:docs-src": "npx nodemon --exec \"npm run build:docs\" --watch src/examples/components/BloombergBridge -e cs,md,yml",
+        "watch:docs-src": "npx nodemon --exec \"npm run build:docs\" --watch BloombergBridge -e cs,md,yml",
         "docs:dev": "npm-run-all -p watch:docs-src serve:docs",
-        "build:docs": "docfx src/examples/components/BloombergBridge/docfx_project/docfx.json",
-        "serve:docs": "browser-sync start --server src/examples/components/BloombergBridge/docfx_project/fpe-bloomberg/ --files src/examples/components/BloombergBridge/docfx_project/fpe-bloomberg/"
+        "build:docs": "docfx BloombergBridge/docfx_project/docfx.json",
+        "serve:docs": "browser-sync start --server BloombergBridge/docfx_project/fpe-bloomberg/ --files BloombergBridge/docfx_project/fpe-bloomberg/"
     },
     "author": "",
     "license": "ISC",
