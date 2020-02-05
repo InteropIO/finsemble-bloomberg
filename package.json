@@ -23,14 +23,14 @@
     },
     "nodemonConfig": {
         "ignore": [
-            "src/examples/components/BloombergBridge/bin",
-            "src/examples/components/BloombergBridge/FinsembleResources",
-            "src/examples/components/BloombergBridge/obj",
-            "src/examples/components/BloombergBridge/Properties",
-            "src/examples/components/BloombergBridge/*.config",
-            "src/examples/components/BloombergBridge/*.csproj",
-            "src/examples/components/BloombergBridge/docfx_project/fpe-bloomberg",
-            "src/examples/components/BloombergBridge/docfx_project/obj"
+            "BloombergBridge/bin",
+            "BloombergBridge/FinsembleResources",
+            "BloombergBridge/obj",
+            "BloombergBridge/Properties",
+            "BloombergBridge/*.config",
+            "BloombergBridge/*.csproj",
+            "BloombergBridge/docfx_project/fpe-bloomberg",
+            "BloombergBridge/docfx_project/obj"
         ]
     }
 }
