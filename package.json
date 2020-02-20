@@ -5,7 +5,7 @@
     "main": "",
     "scripts": {
         "start": "node server.js",
-        "watch:docs-src": "npx nodemon --exec \"npm run build:docs\" --watch BloombergBridge -e cs,md,yml",
+        "watch:docs-src": "npx nodemon --exec \"npm run build:docs\" --watch BloombergBridge -e cs,md,yml,css",
         "docs:dev": "npm-run-all -p watch:docs-src serve:docs",
         "dev:docs": "npm run docs:dev",
         "build:docs": "docfx BloombergBridge/docfx_project/docfx.json",
