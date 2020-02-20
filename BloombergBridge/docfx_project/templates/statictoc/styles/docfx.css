@@ -419,7 +419,7 @@ article section {
 }
 
 .sidenav, .fixed_header, .toc  {
-  background-color: #f1f1f1;
+  background-color: #fafafa;
 }
 
 .sidetoc {
@@ -429,7 +429,7 @@ article section {
   bottom: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  background-color: #f1f1f1;
+  background-color: #fafafa;
   border-left: 1px solid #e7e7e7;
   border-right: 1px solid #e7e7e7;
   z-index: 1;
@@ -440,7 +440,7 @@ article section {
 }
 
 body .toc{
-  background-color: #f1f1f1;
+  background-color: #fafafa;
   overflow-x: hidden;
 }
 
@@ -544,7 +544,7 @@ body .toc{
   position: fixed;
   top: 90px;
   width: 260px;
-  background-color: #f1f1f1;
+  background-color: #fafafa;
   padding: 15px;
   border-left: 1px solid #e7e7e7;
   border-right: 1px solid #e7e7e7;
