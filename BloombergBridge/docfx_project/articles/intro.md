@@ -1,47 +1,28 @@
-# Finsemble-Bloomberg Integration
+# Finsemble's Bloomberg Terminal Connect Integration
 
-## Overview
+Finsemble's Bloomberg Terminal Connect integration enables data synchronicity between the Bloomberg Terminal and Finsemble components on the same computer.
 
-**Blurb about this integration allows Finsemble and Bloomberg to communicate with each other on the same machine as well as that this integration will fail to build if the Terminal Connect DLL is not available.**
+* To get an idea of the types of context sharing that's possible between Finsemble and Bloomberg, [check out our video demonstration.](https://chartiq.wistia.com/medias/z77u5v8x2q)
+* For additional support, please contact your ChartIQ Client Support specialist at <a href="mailto:support@finsemble.com">support@finsemble.com</a>.
 
-## Technical prerequisites for this integration
+## Glossary
+**Bloomberg Terminal Connect**:
+* For more information on Terminal Connect, run `TMCT<GO>` in your terminal.
 
-- Node 8 LTS or 10.15.13
-- Visual Studio 2019
-- Finsemble.dll
-  - Installed via NuGet when using Visual Studio to build the integration.
-- Bloomberglp.TerminalApiEx.dll
-  - Download from Bloomberg Terminal
-    1. Run `TMCT <GO>`
-    1. Click `Software Downloads`
-    1. Follow `To install` instructions in the Terminal
-  - Add the downloaded DLL as a reference to your integration's project
-- Bloomberglp.Blpapi.dll
-  - Download the `C# (.NET) Supported Release` from [Bloomberg](https://www.bloomberg.com/professional/support/api-library/) for Windows.
-  - Add the downloaded DLL as a reference to your integration's project
+**BLP API**:
 
-## How to run
+**Finsemble**:
 
-- Confirm that the previously downloaded DLLs have been referenced in your project.
-  - Terminal Connect API (`Bloomberglp.TerminalApiEx.dll`)
-  - Bloomberg API (`Bloomberglp.Blpapi.dll`)
-- Using Visual Studio, build `BloombergIntegration.sln`
-  - This will install NuGet dependencies
-- `npm install`
-- `npm run start`
-  - `npm run start` will enable a local server so the integration can be hosted and used by Finsemble
-- Launch local Finsemble
-  - Assuming that the local Finsemble is searching for a manifest at `http://localhost:8000`
-  - If you have your own Finsemble seed, follow these steps:
-    1. Navigate to `configs/other`
-    1. Open the `server-environment-startup.json` file
-    1. Under the `"development"` entry, modify `"serverConfig"`
-       - `"serverConfig": "http://localhost:8000/manifest-local.json"`
-  - If you have the Launch Local Finsemble installer, double-click the installer or the installed shortcut
-    - The installed shortcut will default to your desktop
-- Confirm that your integration appears in the `Apps` menu in the Finsemble toolbar.
+## How it works
 
-## Helpful snippets and examples
+This integration creates interoperability and data synchronization by utilizing both the Finsemble Router API and Terminal Connect API.
 
-- Snippets can be seen in the `Snippets.cs` file or [Snippets API reference](xref:BloombergBridge.Snippets)
-- A proof of concept example can be seen in the `Program.cs` file or [Program API reference](xref:BloombergBridge.Program)
+A subscription to the Bloomberg Terminal gives you access to the Terminal Connect API. [The instructions for obtaining the Terminal Connect DLL](intro.md) are available in the "Introduction" article**NOTE TO SELF DON'T FORGET TO FIX**. This integration implements those API calls where we saw useful and relevant use cases.
+
+The Finsemble Router API is used to communicate with other Finsemble components. In this integration, we use separate Router channels as API endpoints. The Terminal Connect API interfaces with the Finsemble Router API to pass messages between Bloomberg Terminal panels/LaunchPad windows and Finsemble components.
+
+In the source code of the main Program there is a function called `BBG_CreateWorksheet`. This function name is also the channel name we declare in the Router. Any Router query calls to this channel will call the corresponding function in the integration. When these endpoints are queried, the integration handles the call and redirects as appropriate. Sometimes this redirect is as simple as passing the data directly to a Terminal Connect API endpoint. Other times, it will involve data manipulation and transformation to conform to the Terminal Connect endpoint. This is possible due to the [Query/Response](https://documentation.chartiq.com/finsemble/tutorial-TheRouter.html#query-response-example) model of communication in the Finsemble Router.
+
+Another style of communication that can be used is [Pub/Sub](https://documentation.chartiq.com/finsemble/tutorial-TheRouter.html). Use this model to check every publish/subscription request that comes across the wire. This allows for a centralized location to aggregate and spread data to the appropriate parties. A benefit of this approach is that publishers and subscribers no longer have to be aware of each other. (For additional information about this powerful API, please refer to the [Finsemble Router documentation](https://documentation.chartiq.com/finsemble/tutorial-TheRouter.html).)
+
+By utilizing both Finsemble and Bloomberg, a user can have all the relevant data and components at their fingertips immediately.
