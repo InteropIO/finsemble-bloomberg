@@ -1,25 +1,47 @@
-# Documentation for the Finsemble-Bloomberg integration
+# Finsemble-Bloomberg Integration
 
-**Open Questions @FPE**
-* Why do the methods declare that they're "Example functions"? Are we only offering examples?
-* From a business perspective, who has the Finsemble-Bloomberg integration? Is it free? Is it only available for uses of a particular package?
-* To me, it feels as if there's an open question about where this documentation should live. If we could i-frame the API documentation, there's no reason it couldn't live on the documentation site as "real" documentation. ((Caveat: I don't know how to do that.)) At the very least, we should be able to link to this documentation from the main doc site. In this case, I'd need more familiarity with how docFX lays things out so I can tinker with things. In general, I'd like to reduce some sections and expand others.
+## Overview
 
+**Blurb about this integration allows Finsemble and Bloomberg to communicate with each other on the same machine as well as that this integration will fail to build if the Terminal Connect DLL is not available.**
 
-**Notes to self**
-* Need glossary of terms for Terminal Connect (TC), BLP API, Finsemble.dll
-* Need explanation for what expected behavior of the integration is
-* Make everything on one page (?)
+## Technical prerequisites for this integration
 
-The Finsemble Bloomberg integration utilizes the .NET API exposed by Bloomberg Terminal Connect, enabling data synchronicity between the Bloomberg Terminal and applications running in Finsemble.
-* For more information on Terminal Connect, run `TMCT<GO>` in your terminal.
-* For a brief video demonstration of the types of context sharing that are possible between Finsemble and Bloomberg, [check out our video on Wistia.](https://chartiq.wistia.com/medias/z77u5v8x2q)
-* For additional support, please contact your ChartIQ Client Support specialist at <a href="mailto:support@finsemble.com">support@finsemble.com</a>.
+- Node 8 LTS or 10.15.13
+- Visual Studio 2019
+- Finsemble.dll
+  - Installed via NuGet when using Visual Studio to build the integration.
+- Bloomberglp.TerminalApiEx.dll
+  - Download from Bloomberg Terminal
+    1. Run `TMCT <GO>`
+    1. Click `Software Downloads`
+    1. Follow `To install` instructions in the Terminal
+  - Add the downloaded DLL as a reference to your integration's project
+- Bloomberglp.Blpapi.dll
+  - Download the `C# (.NET) Supported Release` from [Bloomberg](https://www.bloomberg.com/professional/support/api-library/) for Windows.
+  - Add the downloaded DLL as a reference to your integration's project
 
-## Quick Start Notes
+## How to run
 
-1. Make sure you have the latest version of the [`fpe-bloomberg`](https://github.com/ChartIQ/fpe-bloomberg) integration
-1. Make sure you have the Terminal Connect API SDK
-    * Run `TMCT <GO>` in your Bloomberg Terminal for more information about this
-1. Make sure your Finsemble environment is up to date
-1. Refer to [Articles](articles/intro.md) or [API Documentation](xref:BloombergBridge)
+- Confirm that the previously downloaded DLLs have been referenced in your project.
+  - Terminal Connect API (`Bloomberglp.TerminalApiEx.dll`)
+  - Bloomberg API (`Bloomberglp.Blpapi.dll`)
+- Using Visual Studio, build `BloombergIntegration.sln`
+  - This will install NuGet dependencies
+- `npm install`
+- `npm run start`
+  - `npm run start` will enable a local server so the integration can be hosted and used by Finsemble
+- Launch local Finsemble
+  - Assuming that the local Finsemble is searching for a manifest at `http://localhost:8000`
+  - If you have your own Finsemble seed, follow these steps:
+    1. Navigate to `configs/other`
+    1. Open the `server-environment-startup.json` file
+    1. Under the `"development"` entry, modify `"serverConfig"`
+       - `"serverConfig": "http://localhost:8000/manifest-local.json"`
+  - If you have the Launch Local Finsemble installer, double-click the installer or the installed shortcut
+    - The installed shortcut will default to your desktop
+- Confirm that your integration appears in the `Apps` menu in the Finsemble toolbar.
+
+## Helpful snippets and examples
+
+- Snippets can be seen in the `Snippets.cs` file or [Snippets API reference](xref:BloombergBridge.Snippets)
+- A proof of concept example can be seen in the `Program.cs` file or [Program API reference](xref:BloombergBridge.Program)
