@@ -27,9 +27,9 @@ variables:
 steps:
 - bash: |
     choco install docfx -y
-    docfx src/examples/components/BloombergBridge/docfx_project/docfx.json
+    docfx BloombergBridge/docfx_project/docfx.json
     mkdir fpe-bloomberg
-    cp -r src/examples/components/BloombergBridge/docfx_project/fpe-bloomberg/* fpe-bloomberg/
+    cp -r BloombergBridge/docfx_project/fpe-bloomberg/* fpe-bloomberg/
     ls fpe-bloomberg
   displayName: "docfx build"
 - task: SSH@0
