@@ -1,1 +1,1 @@
-[Get started with Finsemble's Bloomberg Terminal Connect integration!](intro.md)
+[Get started with Finsemble's Bloomberg Terminal Connect integration!](articles/intro.md)
