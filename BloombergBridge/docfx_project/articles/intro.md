@@ -7,7 +7,7 @@ Finsemble's Bloomberg Terminal Connect integration enables data synchronicity be
 * For additional support, please contact your ChartIQ Client Support specialist at <a href="mailto:support@finsemble.com">support@finsemble.com</a>.
 
 ## Glossary
-**Bloomberg Terminal Connect**: Bloomberg Terminal Connect is an interface that allows you to use Bloomberg functions from other applications or spreadsheets.
+**Bloomberg Terminal Connect**: Terminal Connect links proprietary tools and spreadsheets with the Bloomberg Professional Service.
 * For more information on Terminal Connect, run `TMCT<GO>` in your terminal.
 
 **BLP API**: The Bloomberg L.P. API (BLP API) is a public API designed to allow the creation of applications for the Bloomberg Terminal.
