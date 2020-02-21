@@ -1,10 +1,15 @@
 # Sample use cases
 
-You know your users and your use case better than anybody, and your implementation of the Finsemble-Bloomberg Integration will reflect this expertise. However, we do have some sample use cases to spark inspiration:
+You know your users and your use case better than anybody, and your implementation of the Bloomberg Terminal Connect integration will reflect this expertise. However, we do have some sample use cases to spark inspiration. For example:
 
-- You can run arbitrary commands in Bloomberg with arbitrary tails (additional parameters that are passed with a command that control the output of that command) on arbitrary panels while using data from Finsemble components. For example:
-  - A chart in Finsemble displays an equity.
-    When the ticker changes, the Bloomberg integration can send the updated ticker and a `DES` command to a panel of the Bloomberg Terminal.
+- You can run commands in Bloomberg with tails (additional parameters that are passed with a command that control the output of that command) on panels while using data from Finsemble components.
+- You can create two-way data synchronization between Bloomberg LaunchPad components and Finsemble components.
+- You can pull data from Bloomberg using the BLP API into Finsemble components.
+
+## Example code snippets
+
+### Run a Bloomberg function when a chart in Finsemble displays an equity
+When the ticker changes, the integration can send the updated ticker and a `DES` command to a panel of the Bloomberg Terminal.
 
     ```C#
         private static void BBG_RunDESAndUpdateContext(FinsembleEventArgs data)
@@ -47,9 +52,8 @@ You know your users and your use case better than anybody, and your implementati
         }
     ```
 
-  - A chart in Finsemble displays a bond.
-  When an end user updates this bond, the Bloomberg integration can send this new bond with a `TOMS` command to a panel of the Bloomberg Terminal.
-  This will allow a user to view and use the Trade Order Management System inside of Bloomberg.
+### Run a Bloomberg function when a chart in Finsemble displays a bond
+When a chart in Finsemble displays a bond, the integration can send this new bond with a `TOMS` command to a panel of the Bloomberg Terminal. This will allow a user to view and use the Trade Order Management System inside of Bloomberg.
 
   ```C#
         private static void BBG_RunFunction(FinsembleEventArgs data)
@@ -81,10 +85,8 @@ You know your users and your use case better than anybody, and your implementati
         }
   ```
 
-  - A worksheet in Finsemble displays multiple bonds.
-  An end user selects a bond from this worksheet and sends it to Bloomberg through this integration.
-  The integration then sends a `DES`, `YAS`, `QMGR`, and `TOMS` command to each of the Bloomberg Terminal panels or LaunchPad components.
-  Additionally, the integration could send separate tails on each of the previous Bloomberg functions to deliver the exact information a user needs.
+## Send a bond from a Finsemble worksheet to Bloomberg
+An end user can select a bond from a worksheet in Finsemble and send it to Bloomberg through this integration. The integration then sends a `DES`, `YAS`, `QMGR`, and `TOMS` command to each of the Bloomberg Terminal panels or LaunchPad components. Additionally, the integration could send separate tails on each of the previous Bloomberg functions to deliver the exact information an end user needs.
 
   ```C#
         private static void BBG_RunWorkflow(FinsembleEventArgs data)
@@ -116,11 +118,8 @@ You know your users and your use case better than anybody, and your implementati
         }
   ```
 
-- You can create two-way data synchronization between Bloomberg LaunchPad components and Finsemble components. For example:
-  - A user has multiple charts and other components in Finsemble linked on the same channel.
-    Additionally, the user has multiple charts and other components in their LaunchPad environment.
-    If the user changes their symbol/ticker context in either Finsemble or LaunchPad, the linked components in both environments will update accordingly.
-    This cuts down on data duplication between applications and environments.
+### Link Finsemble components with Bloomberg panels
+An end user can link Finsemble components and LaunchPads together. If the end user changes their symbol/ticker context in either Finsemble or LaunchPad, the linked components in both environments will update accordingly. This cuts down on data duplication between applications and environments.
 
     ```C#
         // Updates context when Finsemble sends new context
@@ -193,8 +192,8 @@ You know your users and your use case better than anybody, and your implementati
         }
     ```
 
-- You can pull data from Bloomberg using the BLP API (not Terminal Connect API) into Finsemble components. For example:
-  - A user can use the BLP API to search for a particular equity or bond, then this integration can send that data back into one or more Finsemble components.
+### Share Bloomberg Terminal search data with Finsemble
+A user can use the BLP API to search for a particular equity or bond. Then, this integration can send that data back into one or more Finsemble components.
 
   ```C#
         public static string SecurityLookup(string security)
@@ -209,4 +208,3 @@ You know your users and your use case better than anybody, and your implementati
             return BLP_security;
         }
   ```
-

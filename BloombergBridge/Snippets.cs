@@ -14,7 +14,7 @@ namespace BloombergBridge
     public class Snippets
     {
         /// <summary>
-        /// Example function for testing if a worksheet exists and creating it, if it does not exist
+        /// This function will test if a worksheet exists; if it does not exist, it will create a worksheet with that name
         /// </summary>
         /// <param name="securities">A list of securities to be passed into the newly created worksheet</param>
         // ! Client specific
@@ -33,7 +33,7 @@ namespace BloombergBridge
         }
 
         /// <summary>
-        /// Example function to update a Bloomberg group's context
+        /// This function updates a Bloomberg group's context
         /// </summary>
         /// <param name="groupName">The Bloomberg Group identifier ("Group-A")</param>
         /// <param name="security">A string representing an equity. E.g. "TSLA Equity"</param>
@@ -44,7 +44,7 @@ namespace BloombergBridge
         }
 
         /// <summary>
-        /// Example function to grab a list of securities from a preset worksheet
+        /// This function grabs a list of securities from a preset worksheet
         /// </summary>
         // ! Client specific
         public static void GrabTestSecurities()
@@ -101,7 +101,7 @@ namespace BloombergBridge
             }
         }
         /// <summary>
-        /// Example function for running a DES command on a preset panel
+        /// This function runs a DES command on a preset panel
         /// </summary>
         /// <param name="security">A security that DES will run against</param>
         // ! Client specific
@@ -114,7 +114,7 @@ namespace BloombergBridge
             BlpTerminal.RunFunction(command, panel, enumSecurity);
         }
         /// <summary>
-        /// Example function for using the SECF functionality of a Bloomberg Terminal
+        /// This function will use the SECF functionality of a Bloomberg Terminal
         /// </summary>
         /// <param name="security">A security to search for</param>
         // ! Client specific
@@ -128,7 +128,7 @@ namespace BloombergBridge
         }
 
         /// <summary>
-        /// Example function for replacing securities on a worksheet
+        /// This function replaces securities on a worksheet
         /// </summary>
         // ! Client specific
         public static void ReplaceSecuritiesOnWorksheet()
@@ -157,7 +157,7 @@ namespace BloombergBridge
 
         }
         /// <summary>
-        /// Example function for running some Bloomberg Terminal command with tails
+        /// This function will run an arbitrary Bloomberg Terminal command with tails
         /// </summary>
         /// <param name="security">A security to run DES against</param>
         // ! Client specific
@@ -170,7 +170,7 @@ namespace BloombergBridge
             BlpTerminal.RunFunction(command, panel, enumSecurity, "4");
         }
         /// <summary>
-        /// Example function that shows a breadth of Bloomberg commands available for use
+        /// This function displays a breadth of Bloomberg commands available for use
         /// </summary>
         /// <param name="response">A JSON object containing a security to be used for interal function calls</param>
         // ! Client specific
@@ -194,13 +194,13 @@ namespace BloombergBridge
             try
             {
                 /*
-                 * Send (hardcoded equity) command to terminal from finsemble component 
+                 * Send (hardcoded equity) command to terminal from finsemble component
                  */
                 //DefaultCommandMockEquity(security);
 
                 /*
                  * Send (hardcoded) command to terminal from finsemble component but use
-                 * BLP security lookup to get the correct format 
+                 * BLP security lookup to get the correct format
                  * (as opposed to us appending the instrument type)
                  */
                 //DefaultCommandWithSecurityLookup(security);
