@@ -4,7 +4,6 @@ The technical prerequisites of this integration are:
 
 - Latest version of [Finsemble's Bloomberg Terminal Connect integration](https://github.com/ChartIQ/fpe-bloomberg) integration
     - Make sure your Finsemble environment is up to date.
-- Node 8 LTS or 10.15.13
 - Visual Studio 2019
 - *Finsemble.dll*
   - Installed via NuGet when using Visual Studio to build the integration.
@@ -27,7 +26,6 @@ The technical prerequisites of this integration are:
 3. `npm install`
 4. `npm run start` - This will enable a local server so the integration can be hosted and used by Finsemble.
 5. Launch Finsemble locally.
-    - Note: Make sure that your development environment is set to port 8000: `"serverConfig": "http://localhost:8000/manifest-local.json"`
 6. Confirm that the integration appears in the Apps menu of the Finsemble toolbar.
 
 ## Delivering the integration to your users
@@ -76,4 +74,19 @@ These two lines will allow Finsemble to pull in the Bloomberg Terminal Connect i
 After updating the configuration, an administrator will need to package and release a new version of your smart desktop to your users. The Finsemble Seed Project has a NPM script for creating a Finsemble installer to hand off to users.
 [Read more about creating installers and deploying your smart desktop here.](https://documentation.chartiq.com/finsemble/tutorial-deployingYourSmartDesktop.html)
 
-**Note:** Alternatively, the Terminal Connect API supports remote authentication so theoretically a single desktop that has both Finsemble and Bloomberg could be used by multiple users via a remote desktop client.
+## How to go about integration
+We should provide an overview of the integration process - a develop will not necessarily know exactly what they need to use at the start of the project and the better we guide them at the beginning, the less confused they will be and the less (confusing) support requests we will receive. I think the typical process will be:
+Research the use case(s)
+Talk to your traders and document
+the workflows they operate
+what commands they run  AND the associated tails
+whether they are working with a launchpad group, worksheet or BBG panel
+Work out your improved user journey
+What integration types will you use
+What data needs to flow in each direction
+Determine if you need to translate data to/from an internal format to pass to/from Bloomberg
+Implement that translation
+Work out where your integration will sit in Finsemble, possibilities include:
+A specific component
+A custom client library or preload you can add to multiple components
+A custom desktop service that your components and services will interact with that will pass on commands etc. to the BTC integration
