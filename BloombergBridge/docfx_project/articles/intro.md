@@ -30,8 +30,7 @@ Most (but not all) Bloomberg components can be placed in a Launchpad group. Laun
 
 You can get, set, or subscribe to changes for a particular group. This is bi-directional; the Launchpad group can react to a change in context **or** send a message when its context is changed.
 
-**Example**
-An end user could link Finsemble components and Launchpads together. If the end user changes their symbol context in either Finsemble or Launchpad, the linked components in both environments will update accordingly. This cuts down on data duplication between applications and environments.
+**Example 1**: An end user could link Finsemble components and Launchpads together. If the end user changes their symbol context in either Finsemble or Launchpad, the linked components in both environments will update accordingly. This cuts down on data duplication between applications and environments.
 
 ```C#
 // Updates context when Finsemble sends new context
@@ -104,26 +103,40 @@ private static void BlpTerminal_ComponentGroupEvent(object sender, BlpGroupEvent
 }
 ```
 
+**Example 2**: You can share Bloomberg Terminal search data with Finsemble. If an end user searches for a particular equity or bond in the Terminal, this integration can send that data back into one or more Finsemble components.
+
+```C#
+public static string SecurityLookup(string security)
+{
+    var secFinder = new SecurityLookup();
+    secFinder.Init();
+    secFinder.Run(security);
+    string BLP_security = secFinder.GetSecurity();
+    BLP_security = BLP_security.Replace('<', ' ').Replace('>', ' ');
+    secFinder.Dispose();
+    secFinder = null;
+    return BLP_security;
+}
+```
+
 ### Data sharing with worksheets
-A worksheet is a list of securities that may be referenced by various Bloomberg components in either a Launchpad or panel. Generally, a component that uses a Worksheet as its context will not need to be part of a Launchpad group. 
+A worksheet is a list of securities that may be referenced by various Bloomberg components in either a Launchpad or panel. Generally, a component that uses a Worksheet as its context will not need to be part of a Launchpad group.
 
 In a Launchpad, a component might be set up to listen to a particular worksheet and react to changes to it. The same goes for other functions that are more commonly interacted with via the main panels, such as alerts.
 
 The Bloomberg Terminal Connect integration allows you to create, retrieve, or append **@FPE: Append what?** to worksheets in the Bloomberg Terminal. Changes to a worksheet via the integration will trigger updates within any Launchpad components that are listening to the worksheet.
 
-**Example**:
+**Example**: **@FPE: What example code do we have of this?**
 
-**@FPE: What example code do we have of this?**
+### Send commands from Finsemble to the Bloomberg Terminal
 
-### Send functions from Finsemble to the Bloomberg Terminal
+This integration can also facilitate work with the four main Bloomberg panels. Whereas Launchpads are used to set up groups of context-linked components that provide information about a single security, panels are used for more complex comparisons with multiple securities and use more interactive processes.
 
-This integration can also facilitate work with the four main Bloomberg panels. Whereas Launchpads are used to set up groups of context-linked components that provide information about a single security, panels are used for more complex comparisons with multiple securities and use more interactive processes. Integration with panels can create convenience within workflows. For example, a particular command can be triggered automatically by a Finsemble component, allowing the end user to interact with the resulting display in the Bloomberg pannel to complete the operation.
+Integration with panels can create powerful workflows. For example, a particular command can be triggered automatically by a Finsemble component, allowing the end user to interact with the resulting display in the Bloomberg panel to complete the operation.
 
-This functionality is unidirectional, i.e., commands are sent to a panel from Finsemble via Terminal Connect.
+This functionality is unidirectional, i.e., commands are sent to a panel from Finsemble via Terminal Connect. Most Bloomberg commands can be used in this manner even if they don't have specific Terminal Connect support.
 
 #### The anatomy of a Bloomberg command
-Most Bloomberg commands can be used in this manner even if they don't have specific Terminal Connect support.
-
 Each Bloomberg command is made up of:
 * Mnemonic: The specific command that would normally be entered into the Terminal (e.g., DES, YAS, VCON)
 * Panel number to send it to
@@ -131,8 +144,7 @@ Each Bloomberg command is made up of:
 * Security 1 (optional)
 * Security 2 (optional)
 
-**Example 1**
-You can run a Bloomberg function when a chart in Finsemble displays an equity. When the ticker changes, the integration can send the updated ticker and a `DES` command to a panel of the Bloomberg Terminal.
+**Example 1**: You can run a Bloomberg command when a chart in Finsemble displays an equity. When the ticker changes, the integration can send the updated ticker and a `DES` command to a panel of the Bloomberg Terminal.
 
 ```C#
 private static void BBG_RunDESAndUpdateContext(FinsembleEventArgs data)
@@ -175,8 +187,7 @@ private static void BBG_RunDESAndUpdateContext(FinsembleEventArgs data)
 }
 ```
 
-**Example 2**
-When a chart in Finsemble displays a bond, the integration can send this new bond with a `TOMS` command to a panel of the Bloomberg Terminal. This will allow a user to view and use the Trade Order Management System inside of Bloomberg.
+**Example 2**: When a chart in Finsemble displays a bond, the integration can send this new bond with a `TOMS` command to a panel of the Bloomberg Terminal. This will allow a user to view and use the Trade Order Management System inside of Bloomberg.
 
 ```C#
 private static void BBG_RunFunction(FinsembleEventArgs data)
@@ -208,14 +219,15 @@ private static void BBG_RunFunction(FinsembleEventArgs data)
 }
 ```
 
-
 ## How it works
 
 This integration creates interoperability and data synchronization by utilizing both the Finsemble Router API and Terminal Connect API.
 
-A subscription to the Bloomberg Terminal gives you access to the Terminal Connect API. This integration implements those Terminal Connect API calls where we saw useful and relevant use cases.
+Terminal Connect allows you to link proprietary apps with the Terminal. This integration implements those Terminal Connect API calls where we saw useful and relevant use cases.
 
 The Finsemble Router API is used to communicate with other Finsemble components. In this integration, we use separate Router channels as API endpoints. The Terminal Connect API interfaces with the Finsemble Router API to pass messages between Bloomberg Terminal panels/LaunchPad windows and Finsemble components.
+
+**@FPE: Mark, I would add a diagram about the communication between BTC/theRouter/Finsemble here. In general, would you read over this section and expand it in the ways that you articulated to me at the whiteboard?**
 
 The integration utilizes the Router's Query/Response model. In the source code of the main program there is a function called `BBG_CreateWorksheet`. This function name is also the channel name we declare in the Router. Any Router query calls to this channel will call the corresponding function in the integration. When these endpoints are queried, the integration handles the call and redirects as appropriate. Sometimes this redirect is as simple as passing the data directly to a Terminal Connect API endpoint. Other times, it will involve data manipulation and transformation to conform to the Terminal Connect endpoint. (For additional information about this powerful API, please refer to the [Finsemble Router documentation](https://documentation.chartiq.com/finsemble/tutorial-TheRouter.html).)
 

@@ -28,6 +28,19 @@ The technical prerequisites of this integration are:
 5. Launch Finsemble locally.
 6. Confirm that the integration appears in the Apps menu of the Finsemble toolbar.
 
+## Considerations for your implementation
+Careful consideration must be given to how you will implement the Bloomberg Terminal Connect integration before you begin work. You know your users and your use case better than anybody, and your implementation of the integration will reflect this expertise.
+
+First, research your use case(s). Build a user story by interviewing your traders. Find out what workflows they use during their daily tasks. Do they perform different workflows at different parts of the day? The week? The year?
+
+Research how your end users interface with the Bloomberg Terminal. Establish what commands they use, and what the associated tails are. Do your end users work primarily with Launchpad groups or panels?
+
+Once you've built a user story, define the new user journey you intend to create. Map out the new and improved workflows that you intend to create. What Finsemble components need integration with what parts of the Bloomberg Terminal? What data needs to flow in each direction? Determine if you need to translate data to/from an internal format to pass to/from Bloomberg.
+
+Creating data translations is where the bulk of your implementation work will be.
+
+By thinking through your end users' needs, you will be able to use our example integration to programatically and intelligently build a tool that will serve them well.
+
 ## Delivering the integration to your users
 
 One delivery approach is to host the completed integration on a server accessible to all your users. Finsemble can be configured to launch this integration, just like it would any other application. As a consideration, each user would need their own Bloomberg Terminal license on the same machine as Finsemble.
@@ -73,20 +86,3 @@ These two lines will allow Finsemble to pull in the Bloomberg Terminal Connect i
 
 After updating the configuration, an administrator will need to package and release a new version of your smart desktop to your users. The Finsemble Seed Project has a NPM script for creating a Finsemble installer to hand off to users.
 [Read more about creating installers and deploying your smart desktop here.](https://documentation.chartiq.com/finsemble/tutorial-deployingYourSmartDesktop.html)
-
-## How to go about integration
-We should provide an overview of the integration process - a develop will not necessarily know exactly what they need to use at the start of the project and the better we guide them at the beginning, the less confused they will be and the less (confusing) support requests we will receive. I think the typical process will be:
-Research the use case(s)
-Talk to your traders and document
-the workflows they operate
-what commands they run  AND the associated tails
-whether they are working with a launchpad group, worksheet or BBG panel
-Work out your improved user journey
-What integration types will you use
-What data needs to flow in each direction
-Determine if you need to translate data to/from an internal format to pass to/from Bloomberg
-Implement that translation
-Work out where your integration will sit in Finsemble, possibilities include:
-A specific component
-A custom client library or preload you can add to multiple components
-A custom desktop service that your components and services will interact with that will pass on commands etc. to the BTC integration
