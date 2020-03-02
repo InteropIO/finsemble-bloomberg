@@ -1,6 +1,6 @@
 # Finsemble's Bloomberg Terminal Connect Integration
 
-Finsemble's Bloomberg Terminal Connect integration enables data synchronicity between the Bloomberg Terminal and Finsemble components on the same computer. Importantly, because Finsemble creates interoperability between apps, this integration allows you to connect the Bloomberg Terminal to many different apps in your portfolio: a one-to-many integration.
+Finsemble's Bloomberg Terminal Connect integration enables data synchronicity between the Bloomberg Terminal and Finsemble components on the same computer. Crucially, because Finsemble creates interoperation between multiple applications, you gain added synergy from connecting them all to the Bloomberg Terminal.
 
 This integration is provided as a starting point. Build out these basic examples to provide meaningful workflows for your end users. New workflows will speed up work by keeping your internal apps in sync with the Bloomberg Terminal. Eliminate costly copy and paste errors as the Terminal shares data automatically with your Finsembilized applications.
 
@@ -229,6 +229,6 @@ The Finsemble Router API is used to communicate with other Finsemble components.
 
 **@FPE: Mark, I would add a diagram about the communication between BTC/theRouter/Finsemble here. In general, would you read over this section and expand it in the ways that you articulated to me at the whiteboard?**
 
-The integration utilizes the Router's Query/Response model. In the source code of the main program there is a function called `BBG_CreateWorksheet`. This function name is also the channel name we declare in the Router. Any Router query calls to this channel will call the corresponding function in the integration. When these endpoints are queried, the integration handles the call and redirects as appropriate. Sometimes this redirect is as simple as passing the data directly to a Terminal Connect API endpoint. Other times, it will involve data manipulation and transformation to conform to the Terminal Connect endpoint. (For additional information about this powerful API, please refer to the [Finsemble Router documentation](https://documentation.chartiq.com/finsemble/tutorial-TheRouter.html).)
+The integration utilizes the Router's Query/Response model. In the source code of the main program there is a function called `BBG_CreateWorksheet`. This function name is also the channel name we declare in the Router. Any Router query calls to this channel will call the corresponding function in the integration. When these endpoints are queried, the integration handles the call and passes it onto the Terminal Connect API as appropriate. Sometimes this redirect is as simple as passing the data directly to a Terminal Connect API endpoint. Other times, it will involve data manipulation and transformation to conform to the Terminal Connect endpoint. (For additional information about this powerful API, please refer to the [Finsemble Router documentation](https://documentation.chartiq.com/finsemble/tutorial-TheRouter.html).)
 
 By utilizing both Finsemble and Bloomberg, a user can have all the relevant data and components at their fingertips immediately.
