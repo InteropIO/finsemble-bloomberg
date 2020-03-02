@@ -2,7 +2,7 @@
 
 Finsemble's Bloomberg Terminal Connect integration enables data synchronicity between the Bloomberg Terminal and Finsemble components on the same computer. Crucially, because Finsemble creates interoperation between multiple applications, you gain added synergy from connecting them all to the Bloomberg Terminal.
 
-This integration is provided as a starting point. Build out these basic examples to provide meaningful workflows for your end users. New workflows will speed up work by keeping your internal apps in sync with the Bloomberg Terminal. Eliminate costly errors as the Terminal shares data automatically with your Finsembilized applications.
+This .NET integration is provided as a starting point. Build out these basic examples to provide meaningful workflows for your end users. New workflows will speed up work by keeping your internal apps in sync with the Bloomberg Terminal. Eliminate costly errors as the Terminal shares data automatically with your Finsembilized applications.
 
 * The [GitHub repo for the Bloomberg Terminal Connect integration can be found here](https://github.com/ChartIQ/fpe-bloomberg). Request access by reaching out to a ChartIQ Client Support specialist at <a href="mailto:support@finsemble.com">support@finsemble.com</a>.
 * To get an idea of the types of context sharing that's possible between Finsemble and Bloomberg, [check out our video demonstration.](https://chartiq.wistia.com/medias/z77u5v8x2q)
@@ -20,7 +20,7 @@ This integration is provided as a starting point. Build out these basic examples
 The Bloomberg Terminal Connect integration provides:
 * Bi-directional data sharing between a Launchpad group and Finsemble
 * Bi-directional data sharing between a worksheet and Finsemble
-* The ability for Finsemble to trigger a function in a Bloomberg Panel
+* The ability for Finsemble to trigger a command in a Bloomberg Panel
 
 By using this integration with Finsemble, you can provide these capabilities to your applications. Your Finsembilized components can drive context in the Bloomberg Terminal or react to context changes received from it.
 
@@ -229,5 +229,7 @@ The Finsemble Router API is used to communicate with other Finsemble components.
 **@FPE: Mark, I would add a diagram about the communication between BTC/theRouter/Finsemble here. In general, would you read over this section and expand it in the ways that you articulated to me at the whiteboard?**
 
 The integration utilizes the Router's Query/Response model. In the source code of the main program there is a function called `BBG_CreateWorksheet`. This function name is also the channel name we declare in the Router. Any Router query calls to this channel will call the corresponding function in the integration. When these endpoints are queried, the integration handles the call and passes it onto the Terminal Connect API as appropriate. Sometimes this redirect is as simple as passing the data directly to a Terminal Connect API endpoint. Other times, it will involve data manipulation and transformation to conform to the Terminal Connect endpoint. (For additional information about this powerful API, please refer to the [Finsemble Router documentation](https://documentation.chartiq.com/finsemble/tutorial-TheRouter.html).)
+
+**@FPE: Mark, I think we should address Watson's question here: The documentation mentions using separate Router channels as API endpoints - it would be good to list out the router channels and the type of data that it requires. For anyone using anything apart from .Net it would be needed.**
 
 By utilizing both Finsemble and Bloomberg, a user can have all the relevant data and components at their fingertips immediately.
