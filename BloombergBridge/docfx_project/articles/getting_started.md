@@ -4,7 +4,6 @@ The technical prerequisites of this integration are:
 
 - Latest version of [Finsemble's Bloomberg Terminal Connect integration](https://github.com/ChartIQ/fpe-bloomberg) integration
     - Make sure your Finsemble environment is up to date.
-- Node 8 LTS or 10.15.13
 - Visual Studio 2019
 - *Finsemble.dll*
   - Installed via NuGet when using Visual Studio to build the integration.
@@ -27,8 +26,20 @@ The technical prerequisites of this integration are:
 3. `npm install`
 4. `npm run start` - This will enable a local server so the integration can be hosted and used by Finsemble.
 5. Launch Finsemble locally.
-    - Note: Make sure that your development environment is set to port 8000: `"serverConfig": "http://localhost:8000/manifest-local.json"`
 6. Confirm that the integration appears in the Apps menu of the Finsemble toolbar.
+
+## Considerations for your implementation
+Careful consideration must be given to how you will implement the Bloomberg Terminal Connect integration before you begin work. You know your users and your use case better than anybody, and your implementation of the integration will reflect this expertise.
+
+First, research your use case(s). Build a user story by interviewing your traders. Find out what workflows they use during their daily tasks. Do they perform different workflows at different parts of the day? The week? The year?
+
+Research how your end users interface with the Bloomberg Terminal. Establish what commands they use, and what the associated tails are. Do your end users work primarily with Launchpad groups or panels?
+
+Once you've built a user story, define the new user journey you intend to create. Map out the new and improved workflows that you intend to create. What Finsemble components need integration with what parts of the Bloomberg Terminal? What data needs to flow in each direction? Determine if you need to translate data to/from an internal format to pass to/from Bloomberg.
+
+Creating data translations is where the bulk of your implementation work will be.
+
+By thinking through your end users' needs, you will be able to use our example integration to programatically and intelligently build a tool that will serve them well.
 
 ## Delivering the integration to your users
 
@@ -75,5 +86,3 @@ These two lines will allow Finsemble to pull in the Bloomberg Terminal Connect i
 
 After updating the configuration, an administrator will need to package and release a new version of your smart desktop to your users. The Finsemble Seed Project has a NPM script for creating a Finsemble installer to hand off to users.
 [Read more about creating installers and deploying your smart desktop here.](https://documentation.chartiq.com/finsemble/tutorial-deployingYourSmartDesktop.html)
-
-**Note:** Alternatively, the Terminal Connect API supports remote authentication so theoretically a single desktop that has both Finsemble and Bloomberg could be used by multiple users via a remote desktop client.
