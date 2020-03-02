@@ -2,11 +2,10 @@
 
 Finsemble's Bloomberg Terminal Connect integration enables data synchronicity between the Bloomberg Terminal and Finsemble components on the same computer. Crucially, because Finsemble creates interoperation between multiple applications, you gain added synergy from connecting them all to the Bloomberg Terminal.
 
-This integration is provided as a starting point. Build out these basic examples to provide meaningful workflows for your end users. New workflows will speed up work by keeping your internal apps in sync with the Bloomberg Terminal. Eliminate costly copy and paste errors as the Terminal shares data automatically with your Finsembilized applications.
+This integration is provided as a starting point. Build out these basic examples to provide meaningful workflows for your end users. New workflows will speed up work by keeping your internal apps in sync with the Bloomberg Terminal. Eliminate costly errors as the Terminal shares data automatically with your Finsembilized applications.
 
-* The [GitHub repo for the Bloomberg Terminal Connect integration can be found here](https://github.com/ChartIQ/fpe-bloomberg).
+* The [GitHub repo for the Bloomberg Terminal Connect integration can be found here](https://github.com/ChartIQ/fpe-bloomberg). Request access by reaching out to a ChartIQ Client Support specialist at <a href="mailto:support@finsemble.com">support@finsemble.com</a>.
 * To get an idea of the types of context sharing that's possible between Finsemble and Bloomberg, [check out our video demonstration.](https://chartiq.wistia.com/medias/z77u5v8x2q)
-* For additional support, please contact your ChartIQ Client Support specialist at <a href="mailto:support@finsemble.com">support@finsemble.com</a>.
 
 ## Glossary
 **Bloomberg Terminal Connect**: Terminal Connect links proprietary tools and spreadsheets with the Bloomberg Professional Service.
@@ -20,13 +19,13 @@ This integration is provided as a starting point. Build out these basic examples
 
 The Bloomberg Terminal Connect integration provides:
 * Bi-directional data sharing between a Launchpad group and Finsemble
-* Bi-directional data sharing between a Worksheet and Finsemble
-* Finsemble can trigger a function in a Bloomberg Panel
+* Bi-directional data sharing between a worksheet and Finsemble
+* The ability for Finsemble to trigger a function in a Bloomberg Panel
 
-By using this integration with Finsemble, you will can provide these capabilities to your applications. Your Finsembilized components can drive context in the Bloomberg Terminal or react to context changes received from it.
+By using this integration with Finsemble, you can provide these capabilities to your applications. Your Finsembilized components can drive context in the Bloomberg Terminal or react to context changes received from it.
 
 ### Data sharing with Launchpad groups
-Most (but not all) Bloomberg components can be placed in a Launchpad group. Launchpad groups can take a single security as context. When the security is changed, each member of the Launchpad automatically updates to the new security, e.g., a pricing chart and a news component on a Launchpad both update and show new data when the Launchpad's context is updated. This works similarly to Finsemble's concept of Linker channels.
+Most Bloomberg components can be placed in a Launchpad group. Launchpad groups can take a single security as context. When the security is changed, each member of the Launchpad automatically updates to the new security, e.g., a pricing chart and a news component on a Launchpad both update and show new data when the Launchpad's context is updated. This works similarly to Finsemble's concept of Linker channels.
 
 You can get, set, or subscribe to changes for a particular group. This is bi-directional; the Launchpad group can react to a change in context **or** send a message when its context is changed.
 
@@ -223,7 +222,7 @@ private static void BBG_RunFunction(FinsembleEventArgs data)
 
 This integration creates interoperability and data synchronization by utilizing both the Finsemble Router API and Terminal Connect API.
 
-Terminal Connect allows you to link proprietary apps with the Terminal. This integration implements those Terminal Connect API calls where we saw useful and relevant use cases.
+Terminal Connect allows you to link proprietary apps with the Terminal. This integration implements example Terminal Connect API calls where we saw useful and relevant use cases.
 
 The Finsemble Router API is used to communicate with other Finsemble components. In this integration, we use separate Router channels as API endpoints. The Terminal Connect API interfaces with the Finsemble Router API to pass messages between Bloomberg Terminal panels/LaunchPad windows and Finsemble components.
 
