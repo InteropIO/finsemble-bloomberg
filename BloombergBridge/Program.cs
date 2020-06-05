@@ -22,15 +22,18 @@ namespace BloombergBridge
         private static readonly AutoResetEvent autoEvent = new AutoResetEvent(false);
         private static readonly object lockObj = new object();
         private static Finsemble FSBL = null;
-        private static List<string> securities = null;
-        private static string globalSymbol;
 
-        /// <summary>
-        /// Main runner for Finsemble and Bloomberg integration
-        /// </summary>
-        /// <param name="args">Arguments used to initialize Finsemble</param>
-        // ! Should be client agnostic
-        public static void Main(string[] args)
+		private static bool shutdown = false;
+		private static bool isRegistered = false;
+		private static bool isLoggedIn = false;
+
+
+		/// <summary>
+		/// Main runner for Finsemble and Bloomberg integration
+		/// </summary>
+		/// <param name="args">Arguments used to initialize Finsemble</param>
+		// ! Should be client agnostic
+		public static void Main(string[] args)
         {
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
@@ -51,191 +54,631 @@ namespace BloombergBridge
             catch (Exception err)
             {
                 FSBL.RPC("Logger.error", new List<JToken>
-               {
-                   "Exception thrown: ", err.Message
-               });
+				{
+					"Exception thrown: ", err.Message
+				});
             }
             // Block main thread until worker is finished.
             autoEvent.WaitOne();
-
         }
-        /// <summary>
-        /// Handler for when the Bloomberg Bridge process is terminated.
-        /// </summary>
-        /// <param name="sender">Object</param>
-        /// <param name="e">EventArgs</param>
-        // ! Should be client agnostic
-        private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+
+		/// <summary>
+		/// Function that attempts to conect to the bloomberg terminal and then monitor the connection
+		/// until told to shutdown. Cycles once per second.
+		/// </summary>
+		private static void connectionMonitorThread()
+		{
+			while (!shutdown)
+			{
+				bool statusChange = false;
+				bool _isRegistered = false;
+				bool _isLoggedIn = false;
+
+				try
+				{
+					_isRegistered = BlpApi.IsRegistered;
+				}
+				catch (Exception err)
+				{
+					FSBL.RPC("Logger.error", new List<JToken>
+					{
+						"Bloomberg API registration check failed"
+					});
+				}
+				if (!_isRegistered)
+				{
+					try
+					{
+						//try to register
+						BlpApi.Register();
+						BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
+						_isRegistered = BlpApi.IsRegistered;
+					}
+					catch (Exception err)
+					{
+						_isRegistered = false;
+						FSBL.RPC("Logger.warn", new List<JToken>
+						{
+							"Bloomberg API registration failed"
+						});
+					}
+				}
+				if (_isRegistered)
+				{
+					try
+					{
+						_isLoggedIn = BlpTerminal.IsLoggedIn();
+					}
+					catch (Exception err)
+					{
+						_isLoggedIn = false;
+						FSBL.RPC("Logger.error", new List<JToken>
+						{
+							"Bloomberg API isLoggedIn call failed"
+						});
+					}
+				} else
+				{
+					//can't be logged in if not connected to the BlpApi
+					_isLoggedIn = false;
+				}
+				if (_isRegistered != isRegistered || _isLoggedIn != isLoggedIn)
+				{
+					//status change
+					isRegistered = _isRegistered;
+					isLoggedIn = _isLoggedIn;
+					statusChange = true;
+				}
+				if (statusChange)
+				{
+					JObject connectionStatus = new JObject();
+					connectionStatus.Add("registered", isRegistered);
+					connectionStatus.Add("loggedIn", isLoggedIn);
+					FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
+					FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg connection status changed: ", connectionStatus });
+				}
+				Thread.Sleep(1000);
+			}
+			FSBL.RPC("Logger.log", new List<JToken>
+			{
+				"Bloomberg API connection monitor exiting"
+			});
+		}
+
+		/// <summary>
+		/// Function that fires when the Bloomberg Bridge successfully connects to Finsemble.
+		/// </summary>
+		/// <remarks>
+		/// In our case, we want to check if the Bloomberg Terminal Connect API is available to be used.
+		/// </remarks>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		// ! Client agnostic function
+		private static void OnConnected(object sender, EventArgs e)
+		{
+			FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg bridge connected to Finsemble." });
+
+			//start up connection monitor thread
+			Thread thread = new Thread(new ThreadStart(connectionMonitorThread));
+			thread.Start();
+
+			//setup Router endpoints
+			addResponders();
+		}
+
+		/// <summary>
+		/// Handler for when the Bloomberg Bridge process is terminated.
+		/// </summary>
+		/// <param name="sender">Object</param>
+		/// <param name="e">EventArgs</param>
+		// ! Should be client agnostic
+		private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            FSBL.RouterClient.RemoveResponder("BBG_ready");
-            FSBL.RouterClient.Transmit("BBG_ready", false);
-            FSBL.RouterClient.RemoveListener("BBG_symbol_list", (fsbl_sender, response) =>
-            {
-                Console.WriteLine(response);
-            });
-            FSBL.RouterClient.RemoveListener("BBG_des_symbol", (fsbl_sender, response) =>
-            {
-                Console.WriteLine(response);
-            });
-        }
+			shutdown = true;
+			removeResponders();
+		}
+
+		/// <summary>
+		/// Handles Finsemble shutdown event
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		// ! Client agnostic function
+		private static void OnShutdown(object sender, EventArgs e)
+		{
+			if (FSBL != null)
+			{
+				lock (lockObj)
+				{
+					if (FSBL != null)
+					{
+						try
+						{
+							Process[] processes = Process.GetProcessesByName("BloombergBridge");
+							if (processes.Length > 0)
+							{
+								for (int i = 0; i < processes.Length; i++)
+								{
+									processes[i].Kill();
+								}
+							}
+							// Dispose of Finsemble.
+							FSBL.Dispose();
+						}
+						catch { }
+						finally
+						{
+							FSBL = null;
+							Environment.Exit(0);
+						}
+					}
+
+				}
+			}
+			// Release main thread so application can exit.
+			autoEvent.Set();
+		}
+
+		private static void addResponders()
+		{
+			FSBL.RPC("Logger.log", new List<JToken> { "Setting up query responders" });
+			try
+			{   // ! This is where all client specific functions are called so the FSBL router can set up the appropriate handlers
+				FSBL.RouterClient.AddResponder("BBG_connection_status", (fsbl_sender, queryMessage) =>
+				{
+					BBG_connection_status(queryMessage);
+				});
+
+				FSBL.RouterClient.AddResponder("BBG_run_terminal_function", (fsbl_sender, queryMessage) =>
+				{
+					BBG_run_terminal_function(queryMessage);
+				});
+				
 
 
-        /// <summary>
-        /// Function that fires when the Bloomberg Bridge successfully connects to Finsemble.
-        /// </summary>
-        /// <remarks>
-        /// In our case, we want to check if the Bloomberg Terminal Connect API is available to be used.
-        /// </remarks>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // ! Client agnostic function
-        private static void OnConnected(object sender, EventArgs e)
+
+				/*
+				FSBL.RouterClient.AddListener("BBG_symbol_list", (fsbl_sender, data) =>
+				{
+					BBG_SymbolList(data);
+				});
+
+				FSBL.RouterClient.AddListener("BBG_run_function", (fsbl_sender, data) =>
+				{
+					BBG_RunFunction(data);
+				});
+
+				FSBL.RouterClient.AddResponder("BBG_get_worksheets_of_user", (fsbl_sender, queryMessage) =>
+				{
+					BBG_GetUserWorksheets(queryMessage);
+				});
+
+				FSBL.RouterClient.AddResponder("BBG_Get_Securities_From_Worksheet", (fsbl_sender, queryMessage) =>
+				{
+					BBG_GetSecuritiesFromWorksheet(queryMessage);
+				});
+
+				FSBL.RouterClient.AddListener("BBG_create_worksheet", (fsbl_sender, data) =>
+				{
+					BBG_CreateWorksheet(data);
+				});
+				FSBL.RouterClient.AddListener("BBG_run_DES_and_update_context", (fsbl_sender, data) =>
+				{
+					BBG_RunDESAndUpdateContext(data);
+				});
+				FSBL.RouterClient.AddListener("BBG_update_context", (fsbl_sender, data) =>
+				{
+					BBG_UpdateContext(data);
+				});
+				UpdateFinsembleWithNewContext();
+				*/
+			}
+			catch (Exception err)
+			{
+				Console.WriteLine(err);
+				FSBL.RPC("Logger.error", new List<JToken> { "Error occurred while setting up query responders: ", err.Message });
+			}
+		}
+		
+		private static void removeResponders()
+		{
+			FSBL.RPC("Logger.log", new List<JToken> { "Removing query responders" });
+			FSBL.RouterClient.RemoveResponder("BBG_connection_status", true);
+			FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function", true);
+		}
+
+		/// <summary>
+		/// Query responder to check if we are connected to the terminal and whether the user is logged in
+		/// </summary>
+		/// <param name="queryMessage"></param>
+		private static void BBG_connection_status(FinsembleQueryArgs queryMessage)
+		{
+			JObject connectionStatus = new JObject();
+			connectionStatus.Add("registered", isRegistered);
+			connectionStatus.Add("loggedIn", isLoggedIn);
+			queryMessage.sendQueryMessage(connectionStatus);
+
+			Console.WriteLine("Responded to BBG_connection_status query: " + connectionStatus.ToString());
+			FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_connection_status query: ", connectionStatus });
+		}
+
+
+		/// <summary>
+		/// Function that fires when the Terminal Connect API disconnects.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private static void BlpApi_Disconnected(object sender, EventArgs e)
         {
-            FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg bridge connected to Finsemble." });
+			//status change
+			isRegistered = false;
+			isLoggedIn = false;
+			JObject connectionStatus = new JObject();
+			connectionStatus.Add("registered", isRegistered);
+			connectionStatus.Add("loggedIn", isLoggedIn);
+			FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
+			Console.WriteLine("Transmitted connection status after disconnect: " + connectionStatus.ToString());
+			FSBL.RPC("Logger.log", new List<JToken> { "Transmitted connection status after disconnect: ", connectionStatus });
+		}
 
-            bool isBloombergConnected = false;
-            while (!isBloombergConnected)
-            {
-                try
-                {
-                    // Note for overhead of polling
-                    BlpApi.Register();
-                    BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
-                    isBloombergConnected = true;
-                    FSBL.RouterClient.Transmit("BBG_ready", true);
-                }
-                catch (Exception err)
-                {
+		
 
-                    FSBL.RouterClient.Transmit("BBG_ready", false);
-                    FSBL.RPC("Logger.log", new List<JToken>
-                    {
-                        "Do you have your Bloomberg Terminal running and are you signed in? Trying again in 10 seconds"
-                    });
-                    Thread.Sleep(10000);
-                }
-            }
-            try
-            {
-                FSBL.RouterClient.RemoveResponder("BBG_ready", true);
-                FSBL.RouterClient.AddResponder("BBG_ready", (fsbl_sender, queryMessage) =>
-                {
-                    Console.WriteLine("Responded to BBG_ready query");
-                    queryMessage.sendQueryMessage(true);
-                });
+		/// <summary>
+		/// Query handler function that runs a specified terminal connect command and responds.
+		/// </summary>
+		/// <param name="queryMessage"></param>
+		private static void BBG_run_terminal_function(FinsembleQueryArgs queryMessage)
+		{
+			JObject queryResponse = new JObject();
+			JToken queryData = null;
+			if (isRegistered && isLoggedIn)
+			{
+				//do the thing
+				queryData = queryMessage.response?["data"];
+				if (queryData != null)
+				{
+					string requestedFunction = queryData.Value<string>("function");
 
-            }
-            catch (Exception err)
-            {
-                FSBL.RPC("Logger.error", new List<JToken>
-                {
-                    "Exception thrown: " + err.Message
-                });
-            }
-            try
-            {   // ! This is where all client specific functions are called so the FSBL router can set up the appropriate handlers
-                FSBL.RouterClient.AddListener("BBG_symbol_list", (fsbl_sender, data) =>
-                {
-                    BBG_SymbolList(data);
-                });
+					try {
+						switch (requestedFunction)
+						{
+							case "CreateComponent":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
 
-                FSBL.RouterClient.AddListener("BBG_run_function", (fsbl_sender, data) =>
-                {
-                    BBG_RunFunction(data);
-                });
+								break;
 
-                FSBL.RouterClient.AddResponder("BBG_get_worksheets_of_user", (fsbl_sender, queryMessage) =>
-                {
-                    BBG_GetUserWorksheets(queryMessage);
-                });
+							case "CreateWorksheet":
+								if (validateQueryData(requestedFunction, queryData, new string[] { "securities", "name" }, null, queryResponse))
+								{
+									var _securities = new List<string>();
+									foreach (string a in queryData["securities"])
+									{
+										_securities.Add(a);
+									}
+									BlpWorksheet worksheet = BlpTerminal.CreateWorksheet(queryData["name"].ToString(), _securities);
+									queryResponse.Add("status", true);
+									queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+								}
+								break;
 
-                FSBL.RouterClient.AddResponder("BBG_Get_Securities_From_Worksheet", (fsbl_sender, queryMessage) =>
-                {
-                    BBG_GetSecuritiesFromWorksheet(queryMessage);
-                });
+							case "GetWorksheet":
+								if (validateQueryData(requestedFunction, queryData, null, new string[] { "name", "id" }, queryResponse))
+								{
+									string worksheetId = resolveWorksheetId(queryData, queryResponse);
+									if (worksheetId != null)
+									{
+										BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
+										if (worksheet != null)
+										{
+											queryResponse.Add("status", true);
+											queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+										}
+										else
+										{
+											queryResponse.Add("status", false);
+											queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
+										}
+									}
+								}
 
-                FSBL.RouterClient.AddListener("BBG_create_worksheet", (fsbl_sender, data) =>
-                {
-                    BBG_CreateWorksheet(data);
-                });
-                FSBL.RouterClient.AddListener("BBG_run_DES_and_update_context", (fsbl_sender, data) =>
-                {
-                    BBG_RunDESAndUpdateContext(data);
-                });
-                FSBL.RouterClient.AddListener("BBG_update_context", (fsbl_sender, data) =>
-                {
-                    BBG_UpdateContext(data);
-                });
-                UpdateFinsembleWithNewContext();
-            }
-            catch (Exception err)
-            {
-                Console.WriteLine(err);
-            }
+								break;
 
-        }
+							case "ReplaceWorksheet":
+								if (validateQueryData(requestedFunction, queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
+								{
+									List<string> securities = new List<string>();
+									foreach (string a in queryData["securities"])
+									{
+										securities.Add(a);
+									}
 
-        /// <summary>
-        /// Handles Finsemble shutdown event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // ! Client agnostic function
-        private static void OnShutdown(object sender, EventArgs e)
-        {
-            if (FSBL != null)
-            {
-                lock (lockObj)
-                {
-                    if (FSBL != null)
-                    {
-                        try
-                        {
-                            Process[] processes = Process.GetProcessesByName("BloombergBridge");
-                            if (processes.Length > 0)
-                            {
-                                for (int i = 0; i < processes.Length; i++)
-                                {
-                                    processes[i].Kill();
-                                }
-                            }
-                            // Dispose of Finsemble.
-                            FSBL.Dispose();
-                        }
-                        catch { }
-                        finally
-                        {
-                            FSBL = null;
-                            Environment.Exit(0);
-                        }
-                    }
+									string worksheetId = resolveWorksheetId(queryData, queryResponse);
+									if (worksheetId != null)
+									{
+										BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
+										if (worksheet != null)
+										{
+											worksheet.ReplaceSecurities(securities);
+											queryResponse.Add("status", true);
+											queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+										}
+										else
+										{
+											queryResponse.Add("status", false);
+											queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
+										}
+									}
+								}
 
-                }
-            }
-            // Release main thread so application can exit.
-            autoEvent.Set();
+								break;
 
-        }
+							case "AppendToWorksheet":
+								if (validateQueryData(requestedFunction, queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
+								{
+									List<string> securities = new List<string>();
+									foreach (string a in queryData["securities"])
+									{
+										securities.Add(a);
+									}
 
-        /// <summary>
-        /// Function that fires when the Terminal Connect API disconnects.
-        /// </summary>
-        /// <remarks>This block should contain error handling code</remarks>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // ! Client agnostic function
-        private static void BlpApi_Disconnected(object sender, EventArgs e)
-        {
-            // TODO: Add logic to wait for new BBG terminal instance to come online
-            // ? should we just call OnConnected again?
-            FSBL.RouterClient.Transmit("BBG_ready", false);
-        }
+									string worksheetId = resolveWorksheetId(queryData, queryResponse);
+									if (worksheetId != null)
+									{
+										BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
+										if (worksheet != null)
+										{
+											worksheet.AppendSecurities(securities);
+											queryResponse.Add("status", true);
+											queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+										}
+										else
+										{
+											queryResponse.Add("status", false);
+											queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
+										}
+									}
+								}
 
-        /// <summary>
-        /// Adds Finsemble handlers to BlpTerminal.GroupEvent
-        /// </summary>
-        // ! Client agnostic function for context sharing
-        private static void UpdateFinsembleWithNewContext()
+								break;
+
+							case "GetAllWorksheets":
+								var allWorksheets = BlpTerminal.GetAllWorksheets();
+								JArray worksheets = new JArray();
+								foreach (BlpWorksheet sheet in allWorksheets)
+								{
+									worksheets.Add(renderWorksheet(sheet, false));
+								}
+								queryResponse.Add("status", true);
+								queryResponse.Add("worksheets", worksheets);
+
+								break;
+
+							case "DestroyAllComponents":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+
+								break;
+							case "GetAllGroups":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+
+								break;
+							case "GetAvailableComponents":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+
+								break;
+							case "GetGroupContext":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+
+								break;
+							
+							case "RunFunction":
+								if (validateQueryData(requestedFunction, queryData, new string[] { "mnemonic", "panel" }, null, queryResponse))
+								{
+									string BBG_mnemonic = queryData.Value<string>("mnemonic");
+									string panel = queryData.Value<string>("panel");
+									string tails = null;
+									List<string> securitiesList = new List<string>();
+									if (queryData["tails"] != null)
+									{
+										tails = queryData.Value<string>("tails");
+									}
+
+									if (queryData["securities"] != null)
+									{
+										
+										foreach (string a in queryData["securities"])
+										{
+											securitiesList.Add(a);
+										}
+									}
+									if (securitiesList.Count > 0)
+									{
+										BlpTerminal.RunFunction(BBG_mnemonic, panel, securitiesList, tails);
+										queryResponse.Add("status", true);
+									} else
+									{
+										BlpTerminal.RunFunction(BBG_mnemonic, panel, tails);
+										queryResponse.Add("status", true);
+									}
+								}
+
+								break;
+							case "SetGroupContext":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+
+								break;
+							case "GroupEvent":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+
+								break;
+							case "":
+							case null:
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "No function specified to run");
+								break;
+							default:
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "Unknown function '" + requestedFunction + "' specified");
+								break;
+						}
+
+					}
+					catch (Exception err)
+					{
+						queryResponse.Add("status", false);
+						queryResponse.Add("message", "Exception occurred while running '" + requestedFunction + "', message: " + err.Message);
+					}
+				}
+				else
+				{
+					queryResponse.Add("status", false);
+					queryResponse.Add("message", "Invalid request: no query data");
+				}
+			}
+			else if (!isRegistered)
+			{
+				queryResponse.Add("status", false);
+				queryResponse.Add("message", "Not registed with the Bloomberg BlpApi");
+			} else if (!isLoggedIn)
+			{
+				queryResponse.Add("status", false);
+				queryResponse.Add("message", "Not Logged into Bloomberg terminal");
+			}
+
+			//return the response
+			queryMessage.sendQueryMessage(queryResponse);
+			Console.WriteLine("Responded to BBG_run_terminal_function query: " + queryResponse.ToString());
+			FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_run_terminal_function query: ", queryData, "Response: ", queryResponse });
+		}
+
+
+		//-----------------------------------------------------------------------
+		//Private Utility functions
+		private static bool validateQueryData(string function, JToken queryData, string[] allRequiredArgs, string[] anyRequiredArgs, JObject queryResponse)
+		{
+			if (allRequiredArgs != null)
+			{
+				foreach (string s in allRequiredArgs)
+				{
+					if (queryData[s] == null)
+					{
+						queryResponse.Add("status", false);
+						queryResponse.Add("message", "function '" + function + "' requires argument '" + s + "' whic was not set");
+						return false;
+					}
+				}
+			}
+			if (anyRequiredArgs != null)
+			{
+				foreach (string s in anyRequiredArgs)
+				{
+					if (queryData[s] != null)
+					{
+						return true;
+					}
+				}
+				queryResponse.Add("status", false);
+				queryResponse.Add("message", "function '" + function + "' requires at least one  of (" + string.Join(", ", anyRequiredArgs) + ") none of which were set");
+				return false;
+			}
+			return true;
+		}
+
+		private static string resolveWorksheetId(JToken queryData, JObject queryResponse)
+		{
+			string worksheetId = null;
+			if (queryData["id"] == null)
+			{
+				var worksheetName = queryData.Value<string>("name");
+				var allWorksheets = BlpTerminal.GetAllWorksheets();
+				foreach (BlpWorksheet sheet in allWorksheets)
+				{
+					if (sheet.Name.Equals(worksheetName))
+					{
+						worksheetId = sheet.Id;
+						break;
+					}
+				}
+				if (worksheetId == null)
+				{
+					queryResponse.Add("status", false);
+					queryResponse.Add("message", "Worksheet '" + worksheetName + "' not found");
+				}
+			}
+			else
+			{
+				worksheetId = queryData.Value<string>("id");
+			}
+			return worksheetId;
+		}
+
+		private static JObject renderWorksheet(BlpWorksheet worksheet)
+		{
+			return renderWorksheet(worksheet, false);
+		}
+
+		private static JObject renderWorksheet(BlpWorksheet worksheet, bool includeSecurities)
+		{
+			JObject worksheetObj = new JObject {
+				{ "name", worksheet.Name },
+				{ "id", worksheet.Id },
+				{ "isActive", worksheet.IsActive }
+			};
+
+			if (includeSecurities)
+			{
+				var securities = worksheet.GetSecurities();
+				JArray securitiesArr = new JArray();
+				JObject obj = new JObject();
+				foreach (string a in securities)
+				{
+					securitiesArr.Add(a);
+				}
+				worksheetObj.Add("securities", securitiesArr);
+			}
+			return worksheetObj;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		//----------------------------------------------------------------------------
+		//Old stuff to integrate into new implementation
+
+		/// <summary>
+		/// Adds Finsemble handlers to BlpTerminal.GroupEvent
+		/// </summary>
+		// ! Client agnostic function for context sharing
+		private static void UpdateFinsembleWithNewContext()
         {
             BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
         }
@@ -265,11 +708,6 @@ namespace BloombergBridge
                         var maturityDate = instrument.SelectToken("id.maturityDate");
                         var _symbol = symbol;
                         symbol = _symbol + " " + coupon + " " + maturityDate + " Corp";
-                        globalSymbol = symbol;
-                    }
-                    else
-                    {
-                        globalSymbol = symbol + " Equity";
                     }
 
                     var BBG_groups = BlpTerminal.GetAllGroups();
@@ -281,208 +719,8 @@ namespace BloombergBridge
 
             }
         }
-        /// <summary>
-        /// Runs a DES command and updates BBG group context
-        /// </summary>
-        /// <remarks>This is an ag-grid specific function</remarks>
-        /// <param name="data"></param>
-        // ! Client specific and component specific function
-        private static void BBG_RunDESAndUpdateContext(FinsembleEventArgs data)
-        {
-            // Specific AG-grid implementation on double-click
-            var response = data.response["data"];
-            var instrument = response["fdc3.instrument"];
-            var symbol = (string)instrument.SelectToken("id.ticker");
-            symbol += " Equity";
-            List<string> testList = new List<string>
-                    {
-                        symbol
-                    };
-            if (response["groups"] == null)
-            {
-                BlpTerminal.RunFunction("DES", "1", testList, "1");
-            }
-            else
-            {
-                List<string> groups = new List<string>();
-                for (int i = 0; i < response["groups"].Count(); i++)
-                {
-                    groups.Add((string)response["groups"][i]);
-                }
-                var BBG_groups = BlpTerminal.GetAllGroups();
-                List<string> list_BBG_groups = new List<string>();
-                foreach (BlpGroup item in BBG_groups)
-                {
-                    list_BBG_groups.Add(item.Name);
-                }
-                BlpTerminal.RunFunction("DES", "1", testList, "1");
-                foreach (string group in groups)
-                {
-                    if (list_BBG_groups.Contains(group))
-                    {
-                        BlpTerminal.SetGroupContext(group, symbol);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Replaces securities on a given worksheet with given securities
-        /// </summary>
-        /// <param name="args">JSON object with a list of securities and a worksheet name</param>
-        // ! Client specific function
-        private static void BBG_SymbolList(FinsembleEventArgs args)
-        {
-            var response = args.response["data"];
-            securities = new List<string>();
-            if (response["securities"] != null)
-            {
-                foreach (string a in response["securities"])
-                {
-                    securities.Add(a + " Equity");
-                }
-                if (response["worksheet"] != null)
-                {
-                    // worksheet name should always be valid
-                    var worksheetCast = response["worksheet"].ToString();
-                    ReplaceSecuritiesOnWorksheet(securities, worksheetCast);
-                }
-                else
-                {
-                    // Finsemble sales demo default worksheet 
-                    ReplaceSecuritiesOnWorksheet(securities, "Demo sheet");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates a BBG worksheet with the specified securities
-        /// </summary>
-        /// <param name="data"></param>
-        // ! Client specific function
-        private static void BBG_CreateWorksheet(FinsembleEventArgs data)
-        {
-            var response = data.response["data"];
-            if (response != null)
-            {
-                var _securities = new List<string>();
-                if (response["securities"] != null)
-                {
-                    foreach (string a in response["securities"])
-                    {
-                        _securities.Add(a + " Equity");
-                    }
-                    if (response["worksheet"] != null)
-                    {
-                        // worksheet name should always be valid
-                        var worksheetCast = response["worksheet"].ToString();
-                        BlpTerminal.CreateWorksheet(worksheetCast, _securities);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Transmits a list of securities from a specified worksheet on the "BBG_Get_Securities_From_Worksheet" channel
-        /// </summary>
-        /// <param name="queryMessage">Object that contains a field for "worksheet"</param>
-        // ! Client specific function
-        private static void BBG_GetSecuritiesFromWorksheet(FinsembleQueryArgs queryMessage)
-        {
-            var response = queryMessage.response["data"];
-            var requestedWorksheet = response.Value<string>("worksheet");
-            var allWorksheets = BlpTerminal.GetAllWorksheets();
-            foreach (BlpWorksheet sheet in allWorksheets)
-            {
-                if (sheet.Name.Equals(requestedWorksheet))
-                {
-                    requestedWorksheet = sheet.Id;
-                    break;
-                }
-            }
-            var securities = BlpTerminal.GetWorksheet(requestedWorksheet).GetSecurities();
-            JArray securitiesResponse = new JArray();
-            JObject obj = new JObject();
-            foreach (string a in securities)
-            {
-                securitiesResponse.Add(a);
-            }
-            obj.Add("securities", securitiesResponse);
-            queryMessage.sendQueryMessage(obj);
-        }
-
-        /// <summary>
-        /// Transmits a list of worksheets for the active Bloomberg user on the "BBG_get_worksheets_of_user" channel
-        /// </summary>
-        /// <param name="queryMessage"></param>
-        // ! Client specific function
-        private static void BBG_GetUserWorksheets(FinsembleQueryArgs queryMessage)
-        {
-            Console.WriteLine("Responded to BBG_get_worksheets_of_user query");
-            var worksheets = BlpTerminal.GetAllWorksheets();
-            JArray worksheetsResponse = new JArray();
-            foreach (BlpWorksheet sheet in worksheets)
-            {
-                worksheetsResponse.Add(sheet.Name);
-            }
-
-            queryMessage.sendQueryMessage(worksheetsResponse);
-        }
-
-        /// <summary>
-        /// Runs an arbitrary Bloomberg function
-        /// </summary>
-        /// <param name="data">
-        /// Data that must have fields of: 
-        /// mnemonic, symbol.
-        /// Optional fields of:
-        /// tails, panel
-        /// </param>
-        // ! Client specific function in regards to the default values
-        private static void BBG_RunFunction(FinsembleEventArgs data)
-        {
-            var response = data.response["data"];
-            if (response["mnemonic"] != null && response["fdc3.instrument"] != null)
-            {
-                var BBG_mnemonic = response.Value<string>("mnemonic");
-                var instrument = response["fdc3.instrument"];
-                var symbol = (string)instrument.SelectToken("id.ticker");
-                symbol += " Equity";
-                List<string> securityList = new List<string>
-                        {
-                            symbol
-                        };
-                var tails = "1";
-                var panel = "1";
-                if (response["tails"] != null)
-                {
-                    tails = response.Value<string>("tails");
-                }
-                if (response["panel"] != null)
-                {
-                    panel = response.Value<string>("panel");
-                }
-                BlpTerminal.RunFunction(BBG_mnemonic, panel, securityList, tails);
-            }
-        }
-        /// <summary>
-        /// Replaces securities on a BBG worksheet
-        /// </summary>
-        /// <param name="securities">List of securities</param>
-        /// <param name="worksheetName">BBG worksheet name</param>
-        // ! Client specific function
-        private static void ReplaceSecuritiesOnWorksheet(IList<string> securities, string worksheetName)
-        {
-            var worksheets = BlpTerminal.GetAllWorksheets();
-            foreach (BlpWorksheet sheet in worksheets)
-            {
-                if (sheet.Name == worksheetName)
-                {
-                    sheet.ReplaceSecurities(securities);
-                    return;
-                }
-            }
-        }
+        
+        
 
         /// <summary>
         /// Updates linked Finsemble components when BBG context changes
