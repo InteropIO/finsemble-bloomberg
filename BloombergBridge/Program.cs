@@ -342,12 +342,39 @@ namespace BloombergBridge
 					try {
 						switch (requestedFunction)
 						{
-							case "CreateComponent":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+							case "RunFunction":
+								if (validateQueryData(requestedFunction, queryData, new string[] { "mnemonic", "panel" }, null, queryResponse))
+								{
+									string BBG_mnemonic = queryData.Value<string>("mnemonic");
+									string panel = queryData.Value<string>("panel");
+									string tails = null;
+									List<string> securitiesList = new List<string>();
+									if (queryData["tails"] != null)
+									{
+										tails = queryData.Value<string>("tails");
+									}
+
+									if (queryData["securities"] != null)
+									{
+
+										foreach (string a in queryData["securities"])
+										{
+											securitiesList.Add(a);
+										}
+									}
+									if (securitiesList.Count > 0)
+									{
+										BlpTerminal.RunFunction(BBG_mnemonic, panel, securitiesList, tails);
+										queryResponse.Add("status", true);
+									}
+									else
+									{
+										BlpTerminal.RunFunction(BBG_mnemonic, panel, tails);
+										queryResponse.Add("status", true);
+									}
+								}
 
 								break;
-
 							case "CreateWorksheet":
 								if (validateQueryData(requestedFunction, queryData, new string[] { "securities", "name" }, null, queryResponse))
 								{
@@ -454,19 +481,7 @@ namespace BloombergBridge
 
 								break;
 
-							case "DestroyAllComponents":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-
-
-								break;
 							case "GetAllGroups":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-
-
-								break;
-							case "GetAvailableComponents":
 								queryResponse.Add("status", false);
 								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
 
@@ -479,38 +494,6 @@ namespace BloombergBridge
 
 								break;
 							
-							case "RunFunction":
-								if (validateQueryData(requestedFunction, queryData, new string[] { "mnemonic", "panel" }, null, queryResponse))
-								{
-									string BBG_mnemonic = queryData.Value<string>("mnemonic");
-									string panel = queryData.Value<string>("panel");
-									string tails = null;
-									List<string> securitiesList = new List<string>();
-									if (queryData["tails"] != null)
-									{
-										tails = queryData.Value<string>("tails");
-									}
-
-									if (queryData["securities"] != null)
-									{
-										
-										foreach (string a in queryData["securities"])
-										{
-											securitiesList.Add(a);
-										}
-									}
-									if (securitiesList.Count > 0)
-									{
-										BlpTerminal.RunFunction(BBG_mnemonic, panel, securitiesList, tails);
-										queryResponse.Add("status", true);
-									} else
-									{
-										BlpTerminal.RunFunction(BBG_mnemonic, panel, tails);
-										queryResponse.Add("status", true);
-									}
-								}
-
-								break;
 							case "SetGroupContext":
 								queryResponse.Add("status", false);
 								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
@@ -518,6 +501,24 @@ namespace BloombergBridge
 
 								break;
 							case "GroupEvent":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+
+								break;
+							case "CreateComponent":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+								break;
+
+							case "DestroyAllComponents":
+								queryResponse.Add("status", false);
+								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+
+
+								break;
+							case "GetAvailableComponents":
 								queryResponse.Add("status", false);
 								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
 
