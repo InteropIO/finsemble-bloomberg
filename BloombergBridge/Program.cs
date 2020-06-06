@@ -482,22 +482,40 @@ namespace BloombergBridge
 								break;
 
 							case "GetAllGroups":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-
+								var allGroups = BlpTerminal.GetAllGroups();
+								JArray groups = new JArray();
+								foreach (BlpGroup group in allGroups)
+								{
+									groups.Add(renderGroup(group));
+								}
+								queryResponse.Add("status", true);
+								queryResponse.Add("groups", groups);
 
 								break;
-							case "GetGroupContext":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
 
+							case "GetGroupContext":
+								if (validateQueryData(requestedFunction, queryData, new string[] { "name" }, null, queryResponse))
+								{
+									BlpGroup group = BlpTerminal.GetGroupContext(queryData["name"].ToString());
+									queryResponse.Add("status", true);
+									queryResponse.Add("group", renderGroup(group));
+								}
 
 								break;
 							
 							case "SetGroupContext":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-
+								if (validateQueryData(requestedFunction, queryData, new string[] { "name", "value" }, null, queryResponse))
+								{
+									if (queryData["cookie"] != null)
+									{
+										BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString(), queryData["cookie"].ToString());
+									} else
+									{
+										BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString());
+									}
+									
+									queryResponse.Add("status", true);
+								}
 
 								break;
 							case "GroupEvent":
@@ -652,7 +670,17 @@ namespace BloombergBridge
 			return worksheetObj;
 		}
 
-
+		private static JObject renderGroup(BlpGroup group)
+		{
+			JObject groupObj = new JObject
+			{
+				{  "name", group.Name },
+				{ "type", group.Type },
+				{ "value", group.Value }
+			};
+	
+			return groupObj;
+		}
 
 
 
