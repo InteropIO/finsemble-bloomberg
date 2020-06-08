@@ -128,6 +128,8 @@ namespace BloombergBridge
 					isRegistered = _isRegistered;
 					isLoggedIn = _isLoggedIn;
 					statusChange = true;
+
+					
 				}
 				if (statusChange)
 				{
@@ -136,6 +138,12 @@ namespace BloombergBridge
 					connectionStatus.Add("loggedIn", isLoggedIn);
 					FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
 					FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg connection status changed: ", connectionStatus });
+
+					if (isLoggedIn) //we've just logged in
+					{
+						//setup a handler for group events
+						BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
+					}
 				}
 				Thread.Sleep(1000);
 			}
@@ -158,12 +166,14 @@ namespace BloombergBridge
 		{
 			FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg bridge connected to Finsemble." });
 
+			//setup Router endpoints
+			addResponders();
+
 			//start up connection monitor thread
 			Thread thread = new Thread(new ThreadStart(connectionMonitorThread));
 			thread.Start();
 
-			//setup Router endpoints
-			addResponders();
+			
 		}
 
 		/// <summary>
@@ -183,9 +193,9 @@ namespace BloombergBridge
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-		// ! Client agnostic function
 		private static void OnShutdown(object sender, EventArgs e)
 		{
+			shutdown = true;
 			if (FSBL != null)
 			{
 				lock (lockObj)
@@ -194,6 +204,9 @@ namespace BloombergBridge
 					{
 						try
 						{
+							removeResponders();
+							//TODO: work out why we're doing this
+							/*
 							Process[] processes = Process.GetProcessesByName("BloombergBridge");
 							if (processes.Length > 0)
 							{
@@ -202,6 +215,7 @@ namespace BloombergBridge
 									processes[i].Kill();
 								}
 							}
+							*/
 							// Dispose of Finsemble.
 							FSBL.Dispose();
 						}
@@ -209,7 +223,7 @@ namespace BloombergBridge
 						finally
 						{
 							FSBL = null;
-							Environment.Exit(0);
+							//Environment.Exit(0);
 						}
 					}
 
@@ -218,6 +232,53 @@ namespace BloombergBridge
 			// Release main thread so application can exit.
 			autoEvent.Set();
 		}
+
+
+		private static void BlpTerminal_ComponentGroupEvent(object sender, BlpGroupEventArgs e)
+		{
+			Type type = e.GetType();
+			//TODO: adjust log level down to debug
+			FSBL.RPC("Logger.log", new List<JToken> { "Received Bloomberg group event type: ", type.FullName });
+
+			if (type == typeof(BlpGroupContextChangedEventArgs))
+			{
+				BlpGroupContextChangedEventArgs context = (BlpGroupContextChangedEventArgs)e;
+				JObject output = new JObject();
+				if (context.Group != null)
+				{
+					output.Add("group", renderGroup(context.Group));
+				}
+				if (context.Groups != null)
+				{
+					JArray groups = new JArray();
+					foreach (var group in context.Groups)
+					{
+						groups.Add(renderGroup(group));
+					}
+
+					output.Add("groups", groups);
+				}
+				if (context.Cookie != null && context.Cookie != "")
+				{
+					output.Add("cookie", context.Cookie);
+				}
+				output.Add("externalSource", context.ExternalSource);
+
+				FSBL.RPC("Logger.log", new List<JToken> { "Group Context changed event: ", output });
+
+				FSBL.RouterClient.Transmit("BBG_group_context_events", output);
+				/*
+				var tickerChange = context.Group.Value;
+				if (tickerChange.Contains("List"))
+				{   // Context change that occurs from changing a component's group.
+					// Doesn't contain any data that we would want to send across the wire
+					return;
+				}
+				*/
+
+			}
+		}
+		
 
 		private static void addResponders()
 		{
@@ -231,41 +292,12 @@ namespace BloombergBridge
 
 				FSBL.RouterClient.AddResponder("BBG_run_terminal_function", (fsbl_sender, queryMessage) =>
 				{
-					BBG_run_terminal_function(queryMessage);
+					
+BBG_run_terminal_function(queryMessage);
 				});
 				
 
-
-
 				/*
-				FSBL.RouterClient.AddListener("BBG_symbol_list", (fsbl_sender, data) =>
-				{
-					BBG_SymbolList(data);
-				});
-
-				FSBL.RouterClient.AddListener("BBG_run_function", (fsbl_sender, data) =>
-				{
-					BBG_RunFunction(data);
-				});
-
-				FSBL.RouterClient.AddResponder("BBG_get_worksheets_of_user", (fsbl_sender, queryMessage) =>
-				{
-					BBG_GetUserWorksheets(queryMessage);
-				});
-
-				FSBL.RouterClient.AddResponder("BBG_Get_Securities_From_Worksheet", (fsbl_sender, queryMessage) =>
-				{
-					BBG_GetSecuritiesFromWorksheet(queryMessage);
-				});
-
-				FSBL.RouterClient.AddListener("BBG_create_worksheet", (fsbl_sender, data) =>
-				{
-					BBG_CreateWorksheet(data);
-				});
-				FSBL.RouterClient.AddListener("BBG_run_DES_and_update_context", (fsbl_sender, data) =>
-				{
-					BBG_RunDESAndUpdateContext(data);
-				});
 				FSBL.RouterClient.AddListener("BBG_update_context", (fsbl_sender, data) =>
 				{
 					BBG_UpdateContext(data);
@@ -337,6 +369,8 @@ namespace BloombergBridge
 				queryData = queryMessage.response?["data"];
 				if (queryData != null)
 				{
+					FSBL.RPC("Logger.log", new List<JToken> { "Received query: ", queryData });
+
 					string requestedFunction = queryData.Value<string>("function");
 
 					try {
@@ -518,12 +552,7 @@ namespace BloombergBridge
 								}
 
 								break;
-							case "GroupEvent":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-
-
-								break;
+							
 							case "CreateComponent":
 								queryResponse.Add("status", false);
 								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
@@ -594,7 +623,7 @@ namespace BloombergBridge
 					if (queryData[s] == null)
 					{
 						queryResponse.Add("status", false);
-						queryResponse.Add("message", "function '" + function + "' requires argument '" + s + "' whic was not set");
+						queryResponse.Add("message", "function '" + function + "' requires argument '" + s + "' which was not set");
 						return false;
 					}
 				}
@@ -674,7 +703,7 @@ namespace BloombergBridge
 		{
 			JObject groupObj = new JObject
 			{
-				{  "name", group.Name },
+				{ "name", group.Name },
 				{ "type", group.Type },
 				{ "value", group.Value }
 			};
@@ -684,110 +713,5 @@ namespace BloombergBridge
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		//----------------------------------------------------------------------------
-		//Old stuff to integrate into new implementation
-
-		/// <summary>
-		/// Adds Finsemble handlers to BlpTerminal.GroupEvent
-		/// </summary>
-		// ! Client agnostic function for context sharing
-		private static void UpdateFinsembleWithNewContext()
-        {
-            BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
-        }
-
-        /// <summary>
-        /// Function to update context based on FDC3 instrument. Instrument may be a ticker or fixed income asset.
-        /// </summary>
-        /// <param name="data">JSON containing a FDC3 instrument</param>
-        // ! Client specific function
-        private static void BBG_UpdateContext(FinsembleEventArgs data)
-        {
-            if (data.response != null)
-            {
-                List<string> groups = new List<string>();
-                var response = data.response["data"];
-                if (response.Type is JTokenType.String)
-                {
-                    response = JObject.Parse(response.Value<string>());
-                }
-                var instrument = response["fdc3.instrument"];
-                if (instrument != null)
-                {
-                    var symbol = (string)instrument.SelectToken("id.ticker");
-                    if (instrument.SelectToken("id.coupon") != null)
-                    {
-                        var coupon = instrument.SelectToken("id.coupon");
-                        var maturityDate = instrument.SelectToken("id.maturityDate");
-                        var _symbol = symbol;
-                        symbol = _symbol + " " + coupon + " " + maturityDate + " Corp";
-                    }
-
-                    var BBG_groups = BlpTerminal.GetAllGroups();
-                    foreach (BlpGroup item in BBG_groups)
-                    {
-                        BlpTerminal.SetGroupContext(item.Name, symbol);
-                    }
-                }
-
-            }
-        }
-        
-        
-
-        /// <summary>
-        /// Updates linked Finsemble components when BBG context changes
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // ! Client specific function for setting up context sharing
-        private static void BlpTerminal_ComponentGroupEvent(object sender, BlpGroupEventArgs e)
-        {
-            var type = e.GetType();
-            if (type == typeof(BlpGroupContextChangedEventArgs))
-            {
-                BlpGroupContextChangedEventArgs context = (BlpGroupContextChangedEventArgs)e;
-                var tickerChange = context.Group.Value;
-                if (tickerChange.Contains("List"))
-                {   // Context change that occurs from changing a component's group.
-                    // Doesn't contain any data that we would want to send across the wire
-                    return;
-                }
-                string[] splitter = { "US Equity" };
-                var tickerChangeArray = tickerChange.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
-                var symbolToSend = tickerChangeArray[0];
-                var _data = new
-                {
-                    id = new
-                    {
-                        ticker = symbolToSend.Trim()
-                    }
-                };
-                var data = JsonConvert.SerializeObject(_data, Formatting.Indented);
-                JObject fdc3_instrument = new JObject
-                {
-                    { "dataType", "fdc3.instrument" },
-                    { "data", data }
-                };
-
-            }
-
-        }
     }
 }
