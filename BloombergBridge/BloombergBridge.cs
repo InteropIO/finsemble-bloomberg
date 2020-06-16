@@ -27,6 +27,8 @@ namespace BloombergBridge
 		private static bool isRegistered = false;
 		private static bool isLoggedIn = false;
 
+		private static SecurityLookup secFinder = null;
+
 		/// <summary>
 		/// Main runner for Finsemble and Bloomberg integration
 		/// </summary>
@@ -141,6 +143,19 @@ namespace BloombergBridge
 					{
 						//setup a handler for group events
 						BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
+
+						//setup security finder
+						secFinder = new SecurityLookup();
+						secFinder.Init();
+					}
+					else
+					{
+						//dispose of security finder
+						if (secFinder != null)
+						{
+							secFinder.Dispose();
+							secFinder = null;
+						}
 					}
 				}
 				Thread.Sleep(1000);
@@ -181,6 +196,7 @@ namespace BloombergBridge
 		{
 			shutdown = true;
 			removeResponders();
+		
 		}
 
 		/// <summary>
@@ -302,6 +318,13 @@ namespace BloombergBridge
 			FSBL.RPC("Logger.log", new List<JToken> { "Removing query responders" });
 			FSBL.RouterClient.RemoveResponder("BBG_connection_status", true);
 			FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function", true);
+
+			//dispose of security finder
+			if (secFinder != null)
+			{
+				secFinder.Dispose();
+				secFinder = null;
+			}
 		}
 
 		/// <summary>
@@ -533,7 +556,34 @@ namespace BloombergBridge
 								}
 
 								break;
-							
+
+							case "SecurityLookup":
+								if (validateQueryData(requestedFunction, queryData, new string[] { "security" }, null, queryResponse))
+								{
+									//var secFinder = new SecurityLookup();
+									//secFinder.Init();
+									secFinder.Run(queryData["security"].ToString());
+									string BLP_security = secFinder.GetSecurity();
+									
+									//convert the result into the security name and Type
+									string securityName = BLP_security;
+									string securityType = null;
+									int typeStartIndex = BLP_security.LastIndexOf('<');
+									if (typeStartIndex > -1)
+									{
+										securityName = BLP_security.Substring(0, typeStartIndex).Trim();
+										securityType = char.ToUpper(BLP_security[typeStartIndex + 1]) + BLP_security.Substring(typeStartIndex + 2, BLP_security.Length - (typeStartIndex + 2) - 1);
+									}
+
+									//secFinder.Dispose();
+									//secFinder = null;
+									queryResponse.Add("status", true);
+									queryResponse.Add("security", securityName);
+									queryResponse.Add("type", securityType);
+								}
+
+								break;
+								
 							case "CreateComponent":
 								queryResponse.Add("status", false);
 								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
