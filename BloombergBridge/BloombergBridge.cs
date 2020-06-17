@@ -333,13 +333,20 @@ namespace BloombergBridge
 		/// <param name="queryMessage"></param>
 		private static void BBG_connection_status(FinsembleQueryArgs queryMessage)
 		{
-			JObject connectionStatus = new JObject();
-			connectionStatus.Add("registered", isRegistered);
-			connectionStatus.Add("loggedIn", isLoggedIn);
-			queryMessage.sendQueryMessage(connectionStatus);
+			if (queryMessage.error != null)
+			{
+				//failed to register the query responder properly
+				FSBL.RPC("Logger.error", new List<JToken> { "Error received by BBG_connection_status query responder: ", queryMessage.error });
+			} else {
+				JObject connectionStatus = new JObject();
+				connectionStatus.Add("registered", isRegistered);
+				connectionStatus.Add("loggedIn", isLoggedIn);
+				queryMessage.sendQueryMessage(connectionStatus);
 
-			Console.WriteLine("Responded to BBG_connection_status query: " + connectionStatus.ToString());
-			FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_connection_status query: ", connectionStatus });
+				Console.WriteLine("Responded to BBG_connection_status query: " + connectionStatus.ToString());
+				FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_connection_status query: ", connectionStatus });
+			}
+			
 		}
 
 		/// <summary>
@@ -366,280 +373,304 @@ namespace BloombergBridge
 		/// <param name="queryMessage"></param>
 		private static void BBG_run_terminal_function(FinsembleQueryArgs queryMessage)
 		{
-			JObject queryResponse = new JObject();
-			JToken queryData = null;
-			if (isRegistered && isLoggedIn)
+			if (queryMessage.error != null)
 			{
-				queryData = queryMessage.response?["data"];
-				if (queryData != null)
+				//failed to register the query responder properly
+				FSBL.RPC("Logger.error", new List<JToken> { "Error received by BBG_run_terminal_function query responder: ", queryMessage.error });
+			}
+			else
+			{
+				JObject queryResponse = new JObject();
+				JToken queryData = null;
+				if (isRegistered && isLoggedIn)
 				{
-					FSBL.RPC("Logger.log", new List<JToken> { "Received query: ", queryData });
+					queryData = queryMessage.response?["data"];
+					if (queryData != null)
+					{
+						FSBL.RPC("Logger.log", new List<JToken> { "Received query: ", queryData });
 
-					string requestedFunction = queryData.Value<string>("function");
+						string requestedFunction = queryData.Value<string>("function");
 
-					try {
-						switch (requestedFunction)
+						try
 						{
-							case "RunFunction":
-								if (validateQueryData(requestedFunction, queryData, new string[] { "mnemonic", "panel" }, null, queryResponse))
-								{
-									string BBG_mnemonic = queryData.Value<string>("mnemonic");
-									string panel = queryData.Value<string>("panel");
-									string tails = null;
-									List<string> securitiesList = new List<string>();
-									if (queryData["tails"] != null)
+							switch (requestedFunction)
+							{
+								case "RunFunction":
+									if (validateQueryData(requestedFunction, queryData, new string[] { "mnemonic", "panel" }, null, queryResponse))
 									{
-										tails = queryData.Value<string>("tails");
+										string BBG_mnemonic = queryData.Value<string>("mnemonic");
+										string panel = queryData.Value<string>("panel");
+										string tails = null;
+										List<string> securitiesList = new List<string>();
+										if (queryData["tails"] != null)
+										{
+											tails = queryData.Value<string>("tails");
+										}
+
+										if (queryData["securities"] != null)
+										{
+
+											foreach (string a in queryData["securities"])
+											{
+												securitiesList.Add(a);
+											}
+										}
+										if (securitiesList.Count > 0)
+										{
+											BlpTerminal.RunFunction(BBG_mnemonic, panel, securitiesList, tails);
+											queryResponse.Add("status", true);
+										}
+										else
+										{
+											BlpTerminal.RunFunction(BBG_mnemonic, panel, tails);
+											queryResponse.Add("status", true);
+										}
 									}
 
-									if (queryData["securities"] != null)
+									break;
+								case "CreateWorksheet":
+									if (validateQueryData(requestedFunction, queryData, new string[] { "securities", "name" }, null, queryResponse))
 									{
-
+										var _securities = new List<string>();
 										foreach (string a in queryData["securities"])
 										{
-											securitiesList.Add(a);
+											_securities.Add(a);
+										}
+										BlpWorksheet worksheet = BlpTerminal.CreateWorksheet(queryData["name"].ToString(), _securities);
+										queryResponse.Add("status", true);
+										queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+									}
+									break;
+
+								case "GetWorksheet":
+									if (validateQueryData(requestedFunction, queryData, null, new string[] { "name", "id" }, queryResponse))
+									{
+										string worksheetId = resolveWorksheetId(queryData, queryResponse);
+										if (worksheetId != null)
+										{
+											BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
+											if (worksheet != null)
+											{
+												queryResponse.Add("status", true);
+												queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+											}
+											else
+											{
+												queryResponse.Add("status", false);
+												queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
+											}
 										}
 									}
-									if (securitiesList.Count > 0)
+
+									break;
+
+								case "ReplaceWorksheet":
+									if (validateQueryData(requestedFunction, queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
 									{
-										BlpTerminal.RunFunction(BBG_mnemonic, panel, securitiesList, tails);
+										List<string> securities = new List<string>();
+										foreach (string a in queryData["securities"])
+										{
+											securities.Add(a);
+										}
+
+										string worksheetId = resolveWorksheetId(queryData, queryResponse);
+										if (worksheetId != null)
+										{
+											BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
+											if (worksheet != null)
+											{
+												worksheet.ReplaceSecurities(securities);
+												queryResponse.Add("status", true);
+												queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+											}
+											else
+											{
+												queryResponse.Add("status", false);
+												queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
+											}
+										}
+									}
+
+									break;
+
+								case "AppendToWorksheet":
+									if (validateQueryData(requestedFunction, queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
+									{
+										List<string> securities = new List<string>();
+										foreach (string a in queryData["securities"])
+										{
+											securities.Add(a);
+										}
+
+										string worksheetId = resolveWorksheetId(queryData, queryResponse);
+										if (worksheetId != null)
+										{
+											BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
+											if (worksheet != null)
+											{
+												worksheet.AppendSecurities(securities);
+												queryResponse.Add("status", true);
+												queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+											}
+											else
+											{
+												queryResponse.Add("status", false);
+												queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
+											}
+										}
+									}
+
+									break;
+
+								case "GetAllWorksheets":
+									var allWorksheets = BlpTerminal.GetAllWorksheets();
+									JArray worksheets = new JArray();
+									foreach (BlpWorksheet sheet in allWorksheets)
+									{
+										worksheets.Add(renderWorksheet(sheet, false));
+									}
+									queryResponse.Add("status", true);
+									queryResponse.Add("worksheets", worksheets);
+
+									break;
+
+								case "GetAllGroups":
+									var allGroups = BlpTerminal.GetAllGroups();
+									JArray groups = new JArray();
+									foreach (BlpGroup group in allGroups)
+									{
+										groups.Add(renderGroup(group));
+									}
+									queryResponse.Add("status", true);
+									queryResponse.Add("groups", groups);
+
+									break;
+
+								case "GetGroupContext":
+									if (validateQueryData(requestedFunction, queryData, new string[] { "name" }, null, queryResponse))
+									{
+										BlpGroup group = BlpTerminal.GetGroupContext(queryData["name"].ToString());
+										queryResponse.Add("status", true);
+										queryResponse.Add("group", renderGroup(group));
+									}
+
+									break;
+
+								case "SetGroupContext":
+									if (validateQueryData(requestedFunction, queryData, new string[] { "name", "value" }, null, queryResponse))
+									{
+										if (queryData["cookie"] != null && queryData["cookie"].ToString() != "")
+										{
+											BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString(), queryData["cookie"].ToString());
+										}
+										else
+										{
+											BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString());
+										}
+
 										queryResponse.Add("status", true);
 									}
-									else
+
+									break;
+
+								case "SecurityLookup":
+									if (validateQueryData(requestedFunction, queryData, new string[] { "security" }, null, queryResponse))
 									{
-										BlpTerminal.RunFunction(BBG_mnemonic, panel, tails);
+
+										JArray resultsArr = new JArray();
+										//needs to be surrounded by a lock or mutex as the SecurityLookup code only supports single threaded ops
+										//  the alternative is to setup a securityFinder object for each query then dispose of it after:
+										//    var secFinder = new SecurityLookup();
+										//    secFinder.Init();
+										//      do query
+										//    secFinder.Dispose();
+										//    secFinder = null;
+										lock (secFinder)
+										{
+											secFinder.Query(queryData["security"].ToString(), 10);
+											IList<string> results = secFinder.GetResults();
+
+											//convert the results into the security name and Type
+											//  results typically look like this: AAPL US<equity>
+											//  when we need to output: { name: "AAPL US", type: "Equity" }
+											for (int i = 0; i < results.Count; i++)
+											{
+												string result = results[i];
+												JObject resultObj = new JObject();
+												int typeStartIndex = result.LastIndexOf('<');
+												if (typeStartIndex > -1)
+												{
+													resultObj.Add("name", result.Substring(0, typeStartIndex).Trim());
+													resultObj.Add("type", char.ToUpper(result[typeStartIndex + 1]) + result.Substring(typeStartIndex + 2, result.Length - (typeStartIndex + 2) - 1));
+												}
+												resultsArr.Add(resultObj);
+											}
+										}
+
 										queryResponse.Add("status", true);
-									}
-								}
-
-								break;
-							case "CreateWorksheet":
-								if (validateQueryData(requestedFunction, queryData, new string[] { "securities", "name" }, null, queryResponse))
-								{
-									var _securities = new List<string>();
-									foreach (string a in queryData["securities"])
-									{
-										_securities.Add(a);
-									}
-									BlpWorksheet worksheet = BlpTerminal.CreateWorksheet(queryData["name"].ToString(), _securities);
-									queryResponse.Add("status", true);
-									queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
-								}
-								break;
-
-							case "GetWorksheet":
-								if (validateQueryData(requestedFunction, queryData, null, new string[] { "name", "id" }, queryResponse))
-								{
-									string worksheetId = resolveWorksheetId(queryData, queryResponse);
-									if (worksheetId != null)
-									{
-										BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
-										if (worksheet != null)
-										{
-											queryResponse.Add("status", true);
-											queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
-										}
-										else
-										{
-											queryResponse.Add("status", false);
-											queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
-										}
-									}
-								}
-
-								break;
-
-							case "ReplaceWorksheet":
-								if (validateQueryData(requestedFunction, queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
-								{
-									List<string> securities = new List<string>();
-									foreach (string a in queryData["securities"])
-									{
-										securities.Add(a);
+										queryResponse.Add("results", resultsArr);
 									}
 
-									string worksheetId = resolveWorksheetId(queryData, queryResponse);
-									if (worksheetId != null)
-									{
-										BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
-										if (worksheet != null)
-										{
-											worksheet.ReplaceSecurities(securities);
-											queryResponse.Add("status", true);
-											queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
-										}
-										else
-										{
-											queryResponse.Add("status", false);
-											queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
-										}
-									}
-								}
+									break;
 
-								break;
+								case "CreateComponent":
+									queryResponse.Add("status", false);
+									queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
 
-							case "AppendToWorksheet":
-								if (validateQueryData(requestedFunction, queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
-								{
-									List<string> securities = new List<string>();
-									foreach (string a in queryData["securities"])
-									{
-										securities.Add(a);
-									}
+									break;
 
-									string worksheetId = resolveWorksheetId(queryData, queryResponse);
-									if (worksheetId != null)
-									{
-										BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
-										if (worksheet != null)
-										{
-											worksheet.AppendSecurities(securities);
-											queryResponse.Add("status", true);
-											queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
-										}
-										else
-										{
-											queryResponse.Add("status", false);
-											queryResponse.Add("message", "Worksheet with id '" + worksheetId + "' not found");
-										}
-									}
-								}
-
-								break;
-
-							case "GetAllWorksheets":
-								var allWorksheets = BlpTerminal.GetAllWorksheets();
-								JArray worksheets = new JArray();
-								foreach (BlpWorksheet sheet in allWorksheets)
-								{
-									worksheets.Add(renderWorksheet(sheet, false));
-								}
-								queryResponse.Add("status", true);
-								queryResponse.Add("worksheets", worksheets);
-
-								break;
-
-							case "GetAllGroups":
-								var allGroups = BlpTerminal.GetAllGroups();
-								JArray groups = new JArray();
-								foreach (BlpGroup group in allGroups)
-								{
-									groups.Add(renderGroup(group));
-								}
-								queryResponse.Add("status", true);
-								queryResponse.Add("groups", groups);
-
-								break;
-
-							case "GetGroupContext":
-								if (validateQueryData(requestedFunction, queryData, new string[] { "name" }, null, queryResponse))
-								{
-									BlpGroup group = BlpTerminal.GetGroupContext(queryData["name"].ToString());
-									queryResponse.Add("status", true);
-									queryResponse.Add("group", renderGroup(group));
-								}
-
-								break;
-							
-							case "SetGroupContext":
-								if (validateQueryData(requestedFunction, queryData, new string[] { "name", "value" }, null, queryResponse))
-								{
-									if (queryData["cookie"] != null && queryData["cookie"].ToString() != "")
-									{
-										BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString(), queryData["cookie"].ToString());
-									} else
-									{
-										BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString());
-									}
-									
-									queryResponse.Add("status", true);
-								}
-
-								break;
-
-							case "SecurityLookup":
-								if (validateQueryData(requestedFunction, queryData, new string[] { "security" }, null, queryResponse))
-								{
-									//var secFinder = new SecurityLookup();
-									//secFinder.Init();
-									secFinder.Run(queryData["security"].ToString());
-									string BLP_security = secFinder.GetSecurity();
-									
-									//convert the result into the security name and Type
-									string securityName = BLP_security;
-									string securityType = null;
-									int typeStartIndex = BLP_security.LastIndexOf('<');
-									if (typeStartIndex > -1)
-									{
-										securityName = BLP_security.Substring(0, typeStartIndex).Trim();
-										securityType = char.ToUpper(BLP_security[typeStartIndex + 1]) + BLP_security.Substring(typeStartIndex + 2, BLP_security.Length - (typeStartIndex + 2) - 1);
-									}
-
-									//secFinder.Dispose();
-									//secFinder = null;
-									queryResponse.Add("status", true);
-									queryResponse.Add("security", securityName);
-									queryResponse.Add("type", securityType);
-								}
-
-								break;
-								
-							case "CreateComponent":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-
-								break;
-
-							case "DestroyAllComponents":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+								case "DestroyAllComponents":
+									queryResponse.Add("status", false);
+									queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
 
 
-								break;
-							case "GetAvailableComponents":
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+									break;
+								case "GetAvailableComponents":
+									queryResponse.Add("status", false);
+									queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
 
 
-								break;
-							case "":
-							case null:
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "No function specified to run");
-								break;
-							default:
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "Unknown function '" + requestedFunction + "' specified");
-								break;
+									break;
+								case "":
+								case null:
+									queryResponse.Add("status", false);
+									queryResponse.Add("message", "No function specified to run");
+									break;
+								default:
+									queryResponse.Add("status", false);
+									queryResponse.Add("message", "Unknown function '" + requestedFunction + "' specified");
+									break;
+							}
+
 						}
-
+						catch (Exception err)
+						{
+							queryResponse.Add("status", false);
+							queryResponse.Add("message", "Exception occurred while running '" + requestedFunction + "', message: " + err.Message);
+						}
 					}
-					catch (Exception err)
+					else
 					{
 						queryResponse.Add("status", false);
-						queryResponse.Add("message", "Exception occurred while running '" + requestedFunction + "', message: " + err.Message);
+						queryResponse.Add("message", "Invalid request: no query data");
 					}
 				}
-				else
+				else if (!isRegistered)
 				{
 					queryResponse.Add("status", false);
-					queryResponse.Add("message", "Invalid request: no query data");
+					queryResponse.Add("message", "Not registered with the Bloomberg BlpApi");
 				}
-			}
-			else if (!isRegistered)
-			{
-				queryResponse.Add("status", false);
-				queryResponse.Add("message", "Not registed with the Bloomberg BlpApi");
-			} else if (!isLoggedIn)
-			{
-				queryResponse.Add("status", false);
-				queryResponse.Add("message", "Not Logged into Bloomberg terminal");
-			}
+				else if (!isLoggedIn)
+				{
+					queryResponse.Add("status", false);
+					queryResponse.Add("message", "Not Logged into Bloomberg terminal");
+				}
 
-			//return the response
-			queryMessage.sendQueryMessage(queryResponse);
-			Console.WriteLine("Responded to BBG_run_terminal_function query: " + queryResponse.ToString());
-			FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_run_terminal_function query: ", queryData, "Response: ", queryResponse });
+				//return the response
+				queryMessage.sendQueryMessage(queryResponse);
+				Console.WriteLine("Responded to BBG_run_terminal_function query: " + queryResponse.ToString());
+				FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_run_terminal_function query: ", queryData, "Response: ", queryResponse });
+			}
 		}
 
 		//-----------------------------------------------------------------------

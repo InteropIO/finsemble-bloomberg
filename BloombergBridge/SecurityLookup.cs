@@ -110,20 +110,26 @@ namespace BloombergBridge
         private int d_maxResults = DEFAULT_MAX_RESULTS;
         private Dictionary<string, string> d_filters = new Dictionary<string, string>();
         private string d_authOptions;
-        private string BLP_ticker;
+
+        //private string BLP_ticker;
+		private IList<string> instrument_results;
 
         private Session session;
         private Identity identity;
 
-        public void Run(string ticker)
+        public void Query(string queryString, int maxResults)
         {
-            d_queryString = ticker;
-            SendRequest(session, identity);
+            d_queryString = queryString;
+			d_maxResults = maxResults;
+			instrument_results = new List<string>();
+			SendRequest(session, identity);
             EventLoop(session);
         }
-        public string GetSecurity()
+        public IList<string> GetResults()
         {
-            return BLP_ticker;
+			IList<string> toReturn = instrument_results;
+			instrument_results = null;
+			return toReturn;
         }
         public void Init()
         {
@@ -235,9 +241,16 @@ namespace BloombergBridge
         private void ProcessInstrumentListResponse(Message msg)
         {
             Element results = msg.GetElement(RESULTS_ELEMENT);
-            BLP_ticker = results.GetValueAsElement(0).GetElementAsString(SECURITY_ELEMENT);
+			for (int i = 0; i < results.NumValues; i++)
+			{
+				instrument_results.Add(results.GetValueAsElement(i).GetElementAsString(SECURITY_ELEMENT));
+			}
         }
 
+		/// <summary>
+		/// Not fully implemented yet - does not collect results
+		/// </summary>
+		/// <param name="msg"></param>
         private void ProcessCurveListResponse(Message msg)
         {
             Element results = msg.GetElement(RESULTS_ELEMENT);
@@ -264,7 +277,11 @@ namespace BloombergBridge
             }
         }
 
-        private void ProcessGovtListResponse(Message msg)
+		/// <summary>
+		/// Not fully implemented yet - does not collect results
+		/// </summary>
+		/// <param name="msg"></param>
+		private void ProcessGovtListResponse(Message msg)
         {
             Element results = msg.GetElement(RESULTS_ELEMENT);
             int numResults = results.NumValues;
