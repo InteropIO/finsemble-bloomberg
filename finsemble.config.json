@@ -1,0 +1,8 @@
+{
+  "seedProjectDirectory": "../finsemble-seed",
+  "importConfig": [
+    "$applicationRoot/components/Bloomberg Terminal/config.json",
+    "$applicationRoot/components/Bloomberg Bridge/config.json",
+    "$applicationRoot/components/testBloomberg/config.json"
+  ]
+}

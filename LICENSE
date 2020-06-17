@@ -1,0 +1,201 @@
+Developer License Agreement
+
+This Developer License Agreement (this “Agreement“) is entered into by and between ChartIQ, Inc. (“ChartIQ“) and you
+and/or the entity on whose behalf you are downloading the Software (as defined below) (“you“). This Agreement forms a
+legally binding contract between you and ChartIQ in relation to your use of the software libraries, reference
+implementations, and other related demonstration code (collectively, the “Software“).
+
+In order to use the Software, you must first agree to this Agreement. You may not use the Software if you do not accept
+this Agreement. Among its other terms, this Agreement contains a binding arbitration provision and class action waiver.
+
+By downloading or using the Software, you hereby agree to the terms of this Agreement, including the binding arbitration
+and class action waiver. You may not use the Software and may not accept this Agreement if you are a person barred from
+receiving the Software under the laws of the United States or other countries, including the country from which you use
+the Software. If you are agreeing to be bound by this Agreement on behalf of your employer or other entity, you
+represent and warrant that you have full legal authority to bind your employer or such entity to this Agreement. If you
+do not have the requisite authority, you may not accept this Agreement or use the Software on behalf of your employer or
+other entity. Accordingly, you and ChartIQ acknowledge and agree as follows:
+
+1. LIMITED LICENSE.
+
+Subject to your complete and ongoing compliance with all the terms and conditions set forth in this Agreement, including
+without limitation all license limitations and restrictions set forth herein, ChartIQ grants you the following limited,
+non-exclusive, non-transferable, non-sublicensable, revocable licenses to use, and (where applicable) authorize your
+employees to use, the Software internally solely in connection with building, developing and testing your own
+applications that interoperate with or incorporate the Software (“Applications“) for the purposes of evaluation.
+
+2. RESTRICTIONS.
+
+By accessing or using the Software, you represent, warrant, and covenant that (a) you are a person or business entity
+engaged in the development of software applications, and (b) in the case of a business entity, you have the full power
+and authority to bind such entity to the terms of this Agreement.
+
+You acknowledge that the foregoing license does not include any right to (i) redistribute, sell, lease, license, modify
+or otherwise way create any derivative works of any portion of the Software, or (ii) distribute, deploy, or otherwise
+utilize Applications on a public, production, commercial, or other similar purpose other than internal use for
+evaluation and the development of non-public, experimental Applications (any other public, production, commercial, or
+similar use requires a separate agreement with ChartIQ), or (iii) use or implement any undocumented feature or API, or
+use any documented feature or API other than in accordance with applicable documentation. You agree not to do any of
+the foregoing.
+
+Except as expressly provided herein, you may not (w) reproduce, distribute, publicly display, or publicly perform any
+part of the Software, (x) decompile, reverse engineer, or otherwise access or attempt to access the source code for the
+Software not made available to you in source code form, (y) make or attempt to make any modification to, or otherwise
+create any derivative works of, the Software; or (z) remove, obscure, interfere with or circumvent any feature of the
+Software, including without limitation any copyright or other intellectual property notices, security, or access control
+mechanism. You agree that you will not use the Software to do anything illegal, including facilitating, promoting, or
+otherwise encouraging any illegal activities. You may not use the Software for any purpose other than interoperating
+with the Applications in a manner for which the Software is expressly designed.
+
+You represent and warrant that the Software will not be shipped, transferred or exported into any country or used in any
+manner prohibited by the United States Export Administration Act or any other export laws, restrictions or regulations
+(collectively the “Export Laws“). In addition, if the Software is identified as an export controlled item under the
+Export Laws, you represent and warrant that you are not a citizen, or otherwise located within, an embargoed nation
+(including without limitation Crimea, Cuba, Iran, North Korea, Sudan, or Syria) and that you are not otherwise
+prohibited under the Export Laws from receiving the Software.
+
+ANY USE IN VIOLATION OF THE FOREGOING LIMITATIONS AND RESTRICTIONS IS STRICTLY PROHIBITED, AND UNLICENSED.
+
+3. RESERVATION OF RIGHTS.
+
+The Software is owned by ChartIQ and licensed, not sold, to you. The Software, content, visual interfaces, interactive
+features, information, graphics, design, compilation, computer code, products, services, and all other elements of the
+Software and related documentation (the “Materials“), are protected by copyright, trade dress, patent, and trademark
+laws of the United States and other jurisdictions, international conventions, and all other relevant intellectual
+property and proprietary rights, and applicable laws (collectively, the “Intellectual Property Rights“). You agree that
+ChartIQ or its subsidiaries or affiliated companies and/or its third-party licensors own all legal right, title and
+interest in and to the Software and Materials, including any and all Intellectual Property Rights. ChartIQ reserves all
+rights not expressly granted in this Agreement. You do not acquire any right, title or interest to the Materials,
+whether by implication, estoppel, or otherwise, except for the limited rights set forth in this Agreement.
+
+You agree that the form and nature of the Software that ChartIQ provides may change without prior notice to you and that
+future versions of the Software may be incompatible with applications developed on previous versions of the Software.
+You agree that ChartIQ may stop (permanently or temporarily) providing the Software (or any features within the
+Software) to you or to users generally at ChartIQ’s sole discretion, without prior notice to you. Nothing in this
+Agreement gives you a right to use any of ChartIQ’s trade names, trademarks, service marks, logos, domain names, or
+other distinctive brand features.
+
+4. PURPOSE AND USE.
+
+ChartIQ agrees that it obtains no right, title or interest from you (or your licensors) under this Agreement in or to
+any software applications that you develop using the Software, including any Intellectual Property Rights that subsist
+in those applications. If your application stores personal or sensitive information provided by users, it must do so
+securely. You agree that you will not engage in any activity with the Software, including the development or
+distribution of an Application that interferes with, disrupts, damages, or accesses in an unauthorized manner the
+servers, networks, or other properties or services of any third party. You agree that you are solely responsible for
+(and that ChartIQ has no responsibility to you or to any third party for) any data, content, or resources that you
+create, transmit or display. You agree that you are solely responsible for (and that ChartIQ has no responsibility to
+you or to any third party for) any breach of your obligations under this Agreement, any applicable third party contract
+or terms of service, or any applicable law or regulation, and for the consequences (including any loss or damage which
+ChartIQ or any third party may suffer) of any such breach.
+
+Nothing in this Agreement will impair ChartIQ’s right to independently develop, acquire, license, market, promote or
+distribute products, software or technologies that perform the same or similar functions as, or otherwise compete with,
+the Applications or any other products, software or technologies that you may develop, produce, market, or distribute.
+
+5. PRIVACY AND INFORMATION.
+
+ChartIQ may collect certain data and information from you in connection with your use of the Software and otherwise in
+connection with this Agreement. All such data and information will be collected and used by ChartIQ in accordance with
+ChartIQ’s Privacy Policy (https://www.chartiq.com/privacy-policy/), which you accept and acknowledge. In accordance to
+ChartIQ’s Privacy Policy, you can request access, correction, updates, or deletion of your personal information at any
+time.
+
+If you provide ChartIQ with any comments, bug reports, feedback, enhancements, or modifications proposed or suggested by
+you for the Software or the Service (“Feedback“), such Feedback is provided on a non-confidential basis (notwithstanding
+any notice to the contrary you may include in any accompanying communication), and ChartIQ shall have the right to use
+such Feedback at its discretion, including, but not limited to the incorporation of such suggested changes into the
+Materials or the Software. You hereby grant ChartIQ a royalty-free perpetual, irrevocable, transferable, sublicensable,
+nonexclusive license under all rights necessary to so incorporate and use your Feedback for any purpose, including to
+make and sell products and services.
+
+6. THIRD PARTY SOFTWARE.
+
+The Software consists of a package of components, including references to certain third party software (“Third Party
+Software“) that are provided by their authors under separate license terms (the “Third Party Terms“). Your use of the
+Third Party Software in conjunction with the Software in a manner consistent with this Agreement is permitted, however,
+you may have broader rights and/or restrictions under the applicable Third Party Terms. ChartIQ cannot accept any
+responsibility for the Third Party Software or your use thereof.
+
+7. TERMINATION OF THIS AGREEMENT.
+
+This Agreement will continue to apply until terminated by either you or ChartIQ as set out below. If you want to
+terminate this Agreement, you may do so by ceasing your use of the Software. ChartIQ may at any time, terminate this
+Agreement with you: (a) if you have breached any provision of this Agreement; or (b) at ChartIQ’s convenience. When this
+Agreement comes to an end, all of the legal rights, obligations and liabilities that you and ChartIQ have benefited
+from, been subject to (or which have accrued over time whilst this Agreement has been in force) or which are expressed
+to continue indefinitely, shall be unaffected by this cessation, and paragraphs 2, 3, 4, 5, 6, 7, 9, 10, 11, 13 and 14
+shall continue to apply to such rights, obligations and liabilities indefinitely.
+
+8. DISCLAIMER OF WARRANTIES.
+
+YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE SOFTWARE IS AT YOUR SOLE RISK AND THAT THE SOFTWARE IS PROVIDED
+“AS IS” AND “AS AVAILABLE” WITHOUT WARRANTY OF ANY KIND FROM CHARTIQ. YOUR USE OF THE SOFTWARE AND ANY MATERIAL
+DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE SOFTWARE IS AT YOUR OWN DISCRETION AND RISK AND YOU ARE SOLELY
+RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR OTHER DEVICE OR LOSS OF DATA THAT RESULTS FROM SUCH USE. CHARTIQ
+FURTHER EXPRESSLY DISCLAIMS ALL WARRANTIES AND CONDITIONS OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT
+LIMITED TO THE IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NON-INFRINGEMENT. CHARTIQ EXPRESSLY DISCLAIMS ANY WARRANTIES OF ANY KIND WITH RESPECT TO THE ACCURACY OR FUNCTIONALITY
+OF THE SOFTWARE, AND WITH RESPECT TO THE ACCURACY, VALIDITY, OR COMPLETENESS OF ANY INFORMATION OR FEATURES AVAILABLE
+THROUGH THE SOFTWARE, OR THE QUALITY OR CONSISTENCY OF THE SOFTWARE OR RESULTS OBTAINED THROUGH ITS USE.
+
+9. LIMITATION OF LIABILITY.
+
+YOU EXPRESSLY UNDERSTAND AND AGREE THAT CHARTIQ, ITS SUBSIDIARIES AND AFFILIATES, AND ITS LICENSORS SHALL NOT BE LIABLE
+TO YOU UNDER ANY THEORY OF LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES
+THAT MAY BE INCURRED BY YOU, INCLUDING ANY LOSS OF DATA, WHETHER OR NOT CHARTIQ OR ITS REPRESENTATIVES HAVE BEEN ADVISED
+OF OR SHOULD HAVE BEEN AWARE OF THE POSSIBILITY OF ANY SUCH LOSSES ARISING. IN NO EVENT WILL CHARTIQ’S AGGREGATE
+LIABILITY FOR DAMAGES ARISING OUT OF THIS AGREEMENT OR THE TERMS EXCEED THE GREATER OF AMOUNTS PAID BY YOU FOR THE
+SOFTWARE, IF ANY, OR $50 USD.
+
+10. INDEMNIFICATION.
+
+To the maximum extent permitted by law, you agree to defend, indemnify and hold harmless ChartIQ, its affiliates and
+their respective directors, officers, employees and agents from and against any and all claims, actions, suits or
+proceedings, as well as any and all losses, liabilities, damages, costs and expenses (including reasonable attorneys’
+fees) arising out of or accruing from (a) your use of the Software, (b) any application you develop on the Software that
+infringes any copyright, trademark, trade secret, trade dress, patent or other intellectual property right of any
+person or defames any person or violates their rights of publicity or privacy, and (c) any non-compliance by you with
+this Agreement or any applicable law or regulation.
+
+11. CHANGES TO THIS AGREEMENT.
+
+ChartIQ may make changes to this Agreement as it distributes new versions of the Software. When these changes are made,
+ChartIQ will make a new version of this Agreement available on the website where the Software is made available.
+
+12. BINDING ARBITRATION; CLASS ACTION WAIVER.
+
+You expressly intend and agree that any dispute, controversy or claim arising out of, relating to or in connection with
+this Agreement, including the breach, termination or validity thereof, shall be finally resolved by arbitration. The
+tribunal shall have the power to rule on any challenge to its own jurisdiction or to the validity or enforceability of
+any portion of the agreement to arbitrate. YOU AGREE TO ARBITRATE SOLELY ON AN INDIVIDUAL BASIS, AND THAT THIS AGREEMENT
+DOES NOT PERMIT CLASS ARBITRATION OR ANY CLAIMS BROUGHT AS A PLAINTIFF OR CLASS MEMBER IN ANY CLASS OR REPRESENTATIVE
+ARBITRATION PROCEEDING.
+
+The arbitral tribunal may not consolidate more than one person’s claims, and may not otherwise preside over any form of
+a representative or class proceeding. Notwithstanding the tribunal’s power to rule on its own jurisdiction and the
+validity or enforceability of the agreement to arbitrate, the tribunal has no power to rule on the validity or
+enforceability of the agreement to arbitrate solely on an individual basis.
+
+13. MISCELLANEOUS TERMS.
+
+This Agreement constitutes the entire legal agreement between you and ChartIQ and governs your use of the Software
+(excluding any services which ChartIQ may provide to you under a separate written agreement), and completely supersedes
+any prior agreements between you and ChartIQ in relation to the Software. You agree that if ChartIQ does not exercise or
+enforce any legal right or remedy which is contained in this Agreement (or which ChartIQ has the benefit of under any
+applicable law), this will not be taken to be a formal waiver of ChartIQ’s rights and that those rights or remedies will
+still be available to ChartIQ. If any court of law, having the jurisdiction to decide on this matter, rules that any
+provision of this Agreement is invalid, then that provision will be removed from this Agreement without affecting the
+rest of this Agreement. The remaining provisions of this Agreement will continue to be valid and enforceable so long as
+this Agreement, as so modified, does not substantially impair the respective expectations or reciprocal obligations of
+the parties. You acknowledge and agree that each member of the group of companies of which ChartIQ is the parent shall
+be third party beneficiaries to this Agreement and that such other companies shall be entitled to directly enforce, and
+rely upon, any provision of this Agreement that confers a benefit on (or rights in favor of) them. Other than as set
+forth in the preceding sentence, no other person or entity shall be a third party beneficiary to this Agreement. The
+rights granted in this Agreement may not be assigned or transferred by you without the prior written approval of
+ChartIQ. You shall not be permitted to delegate your responsibilities or obligations under this Agreement without the
+prior written approval of ChartIQ. This Agreement, and your relationship with ChartIQ under this Agreement, shall be
+governed by the laws of the State of Virginia without regard to its conflict of laws provisions. You and ChartIQ agree
+to submit to the exclusive jurisdiction of the courts located within Charlottesville, Virginia to resolve any legal
+matter arising from this Agreement. Notwithstanding this, you agree that ChartIQ shall still be allowed to apply for
+injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
