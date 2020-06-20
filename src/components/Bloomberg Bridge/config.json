@@ -4,7 +4,7 @@
 			"window": {
 				"id": "Bloomberg Bridge Debug",
 				"windowType": "native",
-				"path": "C:/Users/admin/Documents/code/fpe-bloomberg/BloombergBridge/bin/Debug/BloombergBridge.exe",
+				"path": "$bloombergBridgeFolder/bin/Debug/BloombergBridge.exe",
 				"arguments": "",
 				"options": {
 					"autoShow": true,
@@ -45,7 +45,7 @@
 			"window": {
 				"id": "Bloomberg Bridge Release",
 				"windowType": "native",
-				"path": "C:/Users/admin/Documents/code/fpe-bloomberg/BloombergBridge/bin/Release/BloombergBridge.exe",
+				"alias": "bloomberg_bridge",
 				"arguments": "",
 				"options": {
 					"autoShow": true,

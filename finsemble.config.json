@@ -1,5 +1,6 @@
 {
   "seedProjectDirectory": "../finsemble-seed",
+  "bloombergBridgeFolder": "C:/Users/admin/Documents/code/fpe-bloomberg/BloombergBridge",
   "importConfig": [
     "$applicationRoot/components/Bloomberg Terminal/config.json",
     "$applicationRoot/components/Bloomberg Bridge/config.json",

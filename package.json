@@ -5,7 +5,11 @@
   "scripts": {
     "watch": "node ./fpe-scripts/watch.js"
   },
-  "keywords": ["Finsemble","Bloomberg","Terminal connect"],
+  "keywords": [
+    "Finsemble",
+    "Bloomberg",
+    "Terminal connect"
+  ],
   "author": "ChartIQ <support@finsemble.com> (https://www.chartiq.com/finsemble/)",
   "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
@@ -13,6 +17,7 @@
     "fs-extra": "^9.0.0"
   },
   "dependencies": {
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.5",
+    "@chartiq/finsemble": "^4.3.0"
   }
 }

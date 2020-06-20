@@ -330,6 +330,7 @@ window.runSecurityLookup = () => {
 			if (err) {
 				showElement("securityLookupError");
 			} else {
+
 				const end = Date.now();
 				//render results:
 				let results = "";

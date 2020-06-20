@@ -408,3 +408,21 @@ export default class BloombergBridgeClient {
         this.queryBloombergBridge(message, cb);
     }
 }
+
+//For use as a preload
+console.log("BloombergBridgeClient");
+const setupBloombergBridgeClient = () => {
+	console.log("FSBL Ready");
+(FSBL as any).Clients.BloombergBridgeClient = new BloombergBridgeClient((FSBL as any).Clients.Router, (FSBL as any).Clients.Logger);
+
+};
+
+// Startup pattern for preload. Preloads can come in any order, so we need to wait on either the window event or the
+// FSBL event
+if ((window as any).FSBL && (FSBL as any).addEventListener) {
+	(FSBL as any).addEventListener("onReady", setupBloombergBridgeClient);
+} else {
+	window.addEventListener("FSBLReady", setupBloombergBridgeClient);
+}
+
+export default FDC3Client;
