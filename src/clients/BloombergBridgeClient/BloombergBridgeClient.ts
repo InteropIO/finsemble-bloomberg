@@ -437,12 +437,12 @@ export default class BloombergBridgeClient {
     }
 }
 
-//For use as a preload
-console.log("BloombergBridgeClient");
+/**
+ * Automated setup function enabling use as preload on a Finsemble component.
+ */
 const setupBloombergBridgeClient = () => {
-    console.log("FSBL Ready");
-(FSBL as any).Clients.BloombergBridgeClient = new BloombergBridgeClient((FSBL as any).Clients.Router, (FSBL as any).Clients.Logger);
-
+    console.log("Setting up BloombergBridgeClient");
+    (FSBL as any).Clients.BloombergBridgeClient = new BloombergBridgeClient((FSBL as any).Clients.Router, (FSBL as any).Clients.Logger);
 };
 
 // Startup pattern for preload. Preloads can come in any order, so we need to wait on either the window event or the
