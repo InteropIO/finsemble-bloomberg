@@ -1,9 +1,10 @@
 {
-  "name": "finsemble-bloomberg",
+  "name": "fpe-bloomberg",
   "version": "4.3.0",
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
-    "watch": "node ./fpe-scripts/watch.js"
+	"watch": "node ./fpe-scripts/watch.js",
+	"docs": "npx typedoc"
   },
   "keywords": [
     "Finsemble",
@@ -19,7 +20,8 @@
     "typedoc-plugin-markdown": "^2.3.1"
   },
   "dependencies": {
-    "typescript": "^3.9.5",
-    "@chartiq/finsemble": "^4.3.0"
+    "@chartiq/finsemble": "^4.3.0",
+    "@types/node": "^14.0.13",
+    "typescript": "^3.9.5"
   }
 }

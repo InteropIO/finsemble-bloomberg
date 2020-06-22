@@ -1,11 +1,17 @@
-# Finsemble's Bloomberg Terminal Connect Integration
+[fpe-bloomberg](README.md) › [Globals](globals.md)
+
+# fpe-bloomberg
+
+[![Finsemble Logo](https://documentation.chartiq.com/finsemble/styles/img/Finsemble_Logo_Dark.svg)](https://documentation.chartiq.com/finsemble/)
+
+## Finsemble's Bloomberg Terminal Connect Integration
 Welcome to Finsemble's integration with [Bloomberg Terminal Connect](https://www.bloomberg.com/terminal-connect/), which enables Finsemble components and services to interoperate with Bloomberg panels or Launchpad components, allowing you to build powerful workflows for your users that avoid data re-entry and copy/paste errors.
 
 Specifically, the integration enables:
 - Finsemble to execute command functions in a Bloomberg Panel
 - Bi-directional data sharing between Bloomberg worksheets and Finsemble
 - Bi-directional data sharing between Launchpad groups and Finsemble
-- Search functions for Bloomberg security definitions (as provided by the SECF function), e.g. `TSLA US Equity` or ``
+- Search functions for Bloomberg secreadurity definitions (as provided by the SECF function), e.g. `TSLA US Equity` or ``
 
 By using this integration with Finsemble, you can provide these capabilities to your applications. Your Finsembilized components can drive context in the Bloomberg Terminal or react to context changes received from it.
 
@@ -28,14 +34,13 @@ To use the integration you will need access to both a Bloomberg Terminal and lic
   * [Send commands to the Bloomberg Terminal](#send-commands-to-the-bloomberg-terminal)
     + [The anatomy of a Bloomberg command](#the-anatomy-of-a-bloomberg-command)
 
-
 ## How it works
 The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect and the BLP API. The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
 
 The native bridge application must be running before calls to Terminal connect can be made, and can be launched either manually or on startup via a Finsemble component configuration. 
 
 **REPLACE ME**
-![Bloomberg Bridge Architecture Diagram](BloombergArchDiagram.png)
+![Bloomberg Bridge Architecture Diagram](media/BloombergArchDiagram.png)
 
 A number of examples of using the integration are provided:
 - **[Bloomberg Bridge](src/components/Bloomberg%20Bridge)**: Example component configurations for launching the native bridge application.
@@ -43,8 +48,6 @@ A number of examples of using the integration are provided:
 - **[Bloomberg Terminal](src/components/Bloomberg%20Terminal)**: An example configuration for launching the Bloomberg terminal itself
 - **[TBC: Desktop service for FDC3 integration](#)**: An example service that works with the FDC3 channel matcher service to facilitate context sharing with FDC3 system channels in Finsemble and provides an example of instrument/security translation that may be required. See the [Finsemble FDC3 Implementation](https://github.com/ChartIQ/finsemble-fdc3) project for more details on the FDC3 channel matcher service.
 - **[TBC: Security finder example](#)**: An example that demonstrates the use of the SecurityLookup function of the Bloomberg Bridge to implement a search with typeahead for Bloomberg sercurities, which may be used to set the context of launchpad groups.
-
-
 
 ## Installation
 This project contains:
@@ -110,15 +113,6 @@ To use the watch script:
 5) Your seed project directory has now been updated with the 
 
 ### Manual installation
-
-
-
-
-
-
-
-
-
 
 ## Building and Deploying the Bloomberg Bridge
 The Bloomberg Bridge application should be built using Terminal COnnect and BLP API DLL files distributed by Bloomberg. It can then either be deployed to a known path on your users machines, or delivered via a Finsemble app asset, which will be downloaded and installed automatically by Finsemble.

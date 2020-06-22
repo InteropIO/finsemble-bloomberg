@@ -6,14 +6,16 @@
 		"removeComments": true,
 		"preserveConstEnums": true,
 		"sourceMap": true,
-		"allowJs": true
+		"allowJs": true,
+		"types": [
+			"@chartiq/finsemble"
+		],
 	},
-	"include": [
-		"src/**/*",
-		"@chartiq/finsemble/dist/types/**/*"
-	],
-	"exclude": [
-		"node_modules",
-		"**/*.spec.ts"
-	]
+	"typedocOptions": {
+		"out": "./docs",
+		"readme": "./docs_src/README.md",
+		"inputFiles": "./src/clients",
+		"mode": "modules",
+		"media": "./docs_src/media",
+	}
 }
