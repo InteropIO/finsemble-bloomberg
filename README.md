@@ -21,6 +21,13 @@ To use the integration you will need access to both a Bloomberg Terminal and lic
   * [Prerequisites](#prerequisites)
   * [Build the integration](#build-the-integration)
   * [Producing an appAsset for deployment by Finsemble](#produce-an-appasset-for-deployment-by-finsemble)
+- [Use Cases](#use-cases)
+  * [Data sharing with Launchpad groups](#data-sharing-with-launchpad-groups)
+  * [Data sharing with worksheets](#data-sharing-with-worksheets)
+  * [Searching for Securities](#searching-for-securities)
+  * [Send commands to the Bloomberg Terminal](#send-commands-to-the-bloomberg-terminal)
+    + [The anatomy of a Bloomberg command](#the-anatomy-of-a-bloomberg-command)
+
 
 ## How it works
 The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect and the BLP API. The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
@@ -79,8 +86,8 @@ fpe-bloomberg
 └───src                           - Typescript client and example Javascript component source directory
     |
     └───clients
-    |   └───BloomBergBridgeClient        
-	|           BloomBergBridgeClient.ts - Typescript client class and preload for use with BloombergBridge
+    |   └───BloombergBridgeClient        
+	|           BloombergBridgeClient.ts - Typescript client class and preload for use with BloombergBridge
 	|
     └───components
     |   └───Bloomberg Bridge         - Congfigs for launching the Bloomberg Bridge
@@ -111,13 +118,15 @@ To use the watch script:
 
 
 
+
+
 ## Building and Deploying the Bloomberg Bridge
 The Bloomberg Bridge application should be built using Terminal COnnect and BLP API DLL files distributed by Bloomberg. It can then either be deployed to a known path on your users machines, or delivered via a Finsemble app asset, which will be downloaded and installed automatically by Finsemble.
 
 An example appAsset for the Bridge is provided in _/hosted_ directory.
 
 ### Prerequisites
-- Visual Studio 2017 (or later)
+- Visual Studio 2017 (or later) and .Net Framework 4.5.2+
 - Finsemble.dll: Installed automatically via NuGet when using Visual Studio to build the integration.
 - Bloomberglp.TerminalApiEx.dll
   - To download from Bloomberg Terminal, run `TMCT` **\<GO\>**
@@ -157,3 +166,16 @@ An example appAsset for the Bridge is provided in _/hosted_ directory.
 	```
 
   N.B. Finsemble will only download and deploy a new version of the asset if it does not have a copy of the asset that was downloaded via an app asset with the given version number. 
+
+## Use cases
+### Data sharing with Launchpad groups
+### Data sharing with worksheets
+### Searching for Securities
+### Send commands to the Bloomberg Terminal
+
+#### The anatomy of a Bloomberg command
+Each Bloomberg command is made up of:
+- Mnemonic: The specific command that would normally be entered into the Terminal (e.g., DES, YAS, VCON)
+- Panel: The Bloomberg panel number to send it to
+- Securities: (0 or more Bloomberg security strings)
+- Tail: Arguments specific to the mnemonic (optional) - See the help page in the Terminal for each mnemonic to discover what options it supports

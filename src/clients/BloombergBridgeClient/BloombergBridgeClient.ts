@@ -1,6 +1,7 @@
 import { IRouterClient, RouterMessage } from '@chartiq/finsemble/dist/types/clients/IRouterClient';
 import { ILogger } from '@chartiq/finsemble/dist/types/clients/ILogger';
 
+
 const CONNECTION_CHECK_TIMEOUT: number = 1000;
 // tslint:disable:no-console
 
@@ -412,7 +413,7 @@ export default class BloombergBridgeClient {
 //For use as a preload
 console.log("BloombergBridgeClient");
 const setupBloombergBridgeClient = () => {
-	console.log("FSBL Ready");
+    console.log("FSBL Ready");
 (FSBL as any).Clients.BloombergBridgeClient = new BloombergBridgeClient((FSBL as any).Clients.Router, (FSBL as any).Clients.Logger);
 
 };
@@ -420,9 +421,7 @@ const setupBloombergBridgeClient = () => {
 // Startup pattern for preload. Preloads can come in any order, so we need to wait on either the window event or the
 // FSBL event
 if ((window as any).FSBL && (FSBL as any).addEventListener) {
-	(FSBL as any).addEventListener("onReady", setupBloombergBridgeClient);
+    (FSBL as any).addEventListener("onReady", setupBloombergBridgeClient);
 } else {
-	window.addEventListener("FSBLReady", setupBloombergBridgeClient);
+    window.addEventListener("FSBLReady", setupBloombergBridgeClient);
 }
-
-export default FDC3Client;
