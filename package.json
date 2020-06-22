@@ -14,7 +14,9 @@
   "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
     "chokidar": "^3.4.0",
-    "fs-extra": "^9.0.0"
+    "fs-extra": "^9.0.0",
+    "typedoc": "^0.17.7",
+    "typedoc-plugin-markdown": "^2.3.1"
   },
   "dependencies": {
     "typescript": "^3.9.5",
