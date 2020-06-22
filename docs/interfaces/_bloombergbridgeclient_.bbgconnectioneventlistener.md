@@ -2,6 +2,9 @@
 
 # Interface: BBGConnectionEventListener
 
+Interface representing an event handler for connection events, which are fired
+when the BloombergBridge connects or disconnects from the terminal.
+
 ## Hierarchy
 
 * **BBGConnectionEventListener**
@@ -10,7 +13,10 @@
 
 ▸ (`err`: string | Error, `response`: RouterMessage‹object›): *void*
 
-*Defined in [BloombergBridgeClient.ts:8](https://github.com/ChartIQ/fpe-bloomberg/blob/c322ffe/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L8)*
+*Defined in [BloombergBridgeClient.ts:13](https://github.com/ChartIQ/fpe-bloomberg/blob/604172f/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L13)*
+
+Interface representing an event handler for connection events, which are fired
+when the BloombergBridge connects or disconnects from the terminal.
 
 **Parameters:**
 

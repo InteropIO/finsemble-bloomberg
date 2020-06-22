@@ -29,7 +29,10 @@
 
 • **CONNECTION_CHECK_TIMEOUT**: *number* = 1000
 
-*Defined in [BloombergBridgeClient.ts:5](https://github.com/ChartIQ/fpe-bloomberg/blob/c322ffe/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L5)*
+*Defined in [BloombergBridgeClient.ts:6](https://github.com/ChartIQ/fpe-bloomberg/blob/604172f/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L6)*
+
+Timeout in milliseconds for terminal connection checks that will cause a checkConnection
+call to fail.
 
 ## Functions
 
@@ -37,6 +40,6 @@
 
 ▸ **setupBloombergBridgeClient**(): *void*
 
-*Defined in [BloombergBridgeClient.ts:415](https://github.com/ChartIQ/fpe-bloomberg/blob/c322ffe/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L415)*
+*Defined in [BloombergBridgeClient.ts:442](https://github.com/ChartIQ/fpe-bloomberg/blob/604172f/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L442)*
 
 **Returns:** *void*

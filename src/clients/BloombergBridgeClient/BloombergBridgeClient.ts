@@ -1,34 +1,54 @@
-import { IRouterClient, RouterMessage } from '@chartiq/finsemble/dist/types/clients/IRouterClient';
-import { ILogger } from '@chartiq/finsemble/dist/types/clients/ILogger';
+import type { IRouterClient, RouterMessage } from '@chartiq/finsemble/dist/types/clients/IRouterClient';
+import type { ILogger } from '@chartiq/finsemble/dist/types/clients/ILogger';
 
-
+/** Timeout in milliseconds for terminal connection checks that will cause a checkConnection 
+ * call to fail. */
 const CONNECTION_CHECK_TIMEOUT: number = 1000;
 // tslint:disable:no-console
 
+/**
+ * Interface representing an event handler for connection events, which are fired
+ * when the BloombergBridge connects or disconnects from the terminal.
+ */
 interface BBGConnectionEventListener {
     (
+        /** Errors received from Terminal connect - most likely on registration of
+         * the listener. */
         err: (string | Error),
+        /** Flags indicating if the BloombergBridge is registered with the terminal
+         * through terminal connect and whether the user is logged in. Both flags
+         * need to be true for any of the client functions, other than checkConnection
+         * to function.
+        */
         response: RouterMessage<{ registered: boolean, loggedIn: boolean }>,
     ): void;
 }
 
-
+/**
+ * Interface representing an event handler for Bloomberg group events.
+ */
 interface BBGGroupEventListener {
     (
+        /** Errors received from Terminal connect - most likely on registration of 
+         * the listener. */
         err: (string | Error),
+        /** Details relating to BlpComponentContextChangedEventArgs messages received from 
+         * Terminal connect. These will usually relate to single group and reflect changes 
+         * in the group's context or creation of a group, which will generate context changed 
+         * event, but for a group that did not previously exist.*/
         response: RouterMessage<{ group: BBGGroup, groups: BBGGroup[] }>,
     ): void;
 }
 
 /**
  * Interface representing a Bloomberg worksheet.
- * @param id The name of the worksheet (non-unique).
- * @param name The name of the worksheet assigned by the Bloomberg terminal and globally unique.
- * @param isActive the Worksheet's IsActive status.
  */
 interface BBGWorksheet {
+    /** The name of the worksheet (non-unique). */
     id: string;
+    /** The name of the worksheet assigned by the Bloomberg terminal and globally unique. */
     name: string;
+    /** A flag indicating the Worksheet's IsActive status. */
     isActive: boolean;
 }
 
@@ -45,7 +65,13 @@ interface BBGGroup {
 }
 
 /**
- * Client class for communicating with the Finsemble Bloomberg Bridge over the the Finsemble Router.
+ * Client class for communicating with the Finsemble Bloomberg Bridge over the the Finsemble Router,
+ * which in turn communicates with the Bloomberg Terminal via the Terminal Connect and BLP APIs.
+ * 
+ * This Class may either be imported into code and initialized by passing in an instance
+ * of the Finsemble RouterClient and Logger (e.g. in Finsemble Custom Desktop Service) or 
+ * used as a preload to be applied to a component, where it will be automatically initialized
+ * via instances of the RouterClient and Logger referenced from `FSBL.Clients`.
  */
 export default class BloombergBridgeClient {
     private connectionEventListener: BBGConnectionEventListener = null;
@@ -118,7 +144,8 @@ export default class BloombergBridgeClient {
 
 
     /**
-     * Set a handler function for Launchpad group context changed events.
+     * Set a handler function for Launchpad group context changed events, which 
+     * are fired when a group's context changes or a new group is created.
      *
      * Note that only one handler function is permitted, hence calling
      * this multiple times will simply replace the existing handler.

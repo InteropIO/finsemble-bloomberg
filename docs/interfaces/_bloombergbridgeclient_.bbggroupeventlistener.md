@@ -2,6 +2,8 @@
 
 # Interface: BBGGroupEventListener
 
+Interface representing an event handler for Bloomberg group events.
+
 ## Hierarchy
 
 * **BBGGroupEventListener**
@@ -10,7 +12,9 @@
 
 ▸ (`err`: string | Error, `response`: RouterMessage‹object›): *void*
 
-*Defined in [BloombergBridgeClient.ts:16](https://github.com/ChartIQ/fpe-bloomberg/blob/c322ffe/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L16)*
+*Defined in [BloombergBridgeClient.ts:30](https://github.com/ChartIQ/fpe-bloomberg/blob/604172f/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L30)*
+
+Interface representing an event handler for Bloomberg group events.
 
 **Parameters:**
 

@@ -37,7 +37,9 @@ To use the integration you will need access to both a Bloomberg Terminal and lic
 ## How it works
 The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect and the BLP API. The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
 
-The native bridge application must be running before calls to Terminal connect can be made, and can be launched either manually or on startup via a Finsemble component configuration. 
+Documentation for the Typescript client implementation can be found [here](modules/_bloombergbridgeclient_.md).
+
+**Note:** The native bridge application must be running before calls to Terminal connect can be made, and can be launched either manually or on startup via a Finsemble component configuration. 
 
 **REPLACE ME**
 ![Bloomberg Bridge Architecture Diagram](media/BloombergArchDiagram.png)
