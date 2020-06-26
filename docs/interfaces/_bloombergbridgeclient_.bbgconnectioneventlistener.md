@@ -13,7 +13,7 @@ when the BloombergBridge connects or disconnects from the terminal.
 
 ▸ (`err`: string | Error, `response`: RouterMessage‹object›): *void*
 
-*Defined in [BloombergBridgeClient.ts:13](https://github.com/ChartIQ/fpe-bloomberg/blob/931b588/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L13)*
+*Defined in [BloombergBridgeClient.ts:13](https://github.com/ChartIQ/fpe-bloomberg/blob/6851a71/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L13)*
 
 Interface representing an event handler for connection events, which are fired
 when the BloombergBridge connects or disconnects from the terminal.

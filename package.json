@@ -3,8 +3,8 @@
   "version": "4.3.0",
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
-	"watch": "node ./fpe-scripts/watch.js",
-	"docs": "npx typedoc"
+    "watch": "node ./fpe-scripts/watch.js",
+    "docs": "npx typedoc"
   },
   "keywords": [
     "Finsemble",

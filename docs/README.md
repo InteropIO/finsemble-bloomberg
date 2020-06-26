@@ -163,13 +163,15 @@ An example appAsset for the Bridge is provided in _/hosted_ directory.
 
   N.B. Finsemble will only download and deploy a new version of the asset if it does not have a copy of the asset that was downloaded via an app asset with the given version number. 
 
-## Use cases
-### Data sharing with Launchpad groups
-### Data sharing with worksheets
-### Searching for Securities
-### Send commands to the Bloomberg Terminal
+## Using the Bloomberg Bridge Client
 
-#### The anatomy of a Bloomberg command
+### Examples
+#### Data sharing with Launchpad groups
+#### Data sharing with worksheets
+#### Searching for Securities
+#### Send commands to the Bloomberg Terminal
+
+##### The anatomy of a Bloomberg command
 Each Bloomberg command is made up of:
 - Mnemonic: The specific command that would normally be entered into the Terminal (e.g., DES, YAS, VCON)
 - Panel: The Bloomberg panel number to send it to
