@@ -12,7 +12,7 @@ Interface representing an event handler for Bloomberg group events.
 
 ▸ (`err`: string | Error, `response`: RouterMessage‹object›): *void*
 
-*Defined in [BloombergBridgeClient.ts:30](https://github.com/ChartIQ/fpe-bloomberg/blob/6851a71/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L30)*
+*Defined in [BloombergBridgeClient.ts:30](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L30)*
 
 Interface representing an event handler for Bloomberg group events.
 
