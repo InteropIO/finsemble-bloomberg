@@ -86,6 +86,18 @@ export default class BloombergBridgeClient {
      * an exception.
      * @param logger An instance of the Finsemble Logger to be used log messages. If not
      * passed it will be retrieved from FSBL.Clients.Logger or an exception.
+	 * @example Instantiating the client in a Finsemble component:
+	 * ```Javascript
+	 * let bbg = new BloombergBridgeClient(FSBL.Clients.RouterClient, FSBL.Clients.Logger);
+	 * ```
+	 * 
+	 * Instantiating the client in a Finsemble service:
+	 * ```Javascript
+	 * const Finsemble = require("@chartiq/finsemble");
+	 * Finsemble.Clients.Logger.start();
+	 * Finsemble.Clients.Logger.log("test Service starting up");
+	 * let bbg = new BloombergBridgeClient(Finsemble.Clients.RouterClient, Finsemble.Clients.Logger);
+	 * ```
      */
     constructor(routerClient?: IRouterClient, logger?: ILogger) {
         if (routerClient) {
@@ -111,6 +123,17 @@ export default class BloombergBridgeClient {
      * this multiple times will simply replace the existing handler.
      *
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * let connectionEventHandler = (err, resp) => {
+	 *     if (!err && resp && resp.loggedIn) {
+	 *         showConnectedIcon();
+	 *     } else {
+	 *         showDisconnectedIcon();
+	 *     }
+	 * };
+	 * bbg.setConnectionEventListener(connectionEventHandler);
+	 * ```
      */
     setConnectionEventListener(cb: BBGConnectionEventListener) {
         if (this.connectionEventListener) {
@@ -132,6 +155,10 @@ export default class BloombergBridgeClient {
 
     /**
      * Remove the current connection event handler.
+	 * @example
+	 * ```Javascript
+	 * bbg.removeConnectionEventListener();
+	 * ```
      */
     removeConnectionEventListener() {
         if (this.connectionEventListener) {
@@ -150,6 +177,20 @@ export default class BloombergBridgeClient {
      * Note that only one handler function is permitted, hence calling
      * this multiple times will simply replace the existing handler.
      * @param cb Handler function to call on group context change events
+	 * @example
+	 * ```Javascript
+	 * bbg.setGroupEventListener((err, response) => {
+	 *     if (!err) {
+	 *         if (response.data.group && response.data.group.type == "monitor") {
+	 *             console.log("Monitor event:\n" + JSON.stringify(response.data, null, 2));
+	 *         } else {
+	 *             console.log("Security event:\n" + JSON.stringify(response.data, null, 2));
+	 *         }
+	 *     } else {
+	 *             console.error("Error returned from setGroupEventListener", err);
+	 *     }
+	 * });
+	 * ```
      */
     setGroupEventListener(cb: BBGGroupEventListener) {
         if (this.groupEventListener) {
@@ -169,6 +210,10 @@ export default class BloombergBridgeClient {
 
     /**
      * Remove the current group context changed event handler.
+	 * @example
+	 * ```Javascript
+	 * bbg.removeGroupEventListener();
+	 * ```
      */
     removeGroupEventListener() {
         if (this.groupEventListener) {
@@ -184,6 +229,17 @@ export default class BloombergBridgeClient {
      * logged in.
      * @param cb Callback for connection response that will return response as true if we are
      * connected and logged in.
+	 * @example 
+	 * ```Javascript
+	 * let checkConnectionHandler = (err, loggedIn) => {
+	 *     if (!err && loggedIn) {
+	 *         showConnectedIcon();
+	 *     } else {
+	 *         showDisconnectedIcon();
+	 *     }
+	 * };
+	 * bbg.checkConnection(checkConnectionHandler);
+	 * ```
      */
     checkConnection(cb: (err: string | CallbackError | Error, response: boolean) => void) {
         console.log('Checking connection status...');
@@ -218,6 +274,7 @@ export default class BloombergBridgeClient {
      * @param message The query data to pass.
      * @param message.function Required field that determines which function to run.
      * @param cb Callback
+	 * @private
      */
     queryBloombergBridge(
         message: { function: string },
@@ -233,6 +290,7 @@ export default class BloombergBridgeClient {
      * responses
      * from the Bloomberg Bridge to aid debugging.
      * @param cb Callback
+	 * @private
      */
     apiResponseHandler(cb: (err: string | Error, response: { status: boolean }) => void) {
         return (err: string | Error, response: { data: { status: boolean } }) => {
@@ -265,6 +323,20 @@ export default class BloombergBridgeClient {
      * "4")
      * @param tails (optional) parameters passed to the function
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * let mnemonic = "DES";
+	 * let securities = ["MSFT US Equity"];
+	 * let panel = 3;
+	 * let tails = null;
+	 * bbg.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
+	 *     if (!err) {
+	 *         console.log(`Ran command "${mnemonic}" on panel ${panel}`);
+	 *     } else {
+	 *         console.error("Error returned from runBBGCommand", err);
+	 *     }
+	 * });
+	 * ```
      */
     runBBGCommand(
         mnemonic: string,
@@ -289,6 +361,24 @@ export default class BloombergBridgeClient {
      * @param worksheetName Name for the worksheet.
      * @param securities An array of strings representing one or more securities.
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * let securities = ["TSLA US Equity", "AMZN US Equity"];
+	 * bbg.runCreateWorksheet(worksheetName, securities, (err, response) => {
+	 *     if (!err) {
+	 *         if (response && response.worksheet) {
+	 *             //Id assigned to the worksheet
+	 *             let worksheetId = response.worksheet.id;
+	 *             //List of securities resolved by Bloomberg from the input list, unresolvable securities will be removed
+	 *             let workSheetSecurities = response.worksheet.securities;
+	 *         } else {
+	 *             console.error("invalid response from runCreateWorksheet", response);
+	 *         }
+	 *     } else {
+	 *         console.error("Error returned from runCreateWorksheet", err);
+	 *     }
+	 * });
+	 * ```
      */
     runCreateWorksheet(
         worksheetName: string,
@@ -308,6 +398,24 @@ export default class BloombergBridgeClient {
     /**
      * Retrieve all worksheets for the user.
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * bbg.runGetAllWorksheets((err, response) => {
+	 *     if (!err) {
+	 *         if (response && response.worksheets && Array.isArray(response.worksheets)) {
+	 *             response.worksheets.forEach(worksheet => {
+	 *                 let worksheetName = worksheet.name;
+	 *                 let worksheetId = worksheet.id;
+	 *                 ...
+	 *             });
+	 *         } else {
+	 *             console.error("invalid response from runGetAllWorksheets", response);
+	 *         }
+	 *     } else {
+	 *         console.error("Error returned from runGetAllWorksheets", err);
+	 *     }
+	 * });
+	 * ```
      */
     runGetAllWorksheets(
         cb: (
@@ -326,6 +434,23 @@ export default class BloombergBridgeClient {
      * Retrieve a specific worksheet by id.
      * @param worksheetId Worksheet ID to retrieve.
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * bbg.runGetWorksheet(worksheetId, (err, response) => {
+	 *     if (!err) {
+	 *         if (response && response.worksheet && Array.isArray(response.worksheet.securities)) {
+	 *             let worksheetName = response.worksheet.name;
+	 *             let worksheetId = response.worksheet.id;
+	 *             let workSheetSecurities = response.worksheet.securities;
+	 *             ...
+	 *         } else {
+	 *             console.error("invalid response from runGetWorksheet");
+	 *         }
+	 *     } else {
+	 *         console.error("Error returned from runGetWorksheet", err);
+	 *     }
+	 * });
+     * ```
      */
     runGetWorksheet(
         worksheetId: string,
@@ -344,6 +469,24 @@ export default class BloombergBridgeClient {
      * @param worksheetId  Worksheet ID to replace.
      * @param securities An array of strings representing one or more securities.
      * @param cb Callback
+	 * ```Javascript
+	 * let securities = ["TSLA US Equity", "AMZN US Equity"];
+	 * bbg.runReplaceWorksheet(worksheetId, securities, (err, response) => {
+	 *     if (!err) {
+	 *         if (response && response.worksheet) {
+	 *             //Details of the updated worksheet will be returned
+	 *             let worksheetName = response.worksheet.name;
+	 *             //List of securities resolved by Bloomberg from the input list, unresolvable securities will be removed
+	 *             let workSheetSecurities = response.worksheet.securities;
+	 *             ...
+	 *         } else {
+	 *             console.error("invalid response from runReplaceWorksheet", response);
+	 *         }
+	 *     } else {
+	 *         console.error("Error returned from runReplaceWorksheet", err);
+	 *     }
+	 * });
+	 * ```
      */
     runReplaceWorksheet(
         worksheetId: string,
@@ -362,6 +505,26 @@ export default class BloombergBridgeClient {
     /**
      * Gets a list of all available Launchpad component groups.
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * bbg.runGetAllGroups((err, response) => {
+	 *     if (!err) {
+	 *         if (response && response.groups && Array.isArray(response.groups)) {
+	 *             //do something with the returned data
+	 *             response.groups.forEach(group => {
+	 *                 let groupName = group.name;
+	 *                 let groupType = group.type;
+	 *                 let groupCurrentValue = group.value;
+	 *                 ...
+	 *             });
+	 *         } else {
+	 *             console.error("Invalid response returned from runGetAllGroups", response);
+	 *         }
+	 *     } else {
+	 *         console.error("Error returned from runGetAllGroups", err);
+	 *     }
+	 * });
+	 * ```
      */
     runGetAllGroups(
         cb: (err: string | Error, response: { status: boolean, groups: BBGGroup[] }) => void,
@@ -377,6 +540,23 @@ export default class BloombergBridgeClient {
      * Returns details of a Launchpad component group by name.
      * @param groupName The name of the component group to retrieve.
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * bbg.runGetGroupContext(groupName, (err, response) => {
+	 *     if (!err) {
+	 *         if (response && response.group) {
+	 *             let groupName = response.group.name;
+	 *             let groupType = group.type;
+	 *             let groupCurrentValue = group.value;
+	 *             ...
+	 *         } else {
+	 *             console.error("Invalid response returned from runGetGroupContext", response);
+	 *         }
+	 *     } else {
+	 *         console.error("Error returned from runGetGroupContext", err);
+	 *     }
+	 * });
+	 * ```
      */
     runGetGroupContext(
         groupName: string,
@@ -398,6 +578,19 @@ export default class BloombergBridgeClient {
      * @param cookie (optional) Cookie value identifying a particular component within
      * a group to set the context of. Pass null if not required.
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * bbg.runSetGroupContext(groupName, newValue, null, (err, response) => {
+	 *     if (!err) {
+	 * 	       // You may wish to retrieve the current state of Launchpad group here as Bloomberg
+	 *         // will resolve any security your set and may therefore its value may differ from
+	 *         // what you sent. 
+	 *         bbg.runGetGroupContext(groupName, (err2, response2) => { ... });
+	 *     } else {
+	 *         console.error("Error returned from runSetGroupContext", err);
+	 *     }
+	 * });
+	 * ```
      */
     runSetGroupContext(
         groupName: string,
@@ -419,9 +612,29 @@ export default class BloombergBridgeClient {
     }
 
     /**
-     * 
+     * Search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return 
+	 * results in around ~120-150ms and maybe used, for example, to power an autocomplete or 
+	 * typeahead search.
      * @param security The string to lookup a security for
      * @param cb Callback
+	 * @example
+	 * ```Javascript
+	 * bbg.runSecurityLookup(security, (err, response) => {
+	 *     if (!err) {
+	 * 	       if (response && response.results) {
+	 *             //do something with the results
+	 *             response.results.forEach(result => {
+	 *                 console.log(result.name + " " + result.type);
+	 *                 ...
+	 *             });
+	 * 	       } else {
+	 *             console.error("invalid response from runSecurityLookup", response);
+	 * 	       }
+	 *     } else {
+	 * 	       console.error("Error returned from runSecurityLookup", err);
+	 *     }
+	 * });
+	 * ```
      */
     runSecurityLookup(
         security: string,

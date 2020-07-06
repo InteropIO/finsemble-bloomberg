@@ -29,9 +29,9 @@ via instances of the RouterClient and Logger referenced from `FSBL.Clients`.
 
 ### Methods
 
-* [apiResponseHandler](_bloombergbridgeclient_.bloombergbridgeclient.md#apiresponsehandler)
+* [apiResponseHandler](_bloombergbridgeclient_.bloombergbridgeclient.md#private-apiresponsehandler)
 * [checkConnection](_bloombergbridgeclient_.bloombergbridgeclient.md#checkconnection)
-* [queryBloombergBridge](_bloombergbridgeclient_.bloombergbridgeclient.md#querybloombergbridge)
+* [queryBloombergBridge](_bloombergbridgeclient_.bloombergbridgeclient.md#private-querybloombergbridge)
 * [removeConnectionEventListener](_bloombergbridgeclient_.bloombergbridgeclient.md#removeconnectioneventlistener)
 * [removeGroupEventListener](_bloombergbridgeclient_.bloombergbridgeclient.md#removegroupeventlistener)
 * [runBBGCommand](_bloombergbridgeclient_.bloombergbridgeclient.md#runbbgcommand)
@@ -52,16 +52,29 @@ via instances of the RouterClient and Logger referenced from `FSBL.Clients`.
 
 \+ **new BloombergBridgeClient**(`routerClient?`: IRouterClient, `logger?`: ILogger): *[BloombergBridgeClient](_bloombergbridgeclient_.bloombergbridgeclient.md)*
 
-*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
+*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
 
 BloombergBridgeClient constructor.
+
+**`example`** Instantiating the client in a Finsemble component:
+```Javascript
+let bbg = new BloombergBridgeClient(FSBL.Clients.RouterClient, FSBL.Clients.Logger);
+```
+
+Instantiating the client in a Finsemble service:
+```Javascript
+const Finsemble = require("@chartiq/finsemble");
+Finsemble.Clients.Logger.start();
+Finsemble.Clients.Logger.log("test Service starting up");
+let bbg = new BloombergBridgeClient(Finsemble.Clients.RouterClient, Finsemble.Clients.Logger);
+```
 
 **Parameters:**
 
 Name | Type | Description |
 ------ | ------ | ------ |
 `routerClient?` | IRouterClient | An instance of the Finsemble router client to be used for all = communication. If not passed it will be retrieved from FSBL.Clients.RouterClient or an exception. |
-`logger?` | ILogger | An instance of the Finsemble Logger to be used log messages. If not passed it will be retrieved from FSBL.Clients.Logger or an exception.  |
+`logger?` | ILogger | An instance of the Finsemble Logger to be used log messages. If not passed it will be retrieved from FSBL.Clients.Logger or an exception. |
 
 **Returns:** *[BloombergBridgeClient](_bloombergbridgeclient_.bloombergbridgeclient.md)*
 
@@ -71,7 +84,7 @@ Name | Type | Description |
 
 • **connectionEventListener**: *[BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md)* = null
 
-*Defined in [BloombergBridgeClient.ts:77](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L77)*
+*Defined in [BloombergBridgeClient.ts:77](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L77)*
 
 ___
 
@@ -79,7 +92,7 @@ ___
 
 • **groupEventListener**: *[BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md)* = null
 
-*Defined in [BloombergBridgeClient.ts:78](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L78)*
+*Defined in [BloombergBridgeClient.ts:78](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L78)*
 
 ___
 
@@ -87,7 +100,7 @@ ___
 
 • **logger**: *ILogger* = null
 
-*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
+*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
 
 ___
 
@@ -95,15 +108,15 @@ ___
 
 • **routerClient**: *IRouterClient* = null
 
-*Defined in [BloombergBridgeClient.ts:79](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L79)*
+*Defined in [BloombergBridgeClient.ts:79](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L79)*
 
 ## Methods
 
-###  apiResponseHandler
+### `Private` apiResponseHandler
 
 ▸ **apiResponseHandler**(`cb`: function): *(Anonymous function)*
 
-*Defined in [BloombergBridgeClient.ts:237](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L237)*
+*Defined in [BloombergBridgeClient.ts:295](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L295)*
 
 Internal function used to return a call back that will wrap the supplied callback and log all
 responses
@@ -135,10 +148,22 @@ ___
 
 ▸ **checkConnection**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:188](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L188)*
+*Defined in [BloombergBridgeClient.ts:244](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L244)*
 
 Check that Bloomberg bridge is connected to the Bloomberg Terminal and that a user is
 logged in.
+
+**`example`** 
+```Javascript
+let checkConnectionHandler = (err, loggedIn) => {
+    if (!err && loggedIn) {
+        showConnectedIcon();
+    } else {
+        showDisconnectedIcon();
+    }
+};
+bbg.checkConnection(checkConnectionHandler);
+```
 
 **Parameters:**
 
@@ -160,11 +185,11 @@ Name | Type |
 
 ___
 
-###  queryBloombergBridge
+### `Private` queryBloombergBridge
 
 ▸ **queryBloombergBridge**(`message`: object, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:222](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L222)*
+*Defined in [BloombergBridgeClient.ts:279](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L279)*
 
 Internal function used to send a Query to the BBG_run_terminal_function responder of
 BloombergBridge,
@@ -201,9 +226,14 @@ ___
 
 ▸ **removeConnectionEventListener**(): *void*
 
-*Defined in [BloombergBridgeClient.ts:136](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L136)*
+*Defined in [BloombergBridgeClient.ts:163](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L163)*
 
 Remove the current connection event handler.
+
+**`example`** 
+```Javascript
+bbg.removeConnectionEventListener();
+```
 
 **Returns:** *void*
 
@@ -213,9 +243,14 @@ ___
 
 ▸ **removeGroupEventListener**(): *void*
 
-*Defined in [BloombergBridgeClient.ts:173](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L173)*
+*Defined in [BloombergBridgeClient.ts:218](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L218)*
 
 Remove the current group context changed event handler.
+
+**`example`** 
+```Javascript
+bbg.removeGroupEventListener();
+```
 
 **Returns:** *void*
 
@@ -225,9 +260,24 @@ ___
 
 ▸ **runBBGCommand**(`mnemonic`: string, `securities`: string[], `panel`: string, `tails`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:269](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L269)*
+*Defined in [BloombergBridgeClient.ts:341](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L341)*
 
 Run a function in one of the 4 Bloomberg panel windows.
+
+**`example`** 
+```Javascript
+let mnemonic = "DES";
+let securities = ["MSFT US Equity"];
+let panel = 3;
+let tails = null;
+bbg.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
+    if (!err) {
+        console.log(`Ran command "${mnemonic}" on panel ${panel}`);
+    } else {
+        console.error("Error returned from runBBGCommand", err);
+    }
+});
+```
 
 **Parameters:**
 
@@ -273,9 +323,28 @@ ___
 
 ▸ **runCreateWorksheet**(`worksheetName`: string, `securities`: string[], `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:293](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L293)*
+*Defined in [BloombergBridgeClient.ts:383](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L383)*
 
 Create a new worksheet with the specified securities and name.
+
+**`example`** 
+```Javascript
+let securities = ["TSLA US Equity", "AMZN US Equity"];
+bbg.runCreateWorksheet(worksheetName, securities, (err, response) => {
+    if (!err) {
+        if (response && response.worksheet) {
+            //Id assigned to the worksheet
+            let worksheetId = response.worksheet.id;
+            //List of securities resolved by Bloomberg from the input list, unresolvable securities will be removed
+            let workSheetSecurities = response.worksheet.securities;
+        } else {
+            console.error("invalid response from runCreateWorksheet", response);
+        }
+    } else {
+        console.error("Error returned from runCreateWorksheet", err);
+    }
+});
+```
 
 **Parameters:**
 
@@ -312,9 +381,30 @@ ___
 
 ▸ **runGetAllGroups**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:366](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L366)*
+*Defined in [BloombergBridgeClient.ts:529](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L529)*
 
 Gets a list of all available Launchpad component groups.
+
+**`example`** 
+```Javascript
+bbg.runGetAllGroups((err, response) => {
+    if (!err) {
+        if (response && response.groups && Array.isArray(response.groups)) {
+            //do something with the returned data
+            response.groups.forEach(group => {
+                let groupName = group.name;
+                let groupType = group.type;
+                let groupCurrentValue = group.value;
+                ...
+            });
+        } else {
+            console.error("Invalid response returned from runGetAllGroups", response);
+        }
+    } else {
+        console.error("Error returned from runGetAllGroups", err);
+    }
+});
+```
 
 **Parameters:**
 
@@ -343,9 +433,28 @@ ___
 
 ▸ **runGetAllWorksheets**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:312](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L312)*
+*Defined in [BloombergBridgeClient.ts:420](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L420)*
 
 Retrieve all worksheets for the user.
+
+**`example`** 
+```Javascript
+bbg.runGetAllWorksheets((err, response) => {
+    if (!err) {
+        if (response && response.worksheets && Array.isArray(response.worksheets)) {
+            response.worksheets.forEach(worksheet => {
+                let worksheetName = worksheet.name;
+                let worksheetId = worksheet.id;
+                ...
+            });
+        } else {
+            console.error("invalid response from runGetAllWorksheets", response);
+        }
+    } else {
+        console.error("Error returned from runGetAllWorksheets", err);
+    }
+});
+```
 
 **Parameters:**
 
@@ -374,9 +483,27 @@ ___
 
 ▸ **runGetGroupContext**(`groupName`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:381](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L381)*
+*Defined in [BloombergBridgeClient.ts:561](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L561)*
 
 Returns details of a Launchpad component group by name.
+
+**`example`** 
+```Javascript
+bbg.runGetGroupContext(groupName, (err, response) => {
+    if (!err) {
+        if (response && response.group) {
+            let groupName = response.group.name;
+            let groupType = group.type;
+            let groupCurrentValue = group.value;
+            ...
+        } else {
+            console.error("Invalid response returned from runGetGroupContext", response);
+        }
+    } else {
+        console.error("Error returned from runGetGroupContext", err);
+    }
+});
+```
 
 **Parameters:**
 
@@ -409,9 +536,27 @@ ___
 
 ▸ **runGetWorksheet**(`worksheetId`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:330](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L330)*
+*Defined in [BloombergBridgeClient.ts:455](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L455)*
 
 Retrieve a specific worksheet by id.
+
+**`example`** 
+```Javascript
+bbg.runGetWorksheet(worksheetId, (err, response) => {
+    if (!err) {
+        if (response && response.worksheet && Array.isArray(response.worksheet.securities)) {
+            let worksheetName = response.worksheet.name;
+            let worksheetId = response.worksheet.id;
+            let workSheetSecurities = response.worksheet.securities;
+            ...
+        } else {
+            console.error("invalid response from runGetWorksheet");
+        }
+    } else {
+        console.error("Error returned from runGetWorksheet", err);
+    }
+});
+```
 
 **Parameters:**
 
@@ -444,7 +589,7 @@ ___
 
 ▸ **runReplaceWorksheet**(`worksheetId`: string, `securities`: string[], `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:348](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L348)*
+*Defined in [BloombergBridgeClient.ts:491](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L491)*
 
 Replaces a specific worksheet by ID with a new list of securities.
 
@@ -461,6 +606,24 @@ An array of strings representing one or more securities.
 ▪ **cb**: *function*
 
 Callback
+```Javascript
+let securities = ["TSLA US Equity", "AMZN US Equity"];
+bbg.runReplaceWorksheet(worksheetId, securities, (err, response) => {
+    if (!err) {
+        if (response && response.worksheet) {
+            //Details of the updated worksheet will be returned
+            let worksheetName = response.worksheet.name;
+            //List of securities resolved by Bloomberg from the input list, unresolvable securities will be removed
+            let workSheetSecurities = response.worksheet.securities;
+            ...
+        } else {
+            console.error("invalid response from runReplaceWorksheet", response);
+        }
+    } else {
+        console.error("Error returned from runReplaceWorksheet", err);
+    }
+});
+```
 
 ▸ (`err`: string | Error, `response`: object): *void*
 
@@ -483,7 +646,30 @@ ___
 
 ▸ **runSecurityLookup**(`security`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:426](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L426)*
+*Defined in [BloombergBridgeClient.ts:639](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L639)*
+
+Search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return
+results in around ~120-150ms and maybe used, for example, to power an autocomplete or
+typeahead search.
+
+**`example`** 
+```Javascript
+bbg.runSecurityLookup(security, (err, response) => {
+    if (!err) {
+	       if (response && response.results) {
+            //do something with the results
+            response.results.forEach(result => {
+                console.log(result.name + " " + result.type);
+                ...
+            });
+	       } else {
+            console.error("invalid response from runSecurityLookup", response);
+	       }
+    } else {
+	       console.error("Error returned from runSecurityLookup", err);
+    }
+});
+```
 
 **Parameters:**
 
@@ -516,9 +702,23 @@ ___
 
 ▸ **runSetGroupContext**(`groupName`: string, `value`: string, `cookie`: string | null, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:402](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L402)*
+*Defined in [BloombergBridgeClient.ts:595](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L595)*
 
 Set the context value of a Launchpad group by name.
+
+**`example`** 
+```Javascript
+bbg.runSetGroupContext(groupName, newValue, null, (err, response) => {
+    if (!err) {
+	       // You may wish to retrieve the current state of Launchpad group here as Bloomberg
+        // will resolve any security your set and may therefore its value may differ from
+        // what you sent.
+        bbg.runGetGroupContext(groupName, (err2, response2) => { ... });
+    } else {
+        console.error("Error returned from runSetGroupContext", err);
+    }
+});
+```
 
 **Parameters:**
 
@@ -560,18 +760,30 @@ ___
 
 ▸ **setConnectionEventListener**(`cb`: [BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md)): *void*
 
-*Defined in [BloombergBridgeClient.ts:115](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L115)*
+*Defined in [BloombergBridgeClient.ts:138](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L138)*
 
 Set a handler function for connection events.
 
 Note that only one handler function is permitted, hence calling
 this multiple times will simply replace the existing handler.
 
+**`example`** 
+```Javascript
+let connectionEventHandler = (err, resp) => {
+    if (!err && resp && resp.loggedIn) {
+        showConnectedIcon();
+    } else {
+        showDisconnectedIcon();
+    }
+};
+bbg.setConnectionEventListener(connectionEventHandler);
+```
+
 **Parameters:**
 
 Name | Type | Description |
 ------ | ------ | ------ |
-`cb` | [BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md) | Callback  |
+`cb` | [BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md) | Callback |
 
 **Returns:** *void*
 
@@ -581,7 +793,7 @@ ___
 
 ▸ **setGroupEventListener**(`cb`: [BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md)): *void*
 
-*Defined in [BloombergBridgeClient.ts:154](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L154)*
+*Defined in [BloombergBridgeClient.ts:195](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L195)*
 
 Set a handler function for Launchpad group context changed events, which
 are fired when a group's context changes or a new group is created.
@@ -589,10 +801,25 @@ are fired when a group's context changes or a new group is created.
 Note that only one handler function is permitted, hence calling
 this multiple times will simply replace the existing handler.
 
+**`example`** 
+```Javascript
+bbg.setGroupEventListener((err, response) => {
+    if (!err) {
+        if (response.data.group && response.data.group.type == "monitor") {
+            console.log("Monitor event:\n" + JSON.stringify(response.data, null, 2));
+        } else {
+            console.log("Security event:\n" + JSON.stringify(response.data, null, 2));
+        }
+    } else {
+            console.error("Error returned from setGroupEventListener", err);
+    }
+});
+```
+
 **Parameters:**
 
 Name | Type | Description |
 ------ | ------ | ------ |
-`cb` | [BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md) | Handler function to call on group context change events  |
+`cb` | [BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md) | Handler function to call on group context change events |
 
 **Returns:** *void*

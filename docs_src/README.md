@@ -231,7 +231,29 @@ If you are not using the BloombergBridgeClient as a preload in a component (when
 let bbg = new BloombergBridgeClient(FSBL.Clients.RouterClient, FSBL.Clients.Logger);
 ```
 
-
+#### Check if we are connected to the BloombergBridgeClient
+You can either check the connection manually:
+```Javascript
+let checkConnectionHandler = (err, loggedIn) => {
+	if (!err && loggedIn) {
+         showConnectedIcon();
+    } else {
+        showDisconnectedIcon();
+	}
+};
+bbg.checkConnection(checkConnectionHandler);
+```
+or register a handler for connection events:
+```Javascript
+let connectionEventHandler = (err, resp) => {
+    if (!err && resp && resp.loggedIn) {
+        showConnectedIcon();
+    } else {
+        showDisconnectedIcon();
+    }
+};
+bbg.setConnectionEventListener(connectionEventHandler);
+```
 
 #### Data sharing with Launchpad groups
 Retrieve a list of all current Launchpad groups and their current context:

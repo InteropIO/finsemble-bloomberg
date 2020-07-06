@@ -29,7 +29,7 @@
 
 • **CONNECTION_CHECK_TIMEOUT**: *number* = 1000
 
-*Defined in [BloombergBridgeClient.ts:6](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L6)*
+*Defined in [BloombergBridgeClient.ts:6](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L6)*
 
 Timeout in milliseconds for terminal connection checks that will cause a checkConnection
 call to fail.
@@ -40,7 +40,7 @@ call to fail.
 
 ▸ **setupBloombergBridgeClient**(): *void*
 
-*Defined in [BloombergBridgeClient.ts:443](https://github.com/ChartIQ/fpe-bloomberg/blob/e95af2e/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L443)*
+*Defined in [BloombergBridgeClient.ts:656](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L656)*
 
 Automated setup function enabling use as preload on a Finsemble component.
 
