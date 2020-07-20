@@ -56,7 +56,7 @@ This project contains:
 - A .Net solution for building the Bloomberg Bridge
 - a Typescript client to work with the API exposed by Bloomberg Bridge 
 - a number of javascript examples, such as a test component and an example service for integrating BBG LaunchPad groups with FDC3 channels.
-- a watch script that can install the proejct files in a copy of the Finsemble seed project for you.
+- a watch script that can install the project files in a copy of the Finsemble seed project for you.
 
 Please note that the Bloomberg bridge must be deployed to your user's machines for use, see [Producing an appAsset for deployment by Finsemble](#produce-an-appasset-for-deployment-by-finsemble) for instructions on creating an asset and details of how Finsemble can deploy the asset for you. 
 
@@ -105,7 +105,7 @@ fpe-bloomberg
 ```
 
 ### Installation via the watch script
-When run, the watch script deploys all files to the configured Finsemble seed project directory and then watches for any changes in the _/src_ directory. When folders or files are added or removed this will be automatically reflected in the Finsemble Seed Project. *finsemble.config.json* and finsemble.manifest.json are also observed for changes and will update the seed project's main _/configs/application/config.json_ and _/configs/application/manifest-local.json_ files if they change.
+When run, the watch script deploys all files to the configured Finsemble seed project directory and then watches for any changes in the _/src_ directory. When folders or files are added or removed this will be automatically reflected in the Finsemble Seed Project. *finsemble.config.json* and *finsemble.manifest.json* are also observed for changes and will update the seed project's main _/configs/application/config.json_ and _/configs/application/manifest-local.json_ files if they change.
 
 To use the watch script:
 
