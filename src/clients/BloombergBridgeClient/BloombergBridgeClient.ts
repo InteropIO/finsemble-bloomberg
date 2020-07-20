@@ -140,7 +140,7 @@ export default class BloombergBridgeClient {
             this.removeConnectionEventListener();
         }
 
-        console.log('Set new Listener for Bloomberg connection events...');
+        console.log('Added new event listener for Bloomberg connection events.');
         this.connectionEventListener = (err, response) => {
             if (err) {
                 console.error('Received Bloomberg connection error: ', err);
@@ -162,7 +162,7 @@ export default class BloombergBridgeClient {
     removeConnectionEventListener() {
         if (this.connectionEventListener) {
             this.routerClient.removeListener('BBG_connection_status', this.connectionEventListener);
-            console.log('Removed connection event listener');
+            console.log('Removed Bloomberg connection event listener');
         } else {
             console.warn('Tried to remove non-existent connection event listener');
         }
@@ -300,8 +300,8 @@ export default class BloombergBridgeClient {
                 cb(err, null);
             } else if (!response || !response.data || !response.data.status) {
                 const errMsg = 'Negative status returned by BBG_run_terminal_function: ';
-                console.error(errMsg, response);
-                this.logger.error(errMsg, response);
+                console.warn(errMsg, response);
+				this.logger.warn(errMsg, response);
                 cb('Command returned negative status', null);
             } else {
                 const msg = 'BBG_run_terminal_function successful, response: ';
