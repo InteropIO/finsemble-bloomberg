@@ -53,10 +53,7 @@ namespace BloombergBridge
 			}
 			catch (Exception err)
 			{
-				FSBL.RPC("Logger.error", new List<JToken>
-				{
-					"Exception thrown: ", err.Message
-				});
+				Console.WriteLine("Exception thrown while connecting to Finsemble, error: " + err.Message);
 			}
 			// Block main thread until worker is finished.
 			autoEvent.WaitOne();
@@ -70,7 +67,6 @@ namespace BloombergBridge
 		{
 			while (!shutdown)
 			{
-				bool statusChange = false;
 				bool _isRegistered = false;
 				bool _isLoggedIn = false;
 
@@ -117,74 +113,90 @@ namespace BloombergBridge
 							"Bloomberg API isLoggedIn call failed"
 						});
 					}
-				} else
+				}
+				else
 				{
 					//can't be logged in if not connected to the BlpApi
 					_isLoggedIn = false;
 				}
-				if (_isRegistered != isRegistered || _isLoggedIn != isLoggedIn)
-				{
-					//status change
-					isRegistered = _isRegistered;
-					isLoggedIn = _isLoggedIn;
-					statusChange = true;
-				}
-				if (statusChange)
-				{
-					JObject connectionStatus = new JObject();
-					connectionStatus.Add("registered", isRegistered);
-					connectionStatus.Add("loggedIn", isLoggedIn);
-					FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
-					FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg connection status changed: ", connectionStatus });
 
-					if (isLoggedIn) //we've just logged in
-					{
-						try
-						{
-							//setup a handler for group events
-							BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
-
-							//setup security finder
-							secFinder = new SecurityLookup();
-							secFinder.Init();
-						}
-						catch (Exception err)
-						{
-							_isLoggedIn = false;
-							FSBL.RPC("Logger.error", new List<JToken>
-							{
-								"Error occurred during post-login setup: ",
-								err.Message
-							});
-						}
-					}
-					else
-					{
-						try
-						{
-							//dispose of security finder
-							if (secFinder != null)
-							{
-								secFinder.Dispose();
-								secFinder = null;
-							}
-						}
-						catch (Exception err)
-						{
-							FSBL.RPC("Logger.debug", new List<JToken>
-							{
-								"Exception occurred during disposal of security finder:",
-								err.Message
-							});
-						}
-					}
-				}
+				_isLoggedIn = checkForConnectionStatusChange(_isRegistered, _isLoggedIn);
 				Thread.Sleep(1000);
 			}
 			FSBL.RPC("Logger.log", new List<JToken>
 			{
 				"Bloomberg API connection monitor exiting"
 			});
+		}
+
+		/// <summary>
+		/// Utility function called by connectionMonitorThread to detect a change in the connection status.
+		/// </summary>
+		/// <param name="_isRegistered"></param>
+		/// <param name="_isLoggedIn"></param>
+		/// <returns>_isLogged, will be returned false if there are any errors in setting up after a login event</returns>
+		private static bool checkForConnectionStatusChange(bool _isRegistered, bool _isLoggedIn)
+		{
+			bool statusChange = false;
+			if (_isRegistered != isRegistered || _isLoggedIn != isLoggedIn)
+			{
+				//status change
+				isRegistered = _isRegistered;
+				isLoggedIn = _isLoggedIn;
+				statusChange = true;
+			}
+			if (statusChange)
+			{
+				JObject connectionStatus = new JObject();
+				connectionStatus.Add("registered", isRegistered);
+				connectionStatus.Add("loggedIn", isLoggedIn);
+				FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
+				FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg connection status changed: ", connectionStatus });
+
+				if (isLoggedIn) //we've just logged in
+				{
+					try
+					{
+						//setup a handler for group events
+						BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
+
+						//setup security finder
+						secFinder = new SecurityLookup();
+						secFinder.Init();
+					}
+					catch (Exception err)
+					{
+						_isLoggedIn = false;
+						FSBL.RPC("Logger.error", new List<JToken>
+							{
+								"Error occurred during post-login setup: ",
+								err.Message
+							});
+					}
+				}
+				else
+				{
+					try
+					{
+						//dispose of security finder
+						if (secFinder != null)
+						{
+							secFinder.Dispose();
+							secFinder = null;
+						}
+					}
+					catch (Exception err)
+					{
+						FSBL.RPC("Logger.debug", new List<JToken>
+							{
+								"Exception occurred during disposal of security finder:",
+								err.Message
+							});
+					}
+				}
+			}
+
+			return _isLoggedIn;
 		}
 
 		/// <summary>
@@ -237,17 +249,7 @@ namespace BloombergBridge
 						try
 						{
 							removeResponders();
-							//TODO: work out why we were doing this
-							/*
-							Process[] processes = Process.GetProcessesByName("BloombergBridge");
-							if (processes.Length > 0)
-							{
-								for (int i = 0; i < processes.Length; i++)
-								{
-									processes[i].Kill();
-								}
-							}
-							*/
+
 							// Dispose of Finsemble.
 							FSBL.Dispose();
 						}
@@ -273,12 +275,11 @@ namespace BloombergBridge
 		private static void BlpTerminal_ComponentGroupEvent(object sender, BlpGroupEventArgs e)
 		{
 			Type type = e.GetType();
-			//TODO: adjust log level down to debug
-			FSBL.RPC("Logger.log", new List<JToken> { "Received Bloomberg group event type: ", type.FullName });
+			FSBL.RPC("Logger.debug", new List<JToken> { "Received Bloomberg group event type: ", type.FullName });
 
-			if (type == typeof(BlpGroupContextChangedEventArgs))
+			BlpGroupContextChangedEventArgs context = e as BlpGroupContextChangedEventArgs;
+			if (context != null)
 			{
-				BlpGroupContextChangedEventArgs context = (BlpGroupContextChangedEventArgs)e;
 				JObject output = new JObject();
 				if (context.Group != null)
 				{
@@ -294,7 +295,7 @@ namespace BloombergBridge
 
 					output.Add("groups", groups);
 				}
-				if (context.Cookie != null && context.Cookie != "")
+				if (string.IsNullOrWhiteSpace(context.Cookie))
 				{
 					output.Add("cookie", context.Cookie);
 				}
@@ -376,7 +377,7 @@ namespace BloombergBridge
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
 		private static void BlpApi_Disconnected(object sender, EventArgs e)
-				{
+		{
 			//status change
 			isRegistered = false;
 			isLoggedIn = false;
@@ -409,79 +410,7 @@ namespace BloombergBridge
 					if (queryData != null)
 					{
 						FSBL.RPC("Logger.log", new List<JToken> { "Received query: ", queryData });
-
-						string requestedFunction = queryData.Value<string>("function");
-						if (requestedFunction != null)
-						{
-							try
-							{
-								switch (requestedFunction)
-								{
-									case "RunFunction":
-										RunFunction(queryResponse, queryData);
-										break;
-									case "CreateWorksheet":
-										CreateWorksheet(queryResponse, queryData);
-										break;
-									case "GetWorksheet":
-										GetWorksheet(queryResponse, queryData);
-										break;
-									case "ReplaceWorksheet":
-										ReplaceWorksheet(queryResponse, queryData);
-										break;
-									case "AppendToWorksheet":
-										AppendToWorksheet(queryResponse, queryData);
-										break;
-									case "GetAllWorksheets":
-										GetAllWorksheets(queryResponse);
-										break;
-									case "GetAllGroups":
-										GetAllGroups(queryResponse);
-										break;
-									case "GetGroupContext":
-										GetGroupContext(queryResponse, queryData);
-										break;
-									case "SetGroupContext":
-										SetGroupContext(queryResponse, queryData);
-										break;
-									case "SecurityLookup":
-										SecurityLookup(queryResponse, queryData);
-										break;
-									case "CreateComponent":
-										queryResponse.Add("status", false);
-										queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-										break;
-									case "DestroyAllComponents":
-										queryResponse.Add("status", false);
-										queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-										break;
-									case "GetAvailableComponents":
-										queryResponse.Add("status", false);
-										queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
-										break;
-									case "":
-									case null:
-										queryResponse.Add("status", false);
-										queryResponse.Add("message", "No function specified to run");
-										break;
-									default:
-										queryResponse.Add("status", false);
-										queryResponse.Add("message", "Unknown function '" + requestedFunction + "' specified");
-										break;
-								}
-
-							}
-							catch (Exception err)
-							{
-								queryResponse.Add("status", false);
-								queryResponse.Add("message", "Exception occurred while running '" + requestedFunction + "', message: " + err.Message);
-							}
-						}
-						else
-						{
-							queryResponse.Add("status", false);
-							queryResponse.Add("message", "No requested function found in query data:" + queryData.ToString());
-						}
+						BBG_execute_terminal_function(queryResponse, queryData);
 					}
 					else
 					{
@@ -504,6 +433,86 @@ namespace BloombergBridge
 				queryMessage.sendQueryMessage(queryResponse);
 				Console.WriteLine("Responded to BBG_run_terminal_function query: " + queryResponse.ToString());
 				FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_run_terminal_function query: ", queryData, "Response: ", queryResponse });
+			}
+		}
+		/// <summary>
+		/// Utility function called by BBG_run_terminal_function to actually execute each supported terminal function.
+		/// </summary>
+		/// <param name="queryResponse">JObject to add response data to</param>
+		/// <param name="queryData">Optional query data</param>
+		private static void BBG_execute_terminal_function(JObject queryResponse, JToken queryData)
+		{
+			string requestedFunction = queryData.Value<string>("function");
+			if (requestedFunction != null)
+			{
+				try
+				{
+					switch (requestedFunction)
+					{
+						case "RunFunction":
+							RunFunction(queryResponse, queryData);
+							break;
+						case "CreateWorksheet":
+							CreateWorksheet(queryResponse, queryData);
+							break;
+						case "GetWorksheet":
+							GetWorksheet(queryResponse, queryData);
+							break;
+						case "ReplaceWorksheet":
+							ReplaceWorksheet(queryResponse, queryData);
+							break;
+						case "AppendToWorksheet":
+							AppendToWorksheet(queryResponse, queryData);
+							break;
+						case "GetAllWorksheets":
+							GetAllWorksheets(queryResponse);
+							break;
+						case "GetAllGroups":
+							GetAllGroups(queryResponse);
+							break;
+						case "GetGroupContext":
+							GetGroupContext(queryResponse, queryData);
+							break;
+						case "SetGroupContext":
+							SetGroupContext(queryResponse, queryData);
+							break;
+						case "SecurityLookup":
+							SecurityLookup(queryResponse, queryData);
+							break;
+						case "CreateComponent":
+							queryResponse.Add("status", false);
+							queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+							break;
+						case "DestroyAllComponents":
+							queryResponse.Add("status", false);
+							queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+							break;
+						case "GetAvailableComponents":
+							queryResponse.Add("status", false);
+							queryResponse.Add("message", "function '" + requestedFunction + "' not implemented yet");
+							break;
+						case "":
+						case null:
+							queryResponse.Add("status", false);
+							queryResponse.Add("message", "No function specified to run");
+							break;
+						default:
+							queryResponse.Add("status", false);
+							queryResponse.Add("message", "Unknown function '" + requestedFunction + "' specified");
+							break;
+					}
+
+				}
+				catch (Exception err)
+				{
+					queryResponse.Add("status", false);
+					queryResponse.Add("message", "Exception occurred while running '" + requestedFunction + "', message: " + err.Message);
+				}
+			}
+			else
+			{
+				queryResponse.Add("status", false);
+				queryResponse.Add("message", "No requested function found in query data:" + queryData.ToString());
 			}
 		}
 
@@ -790,12 +799,7 @@ namespace BloombergBridge
 			return worksheetId;
 		}
 
-		private static JObject renderWorksheet(BlpWorksheet worksheet)
-		{
-			return renderWorksheet(worksheet, false);
-		}
-
-		private static JObject renderWorksheet(BlpWorksheet worksheet, bool includeSecurities)
+		private static JObject renderWorksheet(BlpWorksheet worksheet, bool includeSecurities = false)
 		{
 			JObject worksheetObj = new JObject {
 				{ "name", worksheet.Name },
