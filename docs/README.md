@@ -56,7 +56,7 @@ This project contains:
 - A .Net solution for building the Bloomberg Bridge
 - a Typescript client to work with the API exposed by Bloomberg Bridge 
 - a number of javascript examples, such as a test component and an example service for integrating BBG LaunchPad groups with FDC3 channels.
-- a watch script that can install the proejct files in a copy of the Finsemble seed project for you.
+- a watch script that can install the project files in a copy of the Finsemble seed project for you.
 
 Please note that the Bloomberg bridge must be deployed to your user's machines for use, see [Producing an appAsset for deployment by Finsemble](#produce-an-appasset-for-deployment-by-finsemble) for instructions on creating an asset and details of how Finsemble can deploy the asset for you. 
 
