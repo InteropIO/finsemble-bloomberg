@@ -142,7 +142,6 @@ export default class BloombergBridgeClient {
 
         console.log('Set new Listener for Bloomberg connection events...');
         this.connectionEventListener = (err, response) => {
-            console.log('Received connection event... Response: ', response);
             if (err) {
                 console.error('Received Bloomberg connection error: ', err);
             } else {
