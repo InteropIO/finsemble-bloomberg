@@ -18,6 +18,36 @@ namespace BloombergBridge
 	/// <summary>
 	/// Security lookup utility, based on the BLP API (not Terminal Connect API), to find a security 
 	/// definition via an auto-complete style search.
+	/// Note: Queries are single threaded meaning they should be surrounded by a lock or separate instances
+	/// created to handle multiple concurrent queries.
+	/// 
+	/// <example>
+	/// //Setup the SecurityLookup instance and initialize it
+	///	SecurityLookup secFinder = secFinder = new SecurityLookup();
+	///	secFinder.Init();
+	///	
+	/// //perform  query
+	///	lock (secFinder)
+	///	{
+	///		secFinder.Query(queryData["security"].ToString(), 10);
+	///		IList<string> results = secFinder.GetResults();
+	///		//convert the results into the security name and Type
+	///		//  results typically look like this: AAPL US<equity>
+	///		//  when we need to output: { name: "AAPL US", type: "Equity" }
+	///		for (int i = 0; i<results.Count; i++)
+	///		{
+	///			string result = results[i];
+	///			JObject resultObj = new JObject();
+	///			int typeStartIndex = result.LastIndexOf('<');
+	///			if (typeStartIndex > -1)
+	///			{
+	///				resultObj.Add("name", result.Substring(0, typeStartIndex).Trim());
+	///				resultObj.Add("type", char.ToUpper(result[typeStartIndex + 1]) + result.Substring(typeStartIndex + 2, result.Length - (typeStartIndex + 2) - 1));
+	///			}
+	///			resultsArr.Add(resultObj);
+	///		}
+	///	}
+	/// </example>
 	/// </summary>
 	internal class SecurityLookup
 	{
@@ -30,13 +60,11 @@ namespace BloombergBridge
 		private static readonly Name SECURITY_ELEMENT = Name.GetName("security");
 
 		private static readonly Name ERROR_RESPONSE = Name.GetName("ErrorResponse");
-		private static readonly Name INSTRUMENT_LIST_RESPONSE =
-			Name.GetName("InstrumentListResponse");
+		private static readonly Name INSTRUMENT_LIST_RESPONSE = Name.GetName("InstrumentListResponse");
 		private static readonly Name CURVE_LIST_RESPONSE = Name.GetName("CurveListResponse");
 		private static readonly Name GOVT_LIST_RESPONSE = Name.GetName("GovtListResponse");
 
-		private static readonly Name INSTRUMENT_LIST_REQUEST =
-			Name.GetName("instrumentListRequest");
+		private static readonly Name INSTRUMENT_LIST_REQUEST = Name.GetName("instrumentListRequest");
 		private static readonly Name CURVE_LIST_REQUEST = Name.GetName("curveListRequest");
 		private static readonly Name GOVT_LIST_REQUEST = Name.GetName("govtListRequest");
 
@@ -142,7 +170,7 @@ namespace BloombergBridge
 		}
 
 		/// <summary>
-		/// Initializese the SecurityLookup instanc by creating a session and authorizing it so that its 
+		/// Initializese the SecurityLookup instance by creating a session and authorizing it so that its 
 		/// ready to conduct searches. Once initialized multiple searches may be conducted with the same instance.
 		/// </summary>
 		public void Init()
