@@ -68,7 +68,7 @@ window.runBBGCommand = () => {
 	if (!error) {
 		bbg.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
 			if (err) {
-				FSBL.Clients.Logger.error("Error received from runBBGCommand:", err);
+				FSBL.Clients.Logger.error(`Error received from runBBGCommand: mnemonic: ${mnemonic}, securities: ${JSON.stringify(securities)}, panel: ${panel}, tails: ${tails}, error:`, err);
 				showElement("commandError");
 			} else {
 				showElement("commandSuccess");
@@ -99,7 +99,7 @@ window.createWorksheet = () => {
 	if (!error) {
 		bbg.runCreateWorksheet(worksheetName, securities, (err, data) => { 
 			if (err) {
-				FSBL.Clients.Logger.error("Error received from runCreateWorksheet:", err);
+				FSBL.Clients.Logger.error(`Error received from runCreateWorksheet: worksheetName: ${worksheetName}, securities: ${JSON.stringify(securities)}, error:`, err);
 				showElement("worksheetError");
 			} else {
 				renderWorksheet(data.worksheet.name, data.worksheet.id, data.worksheet.securities);
@@ -156,10 +156,10 @@ window.loadWorkSheet = (worksheetId) => {
 		if (response && response.worksheet && Array.isArray(response.worksheet.securities)) {
 			renderWorksheet(response.worksheet.name, response.worksheet.id, response.worksheet.securities);
 		} else if (err) {
-			FSBL.Clients.Logger.error("Error received from runGetWorksheet:", err);
+			FSBL.Clients.Logger.error(`Error received from runGetWorksheet: worksheetId: ${worksheetId}, error:`, err);
 			showElement("worksheetError");
 		} else {
-			FSBL.Clients.Logger.error("invalid response from runGetWorksheet", response);
+			FSBL.Clients.Logger.error(`invalid response from runGetWorksheet: worksheetId: ${worksheetId}, response:`, response);
 			showElement("worksheetError");
 		}
 	});
@@ -268,7 +268,7 @@ window.setGroupContext = (detailsElement, sector) => {
 
 	bbg.runSetGroupContext(name, newValue, null, (err, data) => {
 		if (err) {
-			FSBL.Clients.Logger.error("Error received from runSetGroupContext:", err);
+			FSBL.Clients.Logger.error(`Error received from runSetGroupContext, group: ${name}, value: ${newValue}, error: `, err);
 			showElement("setGroupContextError");
 		} else {
 			showElement("setGroupContextSuccess");
@@ -285,10 +285,11 @@ window.refreshGroupContext = (detailsElement) => {
 	let typeField = detailsElement.children[1].children[0];
 	let valueField = detailsElement.children[2].children[0];
 
+	let groupName = nameField.value;
 	//Retrieve context and update values 
-	bbg.runGetGroupContext(nameField.value, (err, data2) => {
+	bbg.runGetGroupContext(groupName, (err, data2) => {
 		if (err) {
-			FSBL.Clients.Logger.error("Error received from runGetGroupContext:", err);
+			FSBL.Clients.Logger.error(`Error received from runGetGroupContext: groupName: ${groupName}, error:` , err);
 			showElement("getGroupContextError");
 		} else {
 			nameField.value = data2.group.name;
@@ -344,7 +345,7 @@ window.runSecurityLookup = () => {
 		const start = Date.now();
 		bbg.runSecurityLookup(security, (err, data) => {
 			if (err) {
-				FSBL.Clients.Logger.error("Error received from runSecurityLookup:", err);
+				FSBL.Clients.Logger.error(`Error received from runSecurityLookup: search string: ${security}, error: `, err);
 				showElement("securityLookupError");
 			} else {
 
