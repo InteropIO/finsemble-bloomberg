@@ -170,7 +170,7 @@ namespace BloombergBridge
 		}
 
 		/// <summary>
-		/// Initializese the SecurityLookup instance by creating a session and authorizing it so that its 
+		/// Initializes the SecurityLookup instance by creating a session and authorizing it so that its 
 		/// ready to conduct searches. Once initialized multiple searches may be conducted with the same instance.
 		/// </summary>
 		public void Init()
@@ -210,8 +210,18 @@ namespace BloombergBridge
 		/// </summary>
 		public void Dispose()
 		{
-			session.Stop();
-			session = null;
+			if (session != null)
+			{
+				try
+				{
+					session.Stop();
+				}
+				catch { }
+				finally
+				{
+					session = null;
+				}
+			}
 		}
 
 		/// <summary>
