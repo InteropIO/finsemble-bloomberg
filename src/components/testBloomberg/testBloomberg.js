@@ -47,24 +47,18 @@ window.runBBGCommand = () => {
 	hideElementsByClass("errorLabel");
 	hideElementsByClass("successLabel");
 
-	let mnemonic = document.getElementById("mnemonic").value;
-	mnemonic = mnemonic ? mnemonic.trim() : null;
+	let mnemonic = getFieldValue("mnemonic");
 	let securities = getSecurities("securities");
-	let tails = document.getElementById("tails").value;
-	tails = tails ? tails.trim() : null;
-	let panel = document.getElementById("panel").value;
+	let tails = getFieldValue("tails");
+	let panel = getFieldValue("panel");
 	
 	//validate input
 	let error = false;
-	if (!mnemonic || mnemonic == "") {
+	if (!mnemonic) {
 		showElement("mnemonicError");
 		error = true;
 	}
-	//many commands are valid with only one security, most can also be run with none
-	// if (!instrument || instrument == "") {
-	// 	showElement("securityError");
-	// 	error = true;
-	// }
+	//Note many commands are valid with only one security, most can also be run with none
 	if (!error) {
 		bbg.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
 			if (err) {
@@ -86,8 +80,7 @@ window.createWorksheet = () => {
 	hideElementsByClass("errorLabel");
 	hideElementsByClass("successLabel");
 
-	let worksheetName = document.getElementById("worksheetName").value;
-	worksheetName = worksheetName ? worksheetName.trim() : null;
+	let worksheetName = getFieldValue("worksheetName");
 	let securities = getSecurities("worksheetSecurities");
 
 	//validate input
@@ -170,8 +163,7 @@ window.replaceWorksheet = () => {
 	hideElementsByClass("errorLabel");
 	hideElementsByClass("successLabel");
 
-	let worksheetId = document.getElementById("worksheetId").value;
-	worksheetId = worksheetId ? worksheetId.trim() : null;
+	let worksheetId = getFieldValue("worksheetId")
 	let securities = getSecurities("worksheetSecurities");
 
 	//validate input
@@ -260,7 +252,6 @@ window.setGroupContext = (detailsElement, sector) => {
 
 	let name = detailsElement.children[0].children[0].value;
 	let newValueField = detailsElement.getElementsByClassName("newGroupValue")[0];
-	
 	let newValue = newValueField.value;
 	if (sector) {
 		newValue += " " + sector;
@@ -330,8 +321,7 @@ window.runSecurityLookup = () => {
 	hideElementsByClass("errorLabel");
 	hideElementsByClass("successLabel");
 
-	let security = document.getElementById("securityLookup").value;
-	security = security ? security.trim() : null;
+	let security = getFieldValue("securityLookup");
 	
 	//validate input
 	let error = false;
@@ -517,6 +507,11 @@ window.getSecurities = (list) => {
 	}
 	return securitiesArr;
 };
+
+window.getFieldValue = (fieldId) => {
+	let fieldValue = document.getElementById(fieldId).value;
+	return fieldValue ? fieldValue.trim() : null;
+}
 
 window.renderWorksheet = (worksheetName, id, securities) => {
 	//clear the list
