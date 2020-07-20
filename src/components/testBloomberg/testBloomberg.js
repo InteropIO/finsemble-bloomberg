@@ -31,7 +31,10 @@ window.checkConnection = () => {
 	bbg.checkConnection((err, resp) => { 
 		if (!err && resp === true) {
 			showConnectedIcon();
-		} else {
+		} else if (err) {
+			FSBL.Clients.Logger.error("Error received when checking connection", err);
+			showDisconnectedIcon();
+		} else if (err) {
 			showDisconnectedIcon();
 		}
 	});
@@ -65,6 +68,7 @@ window.runBBGCommand = () => {
 	if (!error) {
 		bbg.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
 			if (err) {
+				FSBL.Clients.Logger.error("Error received from runBBGCommand:", err);
 				showElement("commandError");
 			} else {
 				showElement("commandSuccess");
@@ -95,6 +99,7 @@ window.createWorksheet = () => {
 	if (!error) {
 		bbg.runCreateWorksheet(worksheetName, securities, (err, data) => { 
 			if (err) {
+				FSBL.Clients.Logger.error("Error received from runCreateWorksheet:", err);
 				showElement("worksheetError");
 			} else {
 				renderWorksheet(data.worksheet.name, data.worksheet.id, data.worksheet.securities);
@@ -132,8 +137,11 @@ window.getAllWorksheets = () => {
 
 				theList.appendChild(li);
 			});
+		} else if (err) {
+			FSBL.Clients.Logger.error("Error received from runGetAllWorksheets:", err);
+			showElement("allWorksheetsError");
 		} else {
-			console.error("invalid response from _runGetAllWorksheets", response);
+			FSBL.Clients.Logger.error("invalid response from runGetAllWorksheets", response);
 			showElement("allWorksheetsError");
 		}
 	});
@@ -147,11 +155,13 @@ window.loadWorkSheet = (worksheetId) => {
 		//TODO: support other types of worksheet
 		if (response && response.worksheet && Array.isArray(response.worksheet.securities)) {
 			renderWorksheet(response.worksheet.name, response.worksheet.id, response.worksheet.securities);
+		} else if (err) {
+			FSBL.Clients.Logger.error("Error received from runGetWorksheet:", err);
+			showElement("worksheetError");
 		} else {
-			console.error("invalid response from _runGetWorksheet");
+			FSBL.Clients.Logger.error("invalid response from runGetWorksheet", response);
 			showElement("worksheetError");
 		}
-	
 	});
 };
 
@@ -173,6 +183,7 @@ window.replaceWorksheet = () => {
 	if (!error) {
 		bbg.runReplaceWorksheet(worksheetId, securities, (err, data) => {
 			if (err) {
+				FSBL.Clients.Logger.error("Error received from runReplaceWorksheet:", err);
 				showElement("worksheetError");
 			} else {
 				renderWorksheet(data.worksheet.name, data.worksheet.id, data.worksheet.securities);
@@ -214,8 +225,11 @@ window.getAllGroups = () => {
 
 				theList.appendChild(li);
 			});
+		} else if (err) {
+			FSBL.Clients.Logger.error("Error received from runGetAllGroups:", err);
+			showElement("allGroupsError");
 		} else {
-			console.error("invalid response from _runGetAllGroups", response);
+			FSBL.Clients.Logger.error("invalid response from runGetAllGroups", response);
 			showElement("allGroupsError");
 		}
 	});
@@ -227,7 +241,6 @@ window.toggleGroup = (elementId, group) => {
 	if (detailsArr.length > 0) {
 		Array.prototype.forEach.call(detailsArr, (deets) => { deets.remove() });
 	} else {
-		
 		let template = document.querySelector('#groupDetails');
 		let details = template.content.cloneNode(true).firstElementChild;
 		let nameField = details.children[0].children[0];
@@ -255,6 +268,7 @@ window.setGroupContext = (detailsElement, sector) => {
 
 	bbg.runSetGroupContext(name, newValue, null, (err, data) => {
 		if (err) {
+			FSBL.Clients.Logger.error("Error received from runSetGroupContext:", err);
 			showElement("setGroupContextError");
 		} else {
 			showElement("setGroupContextSuccess");
@@ -274,6 +288,7 @@ window.refreshGroupContext = (detailsElement) => {
 	//Retrieve context and update values 
 	bbg.runGetGroupContext(nameField.value, (err, data2) => {
 		if (err) {
+			FSBL.Clients.Logger.error("Error received from runGetGroupContext:", err);
 			showElement("getGroupContextError");
 		} else {
 			nameField.value = data2.group.name;
@@ -320,6 +335,7 @@ window.runSecurityLookup = () => {
 	//validate input
 	let error = false;
 	if (!security || security == "") {
+		FSBL.Clients.Logger.error("No security set to lookup");
 		showElement("securityLookupDataError");
 		error = true;
 	}
@@ -328,6 +344,7 @@ window.runSecurityLookup = () => {
 		const start = Date.now();
 		bbg.runSecurityLookup(security, (err, data) => {
 			if (err) {
+				FSBL.Clients.Logger.error("Error received from runSecurityLookup:", err);
 				showElement("securityLookupError");
 			} else {
 
