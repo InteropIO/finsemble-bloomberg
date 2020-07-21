@@ -1,6 +1,3 @@
-{
-	"FDC3Tester": {
-		"output": "components/testBloomberg/testBloomberg",
-		"entry":"./src/components/testBloomberg/testBloomberg.js"
-	}
-}
+[
+	"testBloomberg.js"
+]

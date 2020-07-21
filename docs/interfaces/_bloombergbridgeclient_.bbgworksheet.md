@@ -22,7 +22,7 @@ Interface representing a Bloomberg worksheet.
 
 • **id**: *string*
 
-*Defined in [BloombergBridgeClient.ts:48](https://github.com/ChartIQ/fpe-bloomberg/blob/8a46e97/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L48)*
+*Defined in [BloombergBridgeClient.ts:48](https://github.com/ChartIQ/fpe-bloomberg/blob/a77c7be/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L48)*
 
 The name of the worksheet (non-unique).
 
@@ -32,7 +32,7 @@ ___
 
 • **isActive**: *boolean*
 
-*Defined in [BloombergBridgeClient.ts:52](https://github.com/ChartIQ/fpe-bloomberg/blob/8a46e97/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L52)*
+*Defined in [BloombergBridgeClient.ts:52](https://github.com/ChartIQ/fpe-bloomberg/blob/a77c7be/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L52)*
 
 A flag indicating the Worksheet's IsActive status.
 
@@ -42,6 +42,6 @@ ___
 
 • **name**: *string*
 
-*Defined in [BloombergBridgeClient.ts:50](https://github.com/ChartIQ/fpe-bloomberg/blob/8a46e97/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L50)*
+*Defined in [BloombergBridgeClient.ts:50](https://github.com/ChartIQ/fpe-bloomberg/blob/a77c7be/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L50)*
 
 The name of the worksheet assigned by the Bloomberg terminal and globally unique.

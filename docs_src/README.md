@@ -217,7 +217,8 @@ import BloombergBridgeClient from "../../clients/BloombergBridgeClient/Bloomberg
 ```
 (ensuring that you correct the path to the file as it exists in your project).
 
-Alternatively, it may be used as a preload, by setting the `component.preload` field of your component's configuration to the path to the compiled client. Please ensure that either the full path to the preload is added to the `trustedPreloads` array in your manifest file or `window.options.securityPolicy = 'trusted'` is set in your component config or Finsemble may prevent the preload if your component is loaded from a different domain to the one used to host Finsemble, see Finsemble's [security policies documentation](https://documentation.chartiq.com/finsemble/tutorial-SecurityPolicies.html) for more details.
+Alternatively, it may be used as a preload, by building the Typescript file and then setting the `component.preload` field of your component's configuration to the path to the compiled client. If you are using Finsemble seed project's build system, the Typescript file will be be automatically built for you and output to the _/dist/clients/BloombergBridgeClient_ folder. If you use a different build system, be sure to build the Typescript file before trying to preload it.
+Please ensure that either the full path to the preload is added to the `trustedPreloads` array in your manifest file or `window.options.securityPolicy = 'trusted'` is set in your component config or Finsemble may prevent the preload if your component is loaded from a different domain to the one used to host Finsemble, see Finsemble's [security policies documentation](https://documentation.chartiq.com/finsemble/tutorial-SecurityPolicies.html) for more details.
 
 Documentation for: 
 - the BloombergBridgeClient module can be found [here](modules/_bloombergbridgeclient_.md).
