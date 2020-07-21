@@ -52,7 +52,7 @@ via instances of the RouterClient and Logger referenced from `FSBL.Clients`.
 
 \+ **new BloombergBridgeClient**(`routerClient?`: IRouterClient, `logger?`: ILogger): *[BloombergBridgeClient](_bloombergbridgeclient_.bloombergbridgeclient.md)*
 
-*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
+*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
 
 BloombergBridgeClient constructor.
 
@@ -84,7 +84,7 @@ Name | Type | Description |
 
 • **connectionEventListener**: *[BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md)* = null
 
-*Defined in [BloombergBridgeClient.ts:77](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L77)*
+*Defined in [BloombergBridgeClient.ts:77](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L77)*
 
 ___
 
@@ -92,7 +92,7 @@ ___
 
 • **groupEventListener**: *[BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md)* = null
 
-*Defined in [BloombergBridgeClient.ts:78](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L78)*
+*Defined in [BloombergBridgeClient.ts:78](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L78)*
 
 ___
 
@@ -100,7 +100,7 @@ ___
 
 • **logger**: *ILogger* = null
 
-*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
+*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
 
 ___
 
@@ -108,7 +108,7 @@ ___
 
 • **routerClient**: *IRouterClient* = null
 
-*Defined in [BloombergBridgeClient.ts:79](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L79)*
+*Defined in [BloombergBridgeClient.ts:79](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L79)*
 
 ## Methods
 
@@ -116,7 +116,7 @@ ___
 
 ▸ **apiResponseHandler**(`cb`: function): *(Anonymous function)*
 
-*Defined in [BloombergBridgeClient.ts:295](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L295)*
+*Defined in [BloombergBridgeClient.ts:294](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L294)*
 
 Internal function used to return a call back that will wrap the supplied callback and log all
 responses
@@ -148,7 +148,7 @@ ___
 
 ▸ **checkConnection**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:244](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L244)*
+*Defined in [BloombergBridgeClient.ts:243](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L243)*
 
 Check that Bloomberg bridge is connected to the Bloomberg Terminal and that a user is
 logged in.
@@ -189,7 +189,7 @@ ___
 
 ▸ **queryBloombergBridge**(`message`: object, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:279](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L279)*
+*Defined in [BloombergBridgeClient.ts:278](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L278)*
 
 Internal function used to send a Query to the BBG_run_terminal_function responder of
 BloombergBridge,
@@ -226,7 +226,7 @@ ___
 
 ▸ **removeConnectionEventListener**(): *void*
 
-*Defined in [BloombergBridgeClient.ts:163](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L163)*
+*Defined in [BloombergBridgeClient.ts:162](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L162)*
 
 Remove the current connection event handler.
 
@@ -243,7 +243,7 @@ ___
 
 ▸ **removeGroupEventListener**(): *void*
 
-*Defined in [BloombergBridgeClient.ts:218](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L218)*
+*Defined in [BloombergBridgeClient.ts:217](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L217)*
 
 Remove the current group context changed event handler.
 
@@ -260,7 +260,7 @@ ___
 
 ▸ **runBBGCommand**(`mnemonic`: string, `securities`: string[], `panel`: string, `tails`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:341](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L341)*
+*Defined in [BloombergBridgeClient.ts:340](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L340)*
 
 Run a function in one of the 4 Bloomberg panel windows.
 
@@ -323,7 +323,7 @@ ___
 
 ▸ **runCreateWorksheet**(`worksheetName`: string, `securities`: string[], `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:383](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L383)*
+*Defined in [BloombergBridgeClient.ts:382](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L382)*
 
 Create a new worksheet with the specified securities and name.
 
@@ -381,7 +381,7 @@ ___
 
 ▸ **runGetAllGroups**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:529](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L529)*
+*Defined in [BloombergBridgeClient.ts:528](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L528)*
 
 Gets a list of all available Launchpad component groups.
 
@@ -433,7 +433,7 @@ ___
 
 ▸ **runGetAllWorksheets**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:420](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L420)*
+*Defined in [BloombergBridgeClient.ts:419](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L419)*
 
 Retrieve all worksheets for the user.
 
@@ -483,7 +483,7 @@ ___
 
 ▸ **runGetGroupContext**(`groupName`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:561](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L561)*
+*Defined in [BloombergBridgeClient.ts:560](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L560)*
 
 Returns details of a Launchpad component group by name.
 
@@ -536,7 +536,7 @@ ___
 
 ▸ **runGetWorksheet**(`worksheetId`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:455](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L455)*
+*Defined in [BloombergBridgeClient.ts:454](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L454)*
 
 Retrieve a specific worksheet by id.
 
@@ -589,7 +589,7 @@ ___
 
 ▸ **runReplaceWorksheet**(`worksheetId`: string, `securities`: string[], `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:491](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L491)*
+*Defined in [BloombergBridgeClient.ts:490](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L490)*
 
 Replaces a specific worksheet by ID with a new list of securities.
 
@@ -646,7 +646,7 @@ ___
 
 ▸ **runSecurityLookup**(`security`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:639](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L639)*
+*Defined in [BloombergBridgeClient.ts:638](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L638)*
 
 Search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return
 results in around ~120-150ms and maybe used, for example, to power an autocomplete or
@@ -702,7 +702,7 @@ ___
 
 ▸ **runSetGroupContext**(`groupName`: string, `value`: string, `cookie`: string | null, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:595](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L595)*
+*Defined in [BloombergBridgeClient.ts:594](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L594)*
 
 Set the context value of a Launchpad group by name.
 
@@ -760,7 +760,7 @@ ___
 
 ▸ **setConnectionEventListener**(`cb`: [BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md)): *void*
 
-*Defined in [BloombergBridgeClient.ts:138](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L138)*
+*Defined in [BloombergBridgeClient.ts:138](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L138)*
 
 Set a handler function for connection events.
 
@@ -793,7 +793,7 @@ ___
 
 ▸ **setGroupEventListener**(`cb`: [BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md)): *void*
 
-*Defined in [BloombergBridgeClient.ts:195](https://github.com/ChartIQ/fpe-bloomberg/blob/f7ccdd8/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L195)*
+*Defined in [BloombergBridgeClient.ts:194](https://github.com/ChartIQ/fpe-bloomberg/blob/bdd01e0/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L194)*
 
 Set a handler function for Launchpad group context changed events, which
 are fired when a group's context changes or a new group is created.

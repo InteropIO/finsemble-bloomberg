@@ -33,7 +33,7 @@ To use the integration you will need access to both a Bloomberg Terminal and lic
 
 
 ## How it works
-The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect and the BLP API. The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
+The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect and the BLP API. The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](../src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
 
 Documentation for the Typescript client implementation can be found [here](modules/_bloombergbridgeclient_.md).
 
@@ -42,9 +42,9 @@ Documentation for the Typescript client implementation can be found [here](modul
 ![Bloomberg Bridge Architecture Diagram](media://BloombergArchDiagram.png)
 
 A number of examples of using the integration are provided:
-- **[Bloomberg Bridge](src/components/Bloomberg%20Bridge)**: Example component configurations for launching the native bridge application.
-- **[testBloomberg](src/components/testBloomberg)**: A test component demonstrating use of all API functions.
-- **[Bloomberg Terminal](src/components/Bloomberg%20Terminal)**: An example configuration for launching the Bloomberg terminal itself
+- **[Bloomberg Bridge](../src/components/Bloomberg%20Bridge)**: Example component configurations for launching the native bridge application.
+- **[testBloomberg](../src/components/testBloomberg)**: A test component demonstrating use of all API functions.
+- **[Bloomberg Terminal](../src/components/Bloomberg%20Terminal)**: An example configuration for launching the Bloomberg terminal itself
 - **[Coming Soon: Desktop service for FDC3 integration](#)**: An example service that works with the FDC3 channel matcher service to facilitate context sharing with FDC3 system channels in Finsemble and provides an example of instrument/security translation that may be required. See the [Finsemble FDC3 Implementation](https://github.com/ChartIQ/finsemble-fdc3) project for more details on the FDC3 channel matcher service.
 - **[Coming Soon: Security finder example](#)**: An example that demonstrates the use of the SecurityLookup function of the Bloomberg Bridge to implement a search with typeahead for Bloomberg sercurities, which may be used to set the context of launchpad groups.
 
@@ -113,7 +113,7 @@ To use the watch script:
 2) Clone this repo
    - **our advice:** clone this repo to the same directory as the seed-project e.g *myfolder/finsemble-seed* & *myfolder/finsemble-fdc3*
 
-3) If you clone in a different location, open [finsemble.config.json](finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project.
+3) If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project.
 
 4) Run `npm install` then run `npm run watch` in the _fpe-bloomberg_ project's directory
 **this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds*
@@ -136,13 +136,13 @@ To manually install the integration into your Finsemble project:
 		]
 	}
 	```
-	or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: (src/components/Bloomberg%20Bridge/config.json).
+	or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: _[src/components/Bloomberg%20Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_.
 
 3) The example configuration supplied is for manual launch of the Bloomberg Bridge. You will likely wish to alter it to automatically launch the Bloomberg Bridge on start-up and to hide it from the launcher menu. To do so modify the example to set:
 	- `components['Bloomberg Bridge'].component.spawnOnStartup = true`
 	- `components['Bloomberg Bridge'].foreign.components['App Launcher'].launchableByUser = false`
 
-4) Copy the (src/clients/BloombergBridgeClient/BloombergBridgeClient.ts) file into your project at an appropriate location (e.g. _/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts_). This can then be imported into components or services that you build. 
+4) Copy the _[src/clients/BloombergBridgeClient/BloombergBridgeClient.ts](../src/clients/BloombergBridgeClient/BloombergBridgeClient.ts)_ file into your project at an appropriate location (e.g. _/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts_). This can then be imported into components or services that you build. 
 
 5) If you wish to incorporate any of the supplied examples into your project, copy their folders from (src/components/) or (src/services/) into your project. Each contains: 
 	- a _config.json_ file that you should import or copy into your project.
