@@ -82,24 +82,29 @@ fpe-bloomberg
 |       └───Release
 |       └───Debug
 |
+|───docs                         - Generated documentation directory
+|       README.md                    - This file
+|
+|───docs_src                     - Documentation source directory
+|
 |───fpe-scripts
 |       watch.js                     - Watch script for copying project files into a Finsemble project
 |
 |───hosted
-|       BloombergBridgeRelease.zip   - Example BloombergBridge build packaged for use ans an appAsset
+|       BloombergBridgeRelease.zip   - Example BloombergBridge build packaged for use as an appAsset
 |
 └───src                           - Typescript client and example Javascript component source directory
     |
     └───clients
     |   └───BloombergBridgeClient        
-	|           BloombergBridgeClient.ts - Typescript client class and preload for use with BloombergBridge
-	|
+    |           BloombergBridgeClient.ts - Typescript client class and preload for use with BloombergBridge
+    |
     └───components
     |   └───Bloomberg Bridge         - Congfigs for launching the Bloomberg Bridge
     |   └───Bloomberg Terminal       - Example config for launching the Bloomberg terminal
     |   └───testBloomberg            - Test component demonstrating use of all API functions
-	|   └───SecurityFinder           - Coming soon!
-	|
+    |   └───SecurityFinder           - Coming soon!
+    |
     └───services                     
         └───BloombergFDC3Service     - Coming soon!
 ```
@@ -112,9 +117,9 @@ To use the watch script:
 1) Clone the Finsemble [seed-project](https://github.com/ChartIQ/finsemble-seed) (if you don't already have a local version - see our [Getting Started Tutorial](https://www.chartiq.com/tutorials/?slug=finsemble))
 
 2) Clone this repo
-   - **our advice:** clone this repo to the same directory as the seed-project e.g *myfolder/finsemble-seed* & *myfolder/finsemble-fdc3*
+   - **our advice:** clone this repo to the same directory as the seed-project e.g *myfolder/finsemble-seed* & *myfolder/fpe-bloomberg*
 
-3) If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project.
+3) If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project. If you intend to build an debug the \(.Net\) BloombergBridge, also set the value of the `bloombergBridgeFolder` variable to point to the [BloombergBridge folder](../BloombergBridge) in this project \(see the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables\).
 
 4) Run `npm install` then run `npm run watch` in the _fpe-bloomberg_ project's directory
 **this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds*
@@ -127,32 +132,34 @@ To manually install the integration into your Finsemble project:
 1) Ensure that you have access to a build of the 'Bloomberg Bridge' native component, see the [Building and Deploying the Bloomberg Bridge](#building-and-deploying-the-bloomberg-bridge) section for details. 
 
 2) Configure Finsemble to launch the Bloomberg Bridge. This can be achieved by either importing a config file by, for example, adding to the `importConfig` in your seed project's _/configs/application/config.json_ file:
-	```JSON
-	...
-		...
-		"importConfig": [
-			...
-			"$applicationRoot/components/Bloomberg Bridge/config.json"
-			...
-		]
-	}
-	```
-	or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: _[src/components/Bloomberg%20Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_.
+    ```JSON
+    ...
+        ...
+        "importConfig": [
+            ...
+            "$applicationRoot/components/Bloomberg Bridge/config.json"
+            ...
+        ]
+    }
+    ```
+    or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: _[src/components/Bloomberg Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_.
+
+    Note that the 'Bloomberg Bridge Debug' configuration makes use of a `$bloombergBridgeFolder` variable that should be set in your manifest. See the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables.
 
 3) The example configuration supplied is for manual launch of the Bloomberg Bridge. You will likely wish to alter it to automatically launch the Bloomberg Bridge on start-up and to hide it from the launcher menu. To do so modify the example to set:
-	- `components['Bloomberg Bridge'].component.spawnOnStartup = true`
-	- `components['Bloomberg Bridge'].foreign.components['App Launcher'].launchableByUser = false`
+    - `components['Bloomberg Bridge'].component.spawnOnStartup = true`
+    - `components['Bloomberg Bridge'].foreign.components['App Launcher'].launchableByUser = false`
 
 4) Copy the _[src/clients/BloombergBridgeClient/BloombergBridgeClient.ts](../src/clients/BloombergBridgeClient/BloombergBridgeClient.ts)_ file into your project at an appropriate location (e.g. _/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts_). This can then be imported into components or services that you build. 
 
-5) If you wish to incorporate any of the supplied examples into your project, copy their folders from (src/components/) or (src/services/) into your project. Each contains: 
-	- a _config.json_ file that you should import or copy into your project.
-	- a _finsemble.webpack.json_ file that works with the Finsemble seed project's build system. If you are using a different build, ensure that the component is built by it.
+5) If you wish to incorporate any of the supplied examples into your project, copy their folders from [src/components/](../src/components/) or [src/services/](../src/services/) into your project. Each contains: 
+    - a _config.json_ file that you should import or copy into your project.
+    - a _finsemble.webpack.json_ file that works with the Finsemble seed project's build system. If you are using a different build, ensure that the component is built by it.
 
-	Note: Most of the examples include an import statement for the BloombergBridgeClient that may need to be updated to use the path to the source file you copied into your project in step 4, e.g.
-	```Javascript
-	import BloombergBridgeClient from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
-	```
+    Note: Most of the examples include an import statement for the BloombergBridgeClient that may need to be updated to use the path to the source file you copied into your project in step 4, e.g.
+    ```Javascript
+    import BloombergBridgeClient from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+    ```
 
 ## Building and Deploying the Bloomberg Bridge
 The Bloomberg Bridge application should be built using Terminal Connect and BLP API DLL files distributed by Bloomberg. It can then either be deployed to a known path on your users machines, or delivered via a Finsemble app asset, which will be downloaded and installed automatically by Finsemble.
@@ -178,26 +185,28 @@ An example appAsset for the Bridge is provided in _/hosted_ directory.
   - BLP API (Bloomberglp.Blpapi.dll)
 - Rebuild the project (which will install NuGet dependencies automatically)
 
+### Running the BloombergBridge from a local path
+
 ### Produce an appAsset for deployment by Finsemble
 - Run a Release build
 - Create a zip file from the contents of the _BloombergBridge/bin/Release_ directory and name it appropriately
 - Host the build at an appropriate URL (or if using the watch script and testing locally, add it to the _hosted_ directory of the project)
 - Configure Finsemble's manifest file (e.g. _/configs/application/manifest-local.json_) with an appropriate appAssets configuration of the form:
-	```JSON
-	{
-		...
-		"appAssets": [
-			...
-			{
-				"src": "http://localhost:3375/hosted/BloombergBridgeRelease.zip",
-				"version": "1.0",
-				"alias": "bloomberg_bridge",
-				"target": "BloombergBridge.exe"
-			}
-		],
-		...
-	}
-	```
+    ```JSON
+    {
+        ...
+        "appAssets": [
+            ...
+            {
+                "src": "http://localhost:3375/hosted/BloombergBridgeRelease.zip",
+                "version": "1.0",
+                "alias": "bloomberg_bridge",
+                "target": "BloombergBridge.exe"
+            }
+        ],
+        ...
+    }
+    ```
 
   N.B. Finsemble will only download and deploy a new version of the asset if it does not have a copy of the asset that was downloaded via an app asset with the given version number. Hence, if you need to replace the version installed on the user's machine ensure that you change the value of the `version` field.
 
@@ -236,11 +245,11 @@ let bbg = new BloombergBridgeClient(FSBL.Clients.RouterClient, FSBL.Clients.Logg
 You can either check the connection manually:
 ```Javascript
 let checkConnectionHandler = (err, loggedIn) => {
-	if (!err && loggedIn) {
+    if (!err && loggedIn) {
          showConnectedIcon();
     } else {
         showDisconnectedIcon();
-	}
+    }
 };
 bbg.checkConnection(checkConnectionHandler);
 ```
@@ -260,53 +269,53 @@ bbg.setConnectionEventListener(connectionEventHandler);
 Retrieve a list of all current Launchpad groups and their current context:
 ```Javascript
 bbg.runGetAllGroups((err, response) => {
-	if (!err) {
-		if (response && response.groups && Array.isArray(response.groups)) {
-			//do something with the returned data
-			response.groups.forEach(group => {
-				let groupName = group.name;
-				let groupType = group.type;
-				let groupCurrentValue = group.value;
-				...
-			});
-		} else {
-			console.error("Invalid response returned from runGetAllGroups", response);
-		}
-	} else {
-		console.error("Error returned from runGetAllGroups", err);
-	}
+    if (!err) {
+        if (response && response.groups && Array.isArray(response.groups)) {
+            //do something with the returned data
+            response.groups.forEach(group => {
+                let groupName = group.name;
+                let groupType = group.type;
+                let groupCurrentValue = group.value;
+                ...
+            });
+        } else {
+            console.error("Invalid response returned from runGetAllGroups", response);
+        }
+    } else {
+        console.error("Error returned from runGetAllGroups", err);
+    }
 });
 ```
 
 Get the current state of a Launchpad group:
 ```Javascript
 bbg.runGetGroupContext(groupName, (err, response) => {
-	if (!err) {
-		if (response && response.group) {
-			let groupName = response.group.name;
-			let groupType = group.type;
-			let groupCurrentValue = group.value;
-			...
-		} else {
-			console.error("Invalid response returned from runGetGroupContext", response);
-		}
-	} else {
-		console.error("Error returned from runGetGroupContext", err);
-	}
+    if (!err) {
+        if (response && response.group) {
+            let groupName = response.group.name;
+            let groupType = group.type;
+            let groupCurrentValue = group.value;
+            ...
+        } else {
+            console.error("Invalid response returned from runGetGroupContext", response);
+        }
+    } else {
+        console.error("Error returned from runGetGroupContext", err);
+    }
 });
 ```
 
 Set the state (value) of a Launchpad group:
 ```Javascript
 bbg.runSetGroupContext(groupName, newValue, null, (err, response) => {
-	if (!err) {
-		/* You may wish to retrieve the current state of Launchpad group here as Bloomberg
-		   will resolve any security your set and may therefore its value may differ from 
-		   what you sent. */
-		bbg.runGetGroupContext(groupName, (err2, response2) => { ... });
-	} else {
-		console.error("Error returned from runSetGroupContext", err);
-	}
+    if (!err) {
+        /* You may wish to retrieve the current state of Launchpad group here as Bloomberg
+           will resolve any security your set and may therefore its value may differ from 
+           what you sent. */
+        bbg.runGetGroupContext(groupName, (err2, response2) => { ... });
+    } else {
+        console.error("Error returned from runSetGroupContext", err);
+    }
 });
 ```
 **Note: an optional third parameter allows you to specify a cookie identifying a specific component within the group to update, instead of the whole group.*
@@ -314,15 +323,15 @@ bbg.runSetGroupContext(groupName, newValue, null, (err, response) => {
 Register a listener for group events (e.g. creation or context change):
 ```Javascript
 bbg.setGroupEventListener((err, response) => {
-	if (!err) {
-		if (response.data.group && response.data.group.type == "monitor") {
-			console.log("Monitor event:\n" + JSON.stringify(response.data, null, 2));
-		} else {
-			console.log("Security event:\n" + JSON.stringify(response.data, null, 2));
-		}
-	} else {
-		console.error("Error returned from setGroupEventListener", err);
-	}
+    if (!err) {
+        if (response.data.group && response.data.group.type == "monitor") {
+            console.log("Monitor event:\n" + JSON.stringify(response.data, null, 2));
+        } else {
+            console.log("Security event:\n" + JSON.stringify(response.data, null, 2));
+        }
+    } else {
+        console.error("Error returned from setGroupEventListener", err);
+    }
 });
 ```
 
@@ -330,37 +339,37 @@ bbg.setGroupEventListener((err, response) => {
 Retrieve all worksheets:
 ```Javascript
 bbg.runGetAllWorksheets((err, response) => {
-	if (!err) {
-		if (response && response.worksheets && Array.isArray(response.worksheets)) {
-			response.worksheets.forEach(worksheet => {
-				let worksheetName = worksheet.name;
-				let worksheetId = worksheet.id;
-				...
-			});
-		} else {
-			console.error("invalid response from runGetAllWorksheets", response);
-		}
-	} else{
-		console.error("Error returned from runGetAllWorksheets", err);
-	}
+    if (!err) {
+        if (response && response.worksheets && Array.isArray(response.worksheets)) {
+            response.worksheets.forEach(worksheet => {
+                let worksheetName = worksheet.name;
+                let worksheetId = worksheet.id;
+                ...
+            });
+        } else {
+            console.error("invalid response from runGetAllWorksheets", response);
+        }
+    } else{
+        console.error("Error returned from runGetAllWorksheets", err);
+    }
 });
 ```
 
 Retrieve the content of a particular worksheet by Id:
 ```Javascript
 bbg.runGetWorksheet(worksheetId, (err, response) => {
-	if (!err) {
-		if (response && response.worksheet && Array.isArray(response.worksheet.securities)) {
-			let worksheetName = response.worksheet.name;
-			let worksheetId = response.worksheet.id;
-			let workSheetSecurities = response.worksheet.securities;
-			...
-		} else {
-			console.error("invalid response from runGetWorksheet");
-		}
-	} else {
-		console.error("Error returned from runGetWorksheet", err);
-	}
+    if (!err) {
+        if (response && response.worksheet && Array.isArray(response.worksheet.securities)) {
+            let worksheetName = response.worksheet.name;
+            let worksheetId = response.worksheet.id;
+            let workSheetSecurities = response.worksheet.securities;
+            ...
+        } else {
+            console.error("invalid response from runGetWorksheet");
+        }
+    } else {
+        console.error("Error returned from runGetWorksheet", err);
+    }
 });
 ```
 
@@ -368,19 +377,19 @@ Create a worksheet:
 ```Javascript
 let securities = ["TSLA US Equity", "AMZN US Equity"];
 bbg.runCreateWorksheet(worksheetName, securities, (err, response) => { 
-	if (!err) {
-		if (response && response.worksheet) {
-			//Id assigned to the worksheet
-			let worksheetId = response.worksheet.id; 
-			//List of securities resolved by Bloomberg from the input list, unresolvable securities will be removed
-			let workSheetSecurities = response.worksheet.securities;
-			...
-		} else {
-			console.error("invalid response from runCreateWorksheet", response);
-		}
-	} else {
-		console.error("Error returned from runCreateWorksheet", err);
-	}
+    if (!err) {
+        if (response && response.worksheet) {
+            //Id assigned to the worksheet
+            let worksheetId = response.worksheet.id; 
+            //List of securities resolved by Bloomberg from the input list, unresolvable securities will be removed
+            let workSheetSecurities = response.worksheet.securities;
+            ...
+        } else {
+            console.error("invalid response from runCreateWorksheet", response);
+        }
+    } else {
+        console.error("Error returned from runCreateWorksheet", err);
+    }
 });
 ```
 
@@ -388,19 +397,19 @@ Replace the content of a worksheet:
 ```Javascript
 let securities = ["TSLA US Equity", "AMZN US Equity"];
 bbg.runReplaceWorksheet(worksheetId, securities, (err, response) => {
-	if (!err) {
-		if (response && response.worksheet) {
-			//Details of the updated worksheet will be returned
-			let worksheetName = response.worksheet.name; 
-			//List of securities resolved by Bloomberg from the input list, unresolvable securities will be removed
-			let workSheetSecurities = response.worksheet.securities;
-			...
-		} else {
-			console.error("invalid response from runReplaceWorksheet", response);
-		}
-	} else {
-		console.error("Error returned from runReplaceWorksheet", err);
-	}
+    if (!err) {
+        if (response && response.worksheet) {
+            //Details of the updated worksheet will be returned
+            let worksheetName = response.worksheet.name; 
+            //List of securities resolved by Bloomberg from the input list, unresolvable securities will be removed
+            let workSheetSecurities = response.worksheet.securities;
+            ...
+        } else {
+            console.error("invalid response from runReplaceWorksheet", response);
+        }
+    } else {
+        console.error("Error returned from runReplaceWorksheet", err);
+    }
 });
 ```
 
@@ -408,19 +417,19 @@ bbg.runReplaceWorksheet(worksheetId, securities, (err, response) => {
 You can search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return results in around ~120-150ms and maybe used, for example, to power an autocomplete or typeahead search:
 ```Javascript
 bbg.runSecurityLookup(security, (err, response) => {
-	if (!err) {
-		if (response && response.results) {
-			//do something with the results
-			response.results.forEach(result => {
-				console.log(result.name + " " + result.type);
-				...
-			});
-		} else {
-			console.error("invalid response from runSecurityLookup", response);
-		}	
-	} else {
-		console.error("Error returned from runSecurityLookup", err);
-	}
+    if (!err) {
+        if (response && response.results) {
+            //do something with the results
+            response.results.forEach(result => {
+                console.log(result.name + " " + result.type);
+                ...
+            });
+        } else {
+            console.error("invalid response from runSecurityLookup", response);
+        }	
+    } else {
+        console.error("Error returned from runSecurityLookup", err);
+    }
 });
 ```
 
@@ -440,10 +449,10 @@ let securities = ["MSFT US Equity"];
 let panel = 3;
 let tails = null;
 bbg.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
-	if (!err) {
-		console.log(`Ran command "${mnemonic}" on panel ${panel}`);
-	} else {
-		console.error("Error returned from runBBGCommand", err);
-	}
+    if (!err) {
+        console.log(`Ran command "${mnemonic}" on panel ${panel}`);
+    } else {
+        console.error("Error returned from runBBGCommand", err);
+    }
 });
 ```
