@@ -34,7 +34,8 @@ window.checkConnection = () => {
 		} else if (err) {
 			FSBL.Clients.Logger.error("Error received when checking connection", err);
 			showDisconnectedIcon();
-		} else if (err) {
+		} else {
+			FSBL.Clients.Logger.debug("Negative response when checking connection: ", resp);
 			showDisconnectedIcon();
 		}
 	});
