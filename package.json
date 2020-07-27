@@ -25,6 +25,7 @@
   "dependencies": {
     "@chartiq/finsemble": "^4.3.0",
     "@types/node": "^14.0.13",
+    "react-autosuggest": "^10.0.2",
     "typescript": "^3.9.5"
   }
 }

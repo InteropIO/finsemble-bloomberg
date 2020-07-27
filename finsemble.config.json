@@ -4,6 +4,7 @@
   "importConfig": [
     "$applicationRoot/components/Bloomberg Terminal/config.json",
     "$applicationRoot/components/Bloomberg Bridge/config.json",
-    "$applicationRoot/components/testBloomberg/config.json"
+	"$applicationRoot/components/testBloomberg/config.json",
+	"$applicationRoot/components/SecurityFinder/config.json"
   ]
 }

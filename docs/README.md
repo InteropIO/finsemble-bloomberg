@@ -121,10 +121,15 @@ To use the watch script:
 
 3) If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project. If you intend to build an debug the \(.Net\) BloombergBridge, also set the value of the `$bloombergBridgeFolder` variable to point to the [BloombergBridge folder](../BloombergBridge) in this project \(see the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables\).
 
-4) Run `npm install` then run `npm run watch` in the _fpe-bloomberg_ project's directory
+4) To use the SecurityFinder example, you will also need to install a dependency in your seed project by running:
+```
+npm install react-autosuggest
+```
+
+5) Run `npm install` then run `npm run watch` in the _fpe-bloomberg_ project's directory
 **this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds*
 
-5) Your seed project directory has now been updated with the source files from the integration, run `npm run dev` in your Finsemble seed project's directory to build and run locally.
+6) Your seed project directory has now been updated with the source files from the integration, run `npm run dev` in your Finsemble seed project's directory to build and run locally.
 
 ### Manual installation
 To manually install the integration into your Finsemble project:
@@ -156,10 +161,15 @@ To manually install the integration into your Finsemble project:
     - a _config.json_ file that you should import or copy into your project.
     - a _finsemble.webpack.json_ file that works with the Finsemble seed project's build system. If you are using a different build, ensure that the component is built by it.
 
-    Note: Most of the examples include an import statement for the BloombergBridgeClient that may need to be updated to use the path to the source file you copied into your project in step 4, e.g.
+    **Note:** Most of the examples include an import statement for the BloombergBridgeClient that may need to be updated to use the path to the source file you copied into your project in step 4, e.g.
     ```Javascript
     import BloombergBridgeClient from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
     ```
+    
+	**Note:** To use the SecurityFinder example, you will also need to install a dependency in your seed project by running:
+	```
+	npm install react-autosuggest
+	```
 
 ## Building and Deploying the Bloomberg Bridge
 The Bloomberg Bridge application should be built using Terminal Connect and BLP API DLL files distributed by Bloomberg. It can then either be deployed to a known path on your users machines, or delivered via a Finsemble app asset, which will be downloaded and installed automatically by Finsemble.

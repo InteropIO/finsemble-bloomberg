@@ -1,0 +1,81 @@
+/* theme.css */
+.react-autosuggest__container { 
+	background-color: var(--core-primary);
+	display: flex;
+    flex-direction: column;
+}
+.react-autosuggest__container--open{
+
+}
+.react-autosuggest__input{
+	flex-grow: 1;
+	font-family: var(--font-family);
+	font-weight: var(--font-weight);
+	font-size: 16px;
+	background-color: white;
+	height: 24px;
+}
+.react-autosuggest__input--open{
+
+}
+.react-autosuggest__input--focused{
+	outline: var(--accent-primary) auto 1px;
+	outline-offset: 1px;
+}
+.react-autosuggest__suggestions-container{
+	background-color: var(--core-primary-3);
+}
+.react-autosuggest__suggestions-container--open{
+
+}
+.react-autosuggest__suggestions-list{
+	
+}
+.react-autosuggest__suggestion{
+	color: var(--font-color-1);
+	font-family: var(--font-family);
+	font-weight: var(--font-weight-1);
+	font-size: 16px;
+}
+.react-autosuggest__suggestion--first{
+
+}
+.react-autosuggest__suggestion--highlighted{
+	color: var(--font-color);
+}
+.react-autosuggest__section-container{
+
+}
+.react-autosuggest__section-container--first{
+
+}
+.react-autosuggest__section-title{
+
+}
+#tools{
+	display: flex;
+    flex-direction: column;
+}
+#controls{
+	display: flex;
+    flex-direction: row;
+}
+.control {
+	flex-grow: 1;
+}
+#status{
+	color: var(--core-primary-5);
+	font-size: 12px;
+}
+#root{
+	height: calc(100% - 25px);
+}
+#container{
+	display: flex;
+	position: relative;
+    flex-direction: column;
+	padding: 10px;
+	height: calc(100% - 20px);
+	justify-content: space-between;
+}
+

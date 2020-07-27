@@ -5,19 +5,19 @@ const { copy, mkdirp, access, constants, readJson, writeJson, remove } = require
 const configJSON = require("../finsemble.config.json")
 
 
-const SRC_FOLDER = "src"
-const HOSTED_FOLDER = "hosted"
-const FINSEMBLE_CONFIG = "finsemble.config.json"
-const FINSEMBLE_MANIFEST = "finsemble.manifest.json"
+const SRC_FOLDER = "src";
+const HOSTED_FOLDER = "hosted";
+const FINSEMBLE_CONFIG = "finsemble.config.json";
+const FINSEMBLE_MANIFEST = "finsemble.manifest.json";
 
-const seedDirectory = path.join(configJSON.seedProjectDirectory)
+const seedDirectory = path.join(configJSON.seedProjectDirectory);
 
 access(seedDirectory, constants.F_OK | constants.W_OK, (err) => {
 	if (err) {
 		console.error(
 			`${seedDirectory} ${err.code === 'ENOENT' ? 'does not exist' : 'is read-only'}`);
 	} else {
-		beginWatch(seedDirectory)
+		beginWatch(seedDirectory);
 	}
 });
 
@@ -36,28 +36,28 @@ function beginWatch(seedDirectory) {
 		.on('addDir', path => updateSeed('addDir', path, `Directory ${path} has been added`, seedDirectory))
 		.on('unlinkDir', path => updateSeed('unlinkDir', path, `Directory ${path} has been removed`, seedDirectory))
 		.on('error', error => console.log(`Watcher error: ${error}`, seedDirectory))
-		.on('ready', () => ready(seedDirectory))
+		.on('ready', () => ready(seedDirectory));
 }
 
 
 function updateSeed(action, currentPath, message, seedDirectory) {
-	const destDir = `${seedDirectory}`
-	const destinationPath = path.join(destDir, currentPath)
+	const destDir = `${seedDirectory}`;
+	const destinationPath = path.join(destDir, currentPath);
 
 	if (currentPath === FINSEMBLE_CONFIG) {
 		try {
-			updateConfig(seedDirectory, currentPath)
+			updateConfig(seedDirectory, currentPath);
 		} catch (error) {
-			console.error(`could not update the config due to: ${error}`)
+			console.error(`could not update the config due to: ${error}`);
 		}
 		return
 	}
 
 	if (currentPath === FINSEMBLE_MANIFEST) {
 		try {
-			updateManifestLocal(seedDirectory, currentPath)
+			updateManifestLocal(seedDirectory, currentPath);
 		} catch (error) {
-			console.error(`could not update the config due to: ${error}`)
+			console.error(`could not update the config due to: ${error}`);
 		}
 		return
 	}
@@ -91,7 +91,7 @@ function ready(seedDirectory) {
 
 async function updateManifestLocal(seedDirectory, currentFile) {
 	console.log("Updating manifest file");
-	const seedManifestPath = path.join(seedDirectory, 'configs/application/manifest-local.json')
+	const seedManifestPath = path.join(seedDirectory, 'configs/application/manifest-local.json');
 	try {
 		const seedManifest = await readJson(seedManifestPath);
 		const projectManifest = await readJson(currentFile);
@@ -100,8 +100,8 @@ async function updateManifestLocal(seedDirectory, currentFile) {
 		const projectAppAssets = projectManifest.appAssets;
 		const newAppAssets = [...projectAppAssets];
 		const projectAliases = {};
-		projectAppAssets.forEach(projectElement => { projectAliases[projectElement.alias] = true;});
-		
+		projectAppAssets.forEach(projectElement => { projectAliases[projectElement.alias] = true; });
+
 		//process seed app assets and remove any overlapping ones
 		seedAppAssets.forEach(element => {
 			let skip = false;
@@ -113,15 +113,15 @@ async function updateManifestLocal(seedDirectory, currentFile) {
 		seedManifest.appAssets = newAppAssets;
 
 		const output = await writeJson(seedManifestPath, seedManifest, { spaces: 4 });
-		if (output) console.log('success writing manifest!')
+		if (output) console.log('success writing manifest');
 	} catch (error) {
-		console.error(error)
+		console.error(error);
 	}
-
 }
 
 async function updateConfig(seedDirectory, currentFile) {
-	const seedConfigPath = path.join(seedDirectory, 'configs/application/config.json')
+	console.log("Updating config.json file");
+	const seedConfigPath = path.join(seedDirectory, 'configs/application/config.json');
 	try {
 		const seedConfig = await readJson(seedConfigPath);
 		const projectConfig = await readJson(currentFile);
@@ -135,11 +135,11 @@ async function updateConfig(seedDirectory, currentFile) {
 		
 		//write out updated config
 		const output = await writeJson(seedConfigPath, seedConfig, { spaces: 2 });
-		if (output) console.log('success writing config!')
+		if (output) console.log('success writing config');
 
 
 	} catch (error) {
-		console.error(error)
+		console.error(error);
 	}
 
 }

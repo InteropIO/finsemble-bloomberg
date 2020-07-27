@@ -1,0 +1,58 @@
+{
+	"components": {
+		"Bloomberg Security Finder": {
+			"window": {
+				"url": "$applicationRoot/components/SecurityFinder/index.html",
+				"options": {
+					"resizable": false,
+					"autoShow": true,
+					"alwaysOnTop": false,
+					"securityPolicy": "trusted"
+				},
+				"top": "center",
+				"left": "center",
+				"width": 400,
+				"height": 350
+			},
+			"component": {
+				"preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgeClient.js",
+				"spawnOnStartup": false,
+				"spawnOnHotKey": [
+					"ctrl",
+					"alt",
+					"s"
+				],
+				"singleton": false,
+				"showDevConsoleOnVisible": false
+			},
+			"foreign": {
+				"services": {
+					"windowService": {
+						"manageWindowMovement": true,
+						"allowAutoArrange": false,
+						"allowSnapping": true,
+						"allowTabbing": true,
+						"allowTiling": true,
+						"allowGrouping": true,
+						"allowMinimize": true
+					},
+					"workspace": {}
+				},
+				"components": {
+					"App Launcher": {
+						"launchableByUser": true
+					},
+					"Window Manager": {
+						"alwaysOnTopIcon": true,
+						"title": "Bloomberg Security Finder",
+						"persistWindowState": true,
+						"hideMaximize": true
+					},
+					"Toolbar": {
+						"iconClass": "ff-search"
+					}
+				}
+			}
+		}
+	}
+}
