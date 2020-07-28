@@ -3,14 +3,9 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import SecurityFinder from './SecurityFinder';
 
+window.addEventListener("BloombergBridgeClientReady", BBGReady);
 
-if (window.FSBL && FSBL.addEventListener) {
-	FSBL.addEventListener("onReady", FSBLReady);
-} else {
-	window.addEventListener("FSBLReady", FSBLReady);
-}
-
-function FSBLReady() {
+function BBGReady() {
 	ReactDOM.render(
 		<SecurityFinder />,
 		document.getElementById('root')
