@@ -12,7 +12,7 @@
 				"top": "center",
 				"left": "center",
 				"width": 400,
-				"height": 350
+				"height": 400
 			},
 			"component": {
 				"preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgeClient.js",

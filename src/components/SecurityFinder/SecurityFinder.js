@@ -1,7 +1,7 @@
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-// import 'react-tabs/style/react-tabs.css';
+import Select from 'react-select'
 
 /** When a suggestion is clicked, Autosuggest needs to populate the input
  *  field based on the clicked suggestion (such that the search will return
@@ -35,19 +35,37 @@ class SecurityFinder extends React.Component {
 			commandPanel: "1",
 			commandTails: "",
 			commandError: "",
-			commandSuccess: ""
+			commandSuccess: "",
+			groupError: "",
+			groupSuccess: "",
+			launchPadGroup: "",
+			launchPadGroups: []
 		};
 
 		this.checkConnection = this.checkConnection.bind(this);
 		this.setupConnectionLifecycleChecks = this.setupConnectionLifecycleChecks.bind(this);
+		
 		this.handleCommandPanelInput = this.handleCommandPanelInput.bind(this);
 		this.handleCommandExecute = this.handleCommandExecute.bind(this);
+
+		this.handleLaunchPadGroupInput = this.handleLaunchPadGroupInput.bind(this);
+		this.handleSetGroupContext = this.handleSetGroupContext.bind(this);
+		this.getLaunchPadGroups = this.getLaunchPadGroups.bind(this);
+		this.setupGroupEventListener = this.setupGroupEventListener.bind(this);
+		this.handleNoOptionMessage = this.handleNoOptionMessage.bind(this);
+
 		this.setupConnectionLifecycleChecks();
 	}
 
 	checkConnection() {
 		FSBL.Clients.BloombergBridgeClient.checkConnection((err, resp) => {
 			if (!err && resp === true) {
+				if (!this.state.isConnected) {
+					//we are connecting
+					this.getLaunchPadGroups();
+					this.setupGroupEventListener();
+				}
+
 				this.setState({
 					isConnected: true
 				});
@@ -126,7 +144,7 @@ class SecurityFinder extends React.Component {
 	handleCommandPanelInput(event) {
 		const name = event.target.name;
 		this.setState({ [name]: event.target.value });
-	}
+	};
 
 	handleCommandExecute() {
 		if (this.state.isConnected) {
@@ -140,7 +158,7 @@ class SecurityFinder extends React.Component {
 				console.error(`No command mnemonic set to execute`);
 			} else {
 				console.log(`Executing ${this.state.commandMnemonic} on panel ${this.state.commandPanel} with tails ${this.state.commandTails} and security ${this.state.value}`);
-				bbg.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
+				FSBL.Clients.BloombergBridgeClient.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
 					if (err) {
 						this.setState({ commandError: `Error: ${JSON.stringify(err)}` , commandSuccess: "" });
 						console.error(`No command mnemonic set to execute`);
@@ -154,10 +172,89 @@ class SecurityFinder extends React.Component {
 			console.error(`Unable to run command, not connected to Bloomberg bridge and terminal`);
 			this.setState({ commandError: "Not connected to Bloomberg terminal!", commandSuccess: "" });
 		}
+	};
+
+	getLaunchPadGroups() {
+		FSBL.Clients.BloombergBridgeClient.runGetAllGroups((err, response) => {
+			if (response && response.groups && Array.isArray(response.groups)) {
+				let launchPadGroups = [];
+				response.groups.forEach(element => {
+					launchPadGroups.push({ value: element.name, label: element.name });
+				});
+				let _state = { groupError: "", launchPadGroups: launchPadGroups };
+				//if no group is selected, select one
+				if (!this.state.launchPadGroup && launchPadGroups.length > 0) {
+					_state.launchPadGroup = launchPadGroups[0];
+				}
+				//if the selected group doesn't exist deselect it
+				if (this.state.launchPadGroup) {
+					let found = false;
+					launchPadGroups.forEach((group) => {
+						if (group.value === this.state.launchPadGroup.value) {
+							found = true;
+						}
+					});
+					if (!found) {
+						_state.launchPadGroup = "";
+					}
+				}
+
+				this.setState(_state);
+			} else if (err) {
+				console.error("Error retrieving launchpad groups:", err);
+				this.setState({ groupError: "Error retrieving launchpad groups", groupSuccess: "", launchPadGroups: [] });
+			} else {
+				console.error("invalid response from runGetAllGroups", response);
+				this.setState({ groupError: "Error retrieving launchpad groups", groupSuccess: "", launchPadGroups: [] });
+			}
+		});
+	};
+
+	setupGroupEventListener() {
+		FSBL.Clients.BloombergBridgeClient.setGroupEventListener((err, resp) => {
+			//ignore events - just refresh the groups list
+			this.getLaunchPadGroups();
+		});
+	};
+	
+	handleLaunchPadGroupInput(value) {
+		this.setState({ launchPadGroup: value});
+	};
+
+	handleNoOptionMessage() {
+		// this.setState({ launchPadGroup: "", groupError: "No LaunchPad groups", groupSuccess: "" });
 	}
 
+	handleSetGroupContext() {
+		if (this.state.isConnected) {
+			if (this.state.launchPadGroup) {
+				FSBL.Clients.BloombergBridgeClient.runSetGroupContext(this.state.launchPadGroup.value, this.state.value, null, (err, data) => {
+					if (err) {
+						FSBL.Clients.Logger.error(`Error received from runSetGroupContext, group: ${this.state.launchPadGroup.value}, value: ${this.state.value}, error: `, err);
+						this.setState({ groupError: `Error: ${JSON.stringify(err)}`, groupSuccess: "" });
+						console.error(`Error when setting LaunchPad group context`, err);
+					} else {
+						this.setState({ groupError: "", groupSuccess: `Set ${this.state.launchPadGroup.value} context` });
+					}
+				});
+			} else {
+				console.error(`Unable to set LaunchPad group context, no LaunchPad group selected`);
+				this.setState({ groupError: "No LaunchPad group selected", groupSuccess: "" });
+			}
+		} else {
+			console.error(`Unable to set LaunchPad group context, not connected to Bloomberg bridge and terminal`);
+			this.setState({ groupError: "Not connected to Bloomberg terminal!", groupSuccess: "" });
+		}
+	};
+
 	render() {
-		const { value, suggestions, isLoading, isConnected, commandMnemonic, commandPanel, commandTails, commandError, commandSuccess } = this.state;
+		const {
+			value, suggestions,
+			isLoading, isConnected,
+			commandMnemonic, commandPanel, commandTails, commandError, commandSuccess,
+			groupError, groupSuccess,
+			launchPadGroup, launchPadGroups
+		} = this.state;
 
 		// Autosuggest will pass through all these props to the input.
 		const inputProps = {
@@ -190,28 +287,54 @@ class SecurityFinder extends React.Component {
 				<div id="tools">
 					<Tabs>
 						<TabList>
-							<Tab>Launchpad Groups</Tab>
-							<Tab>Run Command</Tab>
+							<Tab>LaunchPad Groups</Tab>
+							<Tab>Commands</Tab>
 							<Tab>Worksheets</Tab>
+							<Tab>Linker</Tab>
 						</TabList>
 
 						<TabPanel>
-							<h2>Launchpad</h2>
+							<div className="controlsColumn">
+								<div className="controlsRow">
+									<label className="inputLabel flex-dont-grow">
+										LaunchPad Group:&nbsp;
+									</label>
+									<Select
+										name="launchPadGroup"
+										options={launchPadGroups}
+										className='react-select-container'
+										classNamePrefix="react-select"
+										defaultValue={launchPadGroup}
+										menuPlacement='auto'
+										noOptionsMessage={this.handleNoOptionMessage}
+										onChange={this.handleLaunchPadGroupInput}
+									/>
+								</div>
+								<div className="controlsRow justify-flex-start">
+									<button className="button" id="setGroupContextButton" onClick={this.handleSetGroupContext}>set context</button>
+									&nbsp;
+									<label id="groupError" className="errorLabel">{groupError}</label>
+									<label id="groupSuccess" className="successLabel">{groupSuccess}</label>
+								</div>
+							</div>
+							
+							
 						</TabPanel>
+
 						<TabPanel>
 							<label className="inputLabel">
 								{/* Mnemonic: */}
-								<input name="commandMnemonic" className="textField" value={this.state.commandMnemonic} size="6" maxLength="6" placeholder="Mnemonic" onChange={this.handleCommandPanelInput}></input>
+								<input name="commandMnemonic" className="textField" value={commandMnemonic} size="6" maxLength="6" placeholder="Mnemonic" onChange={this.handleCommandPanelInput}></input>
 							</label>
 
 							<label className="inputLabel">
 								Tails:&nbsp;
-								<input name="commandTails" className="textField" value={this.state.commandTails} size="15" maxLength="255" placeholder="optional..."onChange={this.handleCommandPanelInput}></input>
+								<input name="commandTails" className="textField" value={commandTails} size="15" maxLength="255" placeholder="optional..."onChange={this.handleCommandPanelInput}></input>
 							</label>
 
 							<label className="inputLabel">
 								Panel:&nbsp;
-								<select name="commandPanel" className="textField" value={this.state.commandPanel} onChange={this.handleCommandPanelInput}>
+								<select name="commandPanel" className="textField" value={commandPanel} onChange={this.handleCommandPanelInput}>
 									<option value="1">1</option>
 									<option value="2">2</option>
 									<option value="3">3</option>
@@ -221,14 +344,18 @@ class SecurityFinder extends React.Component {
 
 							<button className="button" id="runCommandButton" onClick={this.handleCommandExecute}>execute</button>
 							&nbsp;
-							<label id="commandError" className="errorLabel">{this.state.commandError}</label>
-							<label id="commandSuccess" className="successLabel">{this.state.commandSuccess}</label>
+							<label id="commandError" className="errorLabel">{commandError}</label>
+							<label id="commandSuccess" className="successLabel">{commandSuccess}</label>
 
 
 						</TabPanel>
 						
 						<TabPanel>
 							<h2>worksheets</h2>
+						</TabPanel>
+
+						<TabPanel>
+							<h2>linker</h2>
 						</TabPanel>
 					</Tabs>
 
