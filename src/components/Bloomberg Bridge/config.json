@@ -12,7 +12,7 @@
 					"resizable": true,
 					"showTaskbarIcon": true
 				},
-				"addToWorkspace": true,
+				"addToWorkspace": false,
 				"height": 250,
 				"width": 300
 			},
@@ -53,7 +53,7 @@
 					"resizable": true,
 					"showTaskbarIcon": true
 				},
-				"addToWorkspace": true,
+				"addToWorkspace": false,
 				"height": 250,
 				"width": 300
 			},
