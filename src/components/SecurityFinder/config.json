@@ -4,7 +4,7 @@
 			"window": {
 				"url": "$applicationRoot/components/SecurityFinder/index.html",
 				"options": {
-					"resizable": false,
+					"resizable": true,
 					"autoShow": true,
 					"alwaysOnTop": false,
 					"securityPolicy": "trusted"
@@ -17,7 +17,7 @@
 			"component": {
 				"preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgeClient.js",
 				"spawnOnStartup": false,
-				"spawnOnHotKey": [
+				"spawnOnHotkey": [
 					"ctrl",
 					"alt",
 					"s"
@@ -46,7 +46,8 @@
 						"alwaysOnTopIcon": true,
 						"title": "Bloomberg Security Finder",
 						"persistWindowState": true,
-						"hideMaximize": true
+						"hideMaximize": true,
+						"showLinker": true
 					},
 					"Toolbar": {
 						"iconClass": "ff-search"

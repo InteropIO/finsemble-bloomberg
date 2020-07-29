@@ -3,7 +3,10 @@
 .react-autosuggest__container { 
 	background-color: var(--core-primary);
 	display: flex;
-    flex-direction: column;
+	flex-direction: column;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 64px;
 }
 .react-autosuggest__container--open{
 
@@ -15,6 +18,8 @@
 	font-size: 16px;
 	background-color: white;
 	height: 24px;
+	flex-grow: 0;
+	flex-shrink: 0;
 }
 .react-autosuggest__input--open{
 
@@ -25,19 +30,30 @@
 }
 .react-autosuggest__suggestions-container{
 	background-color: var(--core-primary-3);
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 40px;
 }
 .react-autosuggest__suggestions-container--open{
-
+	flex-grow: 1;
+	flex-shrink: 1;
 }
 .react-autosuggest__suggestions-list{
-	max-height: 180px;
-  	overflow-y: auto;
+	/* max-height: 180px; */
+	overflow-y: auto;
+	margin: 8px 0px;
+	padding: 0px 30px;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 40px;
 }
 .react-autosuggest__suggestion{
 	color: var(--font-color-1);
 	font-family: var(--font-family);
 	font-weight: var(--font-weight-1);
-	font-size: 16px;
+	font-size: 15px;
 }
 .react-autosuggest__suggestion--first{
 
@@ -46,7 +62,11 @@
 	color: var(--font-color);
 }
 .react-autosuggest__section-container{
-
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 40px;
 }
 .react-autosuggest__section-container--first{
 
@@ -186,6 +206,13 @@
 }
 .flex-dont-grow {
 	flex-grow: 0;
+}
+
+.flex-shrink {
+	flex-shrink: 1;
+}
+.flex-dont-shrink {
+	flex-shrink: 0;
 }
 .justify-flex-start {
 	justify-content: flex-start;

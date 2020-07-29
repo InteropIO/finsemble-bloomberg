@@ -268,10 +268,10 @@ class SecurityFinder extends React.Component {
 	handleLinkerPublish() {
 		if (this.state.launchPadGroup && this.state.value) {
 
-			//strip the security type before publishing
+			//just publish the first token as a ticker symbol
 			let value = this.state.value;
 			if (value.indexOf(' ') > -1) {
-				value = value.substring(0, value.lastIndexOf(' '));
+				value = value.substring(0, value.indexOf(' '));
 			}
 
 			FSBL.Clients.LinkerClient.publish({ dataType: "symbol", data: value }, (err, resp) => {
@@ -325,9 +325,10 @@ class SecurityFinder extends React.Component {
 					alwaysRenderSuggestions={true}
 					highlightFirstSuggestion={true}
 					inputProps={inputProps}
+					className="flex-grow flex-shrink"
 				/>
 
-				<div id="tools">
+				<div id="tools" className="flex-dont-grow flex-dont-shrink">
 					<Tabs>
 						<TabList>
 							<Tab>LaunchPad Groups</Tab>
