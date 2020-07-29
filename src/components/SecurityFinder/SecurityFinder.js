@@ -373,10 +373,10 @@ class SecurityFinder extends React.Component {
 							}
 							this.getWorksheets();
 						});
-					} else if (response.worksheet.id == "Error") {
+					} else if (response.worksheet.id === "Error") {
 						//handle non-existent worksheets
 						console.error(`Error retrieving worksheet: worksheetId: ${worksheetId}, error:`, response.worksheet.name);
-						this.setState({ worksheetError: `Error retrieving worksheet: ${response.worksheet.name}`, worksheetSuccess: "" });
+						this.setState({ worksheetError: `${response.worksheet.name}`, worksheetSuccess: "" });
 						this.getWorksheets();
 					} else if (err) {
 						console.error(`Error retrieving worksheet: worksheetId: ${worksheetId}, error:`, err);
