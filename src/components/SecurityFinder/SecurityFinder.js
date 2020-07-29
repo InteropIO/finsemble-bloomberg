@@ -36,8 +36,15 @@ class SecurityFinder extends React.Component {
 			launchPadGroup: "",
 			launchPadGroups: [],
 			linkerError: "",
-			linkerSuccess: ""
+			linkerSuccess: "",
+			suppressLinkerLoops: null,
+			worksheet: null,
+			worksheets: [],
+			worksheetError: "",
+			worksheetSuccess: ""
 		};
+
+		this.handleTabSelected = this.handleTabSelected.bind(this);
 
 		this.checkConnection = this.checkConnection.bind(this);
 		this.setupConnectionLifecycleChecks = this.setupConnectionLifecycleChecks.bind(this);
@@ -53,6 +60,10 @@ class SecurityFinder extends React.Component {
 
 		this.subscribeToLinker = this.subscribeToLinker.bind(this);
 		this.handleLinkerPublish = this.handleLinkerPublish.bind(this);
+
+		this.getWorksheets = this.getWorksheets.bind(this);
+		this.handleWorksheetInput = this.handleWorksheetInput.bind(this);
+		this.handleAddToWorksheet = this.handleAddToWorksheet.bind(this);
 
 		this.setupConnectionLifecycleChecks();
 		this.subscribeToLinker();
@@ -257,10 +268,14 @@ class SecurityFinder extends React.Component {
 	subscribeToLinker() {
 		FSBL.Clients.LinkerClient.subscribe("symbol", (data, envelope) => {
 			if (!envelope.originatedHere()) {
-				//assume we are receiving a basic string via the linker and set it as the search term
-				console.log("received via linker: ", data, envelope);
-				this.setState({ value: data });
-				this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' });
+				//As we're modifying the symbol for sharing, we should suppress any copies of it we receive back
+				let suppressLinkerLoops = this.state.suppressLinkerLoops;
+				if (!suppressLinkerLoops || (Date.now() - suppressLinkerLoops.time > 1500) || suppressLinkerLoops.value != data) {
+					//assume we are receiving a basic string via the linker and set it as the search term
+					console.log("received via linker: ", data, envelope);
+					this.setState({ value: data, suppressLinkerLoops: null });
+					this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' });
+				}
 			}
 		});
 	}
@@ -275,6 +290,11 @@ class SecurityFinder extends React.Component {
 			}
 
 			FSBL.Clients.LinkerClient.publish({ dataType: "symbol", data: value }, (err, resp) => {
+				this.setState({
+					suppressLinkerLoops: {
+						value, time: Date.now()
+					}
+				});
 				if (err) {
 					console.error(`Unable to publish via linker, error: `, err);
 					this.setState({ linkerError: "No LaunchPad group selected", linkerSuccess: "" });
@@ -289,14 +309,115 @@ class SecurityFinder extends React.Component {
 		}
 	}
 
+	getWorksheets() {
+		if (this.state.isConnected) {
+			FSBL.Clients.BloombergBridgeClient.runGetAllWorksheets((err, response) => {
+				if (response && response.worksheets && Array.isArray(response.worksheets)) {
+					let worksheetsArr = [];
+					response.worksheets.forEach(element => {
+						worksheetsArr.push({ value: element.id, label: element.name });
+					});
+					let _state = { worksheets: worksheetsArr };
+					//if no worksheet is selected, select one
+					if (!this.state.worksheet && worksheetsArr.length > 0) {
+						_state.worksheet = worksheetsArr[0];
+					}
+					//if the selected worksheet doesn't exist deselect it
+					if (this.state.worksheet) {
+						let found = false;
+						worksheetsArr.forEach((aWorksheet) => {
+							if (aWorksheet.value === this.state.worksheets.value) {
+								found = true;
+							}
+						});
+						if (!found) {
+							_state.worksheet = "";
+						}
+					}
+
+					this.setState(_state);
+				} else if (err) {
+					console.error("Error retrieving worksheets:", err);
+					this.setState({ worksheetError: `Error retrieving worksheets: ${JSON.stringify(err)}`, worksheetSuccess: "", worksheets: [] });
+				} else {
+					console.error("invalid response from runGetAllWorksheets", response);
+					this.setState({ worksheetError: "Error retrieving worksheets", worksheetSuccess: "", worksheets: [] });
+				}
+			});
+		} else {
+			console.error(`Unable to get worksheets, not connected to Bloomberg bridge and terminal`);
+			this.setState({ worksheetError: "Not connected to Bloomberg terminal!", worksheetSuccess: "" });
+		}
+	};
+
+	handleWorksheetInput(value) {
+		this.setState({ worksheet: value });
+	};
+
+	handleAddToWorksheet() {
+		if (this.state.isConnected) {
+			if (this.state.worksheet && this.state.value) {
+				let worksheetId = this.state.worksheet.value;
+				FSBL.Clients.BloombergBridgeClient.runGetWorksheet(worksheetId, (err, response) => {
+					//TODO: support other types of worksheet
+					if (response && response.worksheet && response.worksheet.id !== "Error" && Array.isArray(response.worksheet.securities)) {
+						//replace the securities in the worksheet
+						let securities = response.worksheet.securities;
+						securities.push(this.state.value);
+						FSBL.Clients.BloombergBridgeClient.runReplaceWorksheet(worksheetId, securities, (err, data) => {
+							if (err) {
+								console.error("Error replacing worksheet securities:", err);
+								this.setState({ worksheetError: `Error replacing worksheet securities: ${JSON.stringify(err)}`, worksheetSuccess: "" });
+							} else {
+								this.setState({ worksheetError: "", worksheetSuccess: "Worksheet updated" });
+							}
+							this.getWorksheets();
+						});
+					} else if (response.worksheet.id == "Error") {
+						//handle non-existent worksheets
+						console.error(`Error retrieving worksheet: worksheetId: ${worksheetId}, error:`, response.worksheet.name);
+						this.setState({ worksheetError: `Error retrieving worksheet: ${response.worksheet.name}`, worksheetSuccess: "" });
+						this.getWorksheets();
+					} else if (err) {
+						console.error(`Error retrieving worksheet: worksheetId: ${worksheetId}, error:`, err);
+						this.setState({ worksheetError: `Error retrieving worksheet: ${JSON.stringify(err)}`, worksheetSuccess: "" });
+						this.getWorksheets();
+					} else {
+						FSBL.Clients.Logger.error(`invalid response from runGetWorksheet: worksheetId: ${worksheetId}, response:`, response);
+						this.setState({ worksheetError: `invalid response from runGetWorksheet`, worksheetSuccess: "" });
+						this.getWorksheets();
+					}
+				});
+			} else if (!this.state.value) {
+				console.error(`Unable to dd to worksheet, no security value set`);
+				this.setState({ worksheetError: "No security value set, search for a security first", worksheetSuccess: "" });
+			} else {
+				console.error(`Unable to add to worksheet, no worksheet selected`);
+				this.setState({ worksheetError: "No worksheet selected!", worksheetSuccess: "" });
+			}
+			this.getWorksheets();
+		} else {
+			console.error(`Unable to add to worksheet, not connected to Bloomberg bridge and terminal`);
+			this.setState({ worksheetError: "Not connected to Bloomberg terminal!", worksheetSuccess: "" });
+		}
+	};
+
+	handleTabSelected(index, lastIndex, event) {
+		if (index == 2) {
+			//selected worksheets
+			this.getWorksheets();
+		}
+		return true;
+	}
+
 	render() {
 		const {
 			value, suggestions,
 			isLoading, isConnected,
 			commandMnemonic, commandPanel, commandTails, commandError, commandSuccess,
-			groupError, groupSuccess,
-			launchPadGroup, launchPadGroups,
-			linkerError, linkerSuccess
+			launchPadGroup, launchPadGroups, groupError, groupSuccess,
+			linkerError, linkerSuccess,
+			worksheet, worksheets, worksheetError, worksheetSuccess
 		} = this.state;
 
 		// Autosuggest will pass through all these props to the input.
@@ -329,7 +450,8 @@ class SecurityFinder extends React.Component {
 				/>
 
 				<div id="tools" className="flex-dont-grow flex-dont-shrink">
-					<Tabs>
+					<Tabs
+						onSelect={this.handleTabSelected}>
 						<TabList>
 							<Tab>LaunchPad Groups</Tab>
 							<Tab>Commands</Tab>
@@ -399,7 +521,30 @@ class SecurityFinder extends React.Component {
 						</TabPanel>
 
 						<TabPanel>
-							<h2>worksheets</h2>
+							<div className="controlsColumn">
+								<div className="controlsRow">
+									<label className="inputLabel flex-dont-grow">
+										Worksheet:&nbsp;
+									</label>
+									<Select
+										name="worksheetName"
+										options={worksheets}
+										className='react-select-container'
+										classNamePrefix="react-select"
+										defaultValue={worksheet}
+										menuPlacement='auto'
+										noOptionsMessage={this.handleNoOptionMessage}
+										onChange={this.handleWorksheetInput}
+									/>
+									<button className="button flex-dont-grow" id="refreshWorksheetsButton" onClick={this.getWorksheets}>refresh</button>
+								</div>
+								<div className="controlsRow justify-flex-start">
+									<button className="button" id="addToWorksheetButton" onClick={this.handleAddToWorksheet}>Add to worksheet</button>
+									&nbsp;
+									<label id="worksheetError" className="errorLabel">{worksheetError}</label>
+									<label id="worksheetSuccess" className="successLabel">{worksheetSuccess}</label>
+								</div>
+							</div>
 						</TabPanel>
 
 						<TabPanel>
