@@ -6,7 +6,7 @@ import Select from 'react-select'
 /** When a suggestion is clicked, Autosuggest needs to populate the input
  *  field based on the clicked suggestion (such that the search will return
  *  the suggestion as the first result). 
- */	
+ */
 const getSuggestionValue = suggestion => suggestion.name + " " + suggestion.type;
 
 /** Render suggestions for display in the suggestions list.
@@ -21,11 +21,6 @@ class SecurityFinder extends React.Component {
 	constructor() {
 		super();
 
-		// Autosuggest is a controlled component.
-		// This means that you need to provide an input value
-		// and an onChange handler that updates this value (see below).
-		// Suggestions also need to be provided to the Autosuggest,
-		// and they are initially empty because the Autosuggest is closed.
 		this.state = {
 			value: '',
 			suggestions: [],
@@ -39,12 +34,14 @@ class SecurityFinder extends React.Component {
 			groupError: "",
 			groupSuccess: "",
 			launchPadGroup: "",
-			launchPadGroups: []
+			launchPadGroups: [],
+			linkerError: "",
+			linkerSuccess: ""
 		};
 
 		this.checkConnection = this.checkConnection.bind(this);
 		this.setupConnectionLifecycleChecks = this.setupConnectionLifecycleChecks.bind(this);
-		
+
 		this.handleCommandPanelInput = this.handleCommandPanelInput.bind(this);
 		this.handleCommandExecute = this.handleCommandExecute.bind(this);
 
@@ -54,7 +51,11 @@ class SecurityFinder extends React.Component {
 		this.setupGroupEventListener = this.setupGroupEventListener.bind(this);
 		this.handleNoOptionMessage = this.handleNoOptionMessage.bind(this);
 
+		this.subscribeToLinker = this.subscribeToLinker.bind(this);
+		this.handleLinkerPublish = this.handleLinkerPublish.bind(this);
+
 		this.setupConnectionLifecycleChecks();
+		this.subscribeToLinker();
 	}
 
 	checkConnection() {
@@ -147,7 +148,7 @@ class SecurityFinder extends React.Component {
 	};
 
 	handleCommandExecute() {
-		if (this.state.isConnected) {
+		if (this.state.isConnected && this.state.value) {
 			const mnemonic = this.state.commandMnemonic;
 			const securities = [this.state.value];
 			const tails = this.state.commandTails;
@@ -160,14 +161,17 @@ class SecurityFinder extends React.Component {
 				console.log(`Executing ${this.state.commandMnemonic} on panel ${this.state.commandPanel} with tails ${this.state.commandTails} and security ${this.state.value}`);
 				FSBL.Clients.BloombergBridgeClient.runBBGCommand(mnemonic, securities, panel, tails, (err, response) => {
 					if (err) {
-						this.setState({ commandError: `Error: ${JSON.stringify(err)}` , commandSuccess: "" });
+						this.setState({ commandError: `Error: ${JSON.stringify(err)}`, commandSuccess: "" });
 						console.error(`No command mnemonic set to execute`);
 					} else {
 						this.setState({ commandError: "", commandSuccess: `executed ${mnemonic}` });
 					}
 				});
 			}
-			
+
+		} else if (!this.state.value) {
+			console.error(`Unable to run command, no security value set`);
+			this.setState({ commandError: "No security value set, search for a security first", commandSuccess: "" });
 		} else {
 			console.error(`Unable to run command, not connected to Bloomberg bridge and terminal`);
 			this.setState({ commandError: "Not connected to Bloomberg terminal!", commandSuccess: "" });
@@ -216,9 +220,9 @@ class SecurityFinder extends React.Component {
 			this.getLaunchPadGroups();
 		});
 	};
-	
+
 	handleLaunchPadGroupInput(value) {
-		this.setState({ launchPadGroup: value});
+		this.setState({ launchPadGroup: value });
 	};
 
 	handleNoOptionMessage() {
@@ -227,7 +231,7 @@ class SecurityFinder extends React.Component {
 
 	handleSetGroupContext() {
 		if (this.state.isConnected) {
-			if (this.state.launchPadGroup) {
+			if (this.state.launchPadGroup && this.state.value) {
 				FSBL.Clients.BloombergBridgeClient.runSetGroupContext(this.state.launchPadGroup.value, this.state.value, null, (err, data) => {
 					if (err) {
 						FSBL.Clients.Logger.error(`Error received from runSetGroupContext, group: ${this.state.launchPadGroup.value}, value: ${this.state.value}, error: `, err);
@@ -237,6 +241,9 @@ class SecurityFinder extends React.Component {
 						this.setState({ groupError: "", groupSuccess: `Set ${this.state.launchPadGroup.value} context` });
 					}
 				});
+			} else if (!this.state.value) {
+				console.error(`Unable to set LaunchPad group context, no security value set`);
+				this.setState({ groupError: "No security value set, search for a security first", commandSuccess: "" });
 			} else {
 				console.error(`Unable to set LaunchPad group context, no LaunchPad group selected`);
 				this.setState({ groupError: "No LaunchPad group selected", groupSuccess: "" });
@@ -247,13 +254,49 @@ class SecurityFinder extends React.Component {
 		}
 	};
 
+	subscribeToLinker() {
+		FSBL.Clients.LinkerClient.subscribe("symbol", (data, envelope) => {
+			if (!envelope.originatedHere()) {
+				//assume we are receiving a basic string via the linker and set it as the search term
+				console.log("received via linker: ", data, envelope);
+				this.setState({ value: data });
+				this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' });
+			}
+		});
+	}
+
+	handleLinkerPublish() {
+		if (this.state.launchPadGroup && this.state.value) {
+
+			//strip the security type before publishing
+			let value = this.state.value;
+			if (value.indexOf(' ') > -1) {
+				value = value.substring(0, value.lastIndexOf(' '));
+			}
+
+			FSBL.Clients.LinkerClient.publish({ dataType: "symbol", data: value }, (err, resp) => {
+				if (err) {
+					console.error(`Unable to publish via linker, error: `, err);
+					this.setState({ linkerError: "No LaunchPad group selected", linkerSuccess: "" });
+				} else {
+					console.log(`${value} published via linker to topic 'symbol'`, resp);
+					this.setState({ linkerError: "", linkerSuccess: `${value} published to topic 'symbol'` });
+				}
+			});
+		} else if (!this.state.value) {
+			console.error(`Unable to publish to linker, no security value set`);
+			this.setState({ linkerError: "No security value set, search for a security first", linkerSuccess: "" });
+		}
+	}
+
 	render() {
 		const {
 			value, suggestions,
 			isLoading, isConnected,
 			commandMnemonic, commandPanel, commandTails, commandError, commandSuccess,
 			groupError, groupSuccess,
-			launchPadGroup, launchPadGroups
+			launchPadGroup, launchPadGroups,
+			linkerError, linkerSuccess
 		} = this.state;
 
 		// Autosuggest will pass through all these props to the input.
@@ -273,17 +316,17 @@ class SecurityFinder extends React.Component {
 		// Finally, render it!
 		return (
 			<div id="container">
-				<Autosuggest
+				<Autosuggest id="securitySearch"
 					suggestions={suggestions}
 					onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
 					onSuggestionsClearRequested={this.onSuggestionsClearRequested}
 					getSuggestionValue={getSuggestionValue}
 					renderSuggestion={renderSuggestion}
-					alwaysRenderSuggestions={false}
+					alwaysRenderSuggestions={true}
 					highlightFirstSuggestion={true}
 					inputProps={inputProps}
 				/>
-				
+
 				<div id="tools">
 					<Tabs>
 						<TabList>
@@ -317,55 +360,71 @@ class SecurityFinder extends React.Component {
 									<label id="groupSuccess" className="successLabel">{groupSuccess}</label>
 								</div>
 							</div>
-							
-							
+
+
 						</TabPanel>
 
 						<TabPanel>
-							<label className="inputLabel">
-								{/* Mnemonic: */}
-								<input name="commandMnemonic" className="textField" value={commandMnemonic} size="6" maxLength="6" placeholder="Mnemonic" onChange={this.handleCommandPanelInput}></input>
-							</label>
 
-							<label className="inputLabel">
-								Tails:&nbsp;
-								<input name="commandTails" className="textField" value={commandTails} size="15" maxLength="255" placeholder="optional..."onChange={this.handleCommandPanelInput}></input>
-							</label>
+							<div className="controlsColumn">
+								<div className="controlsRow">
+									<label className="inputLabel flex-dont-grow">
+										{/* Mnemonic: */}
+										<input name="commandMnemonic" className="textField" value={commandMnemonic} size="6" maxLength="6" placeholder="Mnemonic" onChange={this.handleCommandPanelInput}></input>
+									</label>
+									<label className="inputLabel flex-dont-grow">
+										Tails:&nbsp;
+									</label>
+									<input name="commandTails" className="textField flex-grow" value={commandTails} size="15" maxLength="255" placeholder="optional..." onChange={this.handleCommandPanelInput}></input>
 
-							<label className="inputLabel">
-								Panel:&nbsp;
-								<select name="commandPanel" className="textField" value={commandPanel} onChange={this.handleCommandPanelInput}>
-									<option value="1">1</option>
-									<option value="2">2</option>
-									<option value="3">3</option>
-									<option value="4">4</option>
-								</select>
-							</label>
-
-							<button className="button" id="runCommandButton" onClick={this.handleCommandExecute}>execute</button>
-							&nbsp;
-							<label id="commandError" className="errorLabel">{commandError}</label>
-							<label id="commandSuccess" className="successLabel">{commandSuccess}</label>
-
+									<label className="inputLabel flex-dont-grow">
+										Panel:&nbsp;
+										<select name="commandPanel" className="textField" value={commandPanel} onChange={this.handleCommandPanelInput}>
+											<option value="1">1</option>
+											<option value="2">2</option>
+											<option value="3">3</option>
+											<option value="4">4</option>
+										</select>
+									</label>
+								</div>
+								<div className="controlsRow justify-flex-start">
+									<button className="button" id="runCommandButton" onClick={this.handleCommandExecute}>execute</button>
+									&nbsp;
+									<label id="commandError" className="errorLabel">{commandError}</label>
+									<label id="commandSuccess" className="successLabel">{commandSuccess}</label>
+								</div>
+							</div>
 
 						</TabPanel>
-						
+
 						<TabPanel>
 							<h2>worksheets</h2>
 						</TabPanel>
 
 						<TabPanel>
-							<h2>linker</h2>
+							<div className="controlsColumn">
+								<div className="controlsRow">
+									<label className="inputLabel flex-dont-grow">
+										Publish via Finsemble Linker:&nbsp;
+									</label>
+								</div>
+								<div className="controlsRow justify-flex-start">
+									<button className="button" id="runCommandButton" onClick={this.handleLinkerPublish}>publish</button>
+									&nbsp;
+									<label id="linkerError" className="errorLabel">{linkerError}</label>
+									<label id="linkerSuccess" className="successLabel">{linkerSuccess}</label>
+								</div>
+							</div>
 						</TabPanel>
 					</Tabs>
 
 
-					
+
 					<div id="status">
 						<strong>Status:</strong> {status}
 					</div>
 				</div>
-				
+
 			</div>
 		);
 	}
