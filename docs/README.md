@@ -1,6 +1,6 @@
-[fpe-bloomberg](README.md) › [Globals](globals.md)
+[Finsemble-Bloomberg](README.md) › [Globals](globals.md)
 
-# fpe-bloomberg
+# Finsemble Bloomberg Integration
 
 [![Finsemble Logo](https://documentation.chartiq.com/finsemble/styles/img/Finsemble_Logo_Dark.svg)](https://documentation.chartiq.com/finsemble/)
 
@@ -64,7 +64,7 @@ In order to use the Javascript and Typescript examples, you can either copy the 
 
 ### Files
 ```
-fpe-bloomberg
+finsmble-bloomberg
 |   .gitignore                   - gitignore file configured for both javascript and .Net projects
 |   BloombergIntegration.sln     - Visual studio solution for building the .Net Bloomberg Bridge app  
 |   finsemble.config.json        - Watch script config and Finsemble examples config imports 
