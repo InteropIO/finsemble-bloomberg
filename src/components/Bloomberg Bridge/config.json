@@ -1,0 +1,86 @@
+{
+	"components": {
+		"Bloomberg Bridge Debug": {
+			"window": {
+				"id": "Bloomberg Bridge Debug",
+				"windowType": "native",
+				"path": "$bloombergBridgeFolder/bin/Debug/BloombergBridge.exe",
+				"arguments": "",
+				"options": {
+					"autoShow": true,
+					"alwaysOnTop": false,
+					"resizable": true,
+					"showTaskbarIcon": true
+				},
+				"addToWorkspace": false,
+				"height": 250,
+				"width": 300
+			},
+			"component": {
+				"spawnOnStartup": false
+			},
+			"foreign": {
+				"services": {
+					"workspaceService": {
+						"canGroup": true,
+						"isArrangable": true
+					}
+				},
+				"components": {
+					"App Launcher": {
+						"launchableByUser": true
+					},
+					"Window Manager": {
+						"persistWindowState": false,
+						"FSBLHeader": true,
+						"showLinker": true
+					},
+					"Toolbar": {
+						"iconClass": "ff-component"
+					}
+				}
+			}
+		},
+		"Bloomberg Bridge Release": {
+			"window": {
+				"id": "Bloomberg Bridge Release",
+				"windowType": "native",
+				"alias": "bloomberg_bridge",
+				"arguments": "",
+				"options": {
+					"autoShow": true,
+					"alwaysOnTop": false,
+					"resizable": true,
+					"showTaskbarIcon": true
+				},
+				"addToWorkspace": false,
+				"height": 250,
+				"width": 300
+			},
+			"component": {
+				"spawnOnStartup": false
+			},
+			"foreign": {
+				"services": {
+					"workspaceService": {
+						"canGroup": true,
+						"isArrangable": true
+					}
+				},
+				"components": {
+					"App Launcher": {
+						"launchableByUser": true
+					},
+					"Window Manager": {
+						"persistWindowState": false,
+						"FSBLHeader": true,
+						"showLinker": true
+					},
+					"Toolbar": {
+						"iconClass": "ff-component"
+					}
+				}
+			}
+		}
+	}
+}

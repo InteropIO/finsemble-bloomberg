@@ -1,37 +1,32 @@
 {
-    "name": "fpe-bloomberg",
-    "version": "2.6.11",
-    "description": "",
-    "main": "",
-    "scripts": {
-        "start": "node server.js",
-        "watch:docs-src": "npx nodemon --exec \"npm run build:docs\" --watch BloombergBridge -e cs,md,yml,css",
-        "docs:dev": "npm-run-all -p watch:docs-src serve:docs",
-        "dev:docs": "npm run docs:dev",
-        "build:docs": "docfx BloombergBridge/docfx_project/docfx.json",
-        "serve:docs": "browser-sync start --server BloombergBridge/docfx_project/fpe-bloomberg/ --files BloombergBridge/docfx_project/fpe-bloomberg/"
-    },
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "express": "4.17.1",
-        "cors": "2.8.5"
-    },
-    "devDependencies": {
-        "npm-run-all": "^4.1.5",
-        "browser-sync": "^2.26.7",
-        "nodemon": "^2.0.2"
-    },
-    "nodemonConfig": {
-        "ignore": [
-            "BloombergBridge/bin",
-            "BloombergBridge/FinsembleResources",
-            "BloombergBridge/obj",
-            "BloombergBridge/Properties",
-            "BloombergBridge/*.config",
-            "BloombergBridge/*.csproj",
-            "BloombergBridge/docfx_project/fpe-bloomberg",
-            "BloombergBridge/docfx_project/obj"
-        ]
-    }
+  "name": "finsemble-bloomberg",
+  "version": "4.3.0",
+  "description": "Finsemble's Bloomberg Terminal Connect Integration",
+  "scripts": {
+    "watch": "node ./fpe-scripts/watch.js",
+    "docs": "npx typedoc"
+  },
+  "keywords": [
+    "Finsemble",
+    "Bloomberg",
+    "Terminal connect"
+  ],
+  "author": "ChartIQ <support@finsemble.com> (https://www.chartiq.com/finsemble/)",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "node": ">=10"
+  },
+  "devDependencies": {
+    "chokidar": "^3.4.0",
+    "fs-extra": "^9.0.0",
+    "typedoc": "^0.17.7",
+    "typedoc-plugin-markdown": "^2.3.1"
+  },
+  "dependencies": {
+    "@chartiq/finsemble": "^4.3.0",
+    "@types/node": "^14.0.13",
+    "react-autosuggest": "^10.0.2",
+    "react-tabs": "^3.1.1",
+    "typescript": "^3.9.5"
+  }
 }

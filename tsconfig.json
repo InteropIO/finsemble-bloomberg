@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "es2017",
+		"module": "commonjs",
+		"noImplicitAny": true,
+		"removeComments": true,
+		"preserveConstEnums": true,
+		"sourceMap": true,
+		"allowJs": true,
+		"types": [
+			"@chartiq/finsemble"
+		],
+	},
+	"typedocOptions": {
+		"out": "./docs",
+		"readme": "./docs_src/README.md",
+		"inputFiles": "./src/clients",
+		"mode": "modules",
+		"media": "./docs_src/media",
+	}
+}
