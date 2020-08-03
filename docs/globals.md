@@ -1,6 +1,6 @@
-[fpe-bloomberg](README.md) › [Globals](globals.md)
+[finsemble-bloomberg](README.md) › [Globals](globals.md)
 
-# fpe-bloomberg
+# finsemble-bloomberg
 
 ## Index
 

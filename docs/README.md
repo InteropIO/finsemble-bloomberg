@@ -117,7 +117,7 @@ To use the watch script:
 1) Clone the Finsemble [seed-project](https://github.com/ChartIQ/finsemble-seed) (if you don't already have a local version - see our [Getting Started Tutorial](https://www.chartiq.com/tutorials/?slug=finsemble))
 
 2) Clone this repo
-   - **our advice:** clone this repo to the same directory as the seed-project e.g *myfolder/finsemble-seed* & *myfolder/fpe-bloomberg*
+   - **our advice:** clone this repo to the same directory as the seed-project e.g *myfolder/finsemble-seed* & *myfolder/finsemble-bloomberg*
 
 3) If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project. If you intend to build an debug the \(.Net\) BloombergBridge, also set the value of the `$bloombergBridgeFolder` variable to point to the [BloombergBridge folder](../BloombergBridge) in this project \(see the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables\).
 
@@ -126,7 +126,7 @@ To use the watch script:
 npm install react-autosuggest
 ```
 
-5) Run `npm install` then run `npm run watch` in the _fpe-bloomberg_ project's directory
+5) Run `npm install` then run `npm run watch` in the _finsemble-bloomberg_ project's directory
 **this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds*
 
 6) Your seed project directory has now been updated with the source files from the integration, run `npm run dev` in your Finsemble seed project's directory to build and run locally.
