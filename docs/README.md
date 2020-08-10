@@ -1,6 +1,6 @@
-[Finsemble-Bloomberg](README.md) › [Globals](globals.md)
+[finsemble-bloomberg](README.md) › [Globals](globals.md)
 
-# Finsemble Bloomberg Integration
+# finsemble-bloomberg
 
 [![Finsemble Logo](https://documentation.chartiq.com/finsemble/styles/img/Finsemble_Logo_Dark.svg)](https://documentation.chartiq.com/finsemble/)
 
@@ -49,7 +49,7 @@ A number of examples of using the integration are provided:
 - **[testBloomberg](../src/components/testBloomberg)**: A test component demonstrating use of all API functions.
 - **[Bloomberg Terminal](../src/components/Bloomberg%20Terminal)**: An example configuration for launching the Bloomberg terminal itself
 - **[Coming Soon: Desktop service for FDC3 integration](#)**: An example service that works with the FDC3 channel matcher service to facilitate context sharing with FDC3 system channels in Finsemble and provides an example of instrument/security translation that may be required. See the [Finsemble FDC3 Implementation](https://github.com/ChartIQ/finsemble-fdc3) project for more details on the FDC3 channel matcher service.
-- **[Coming Soon: Security finder example](#)**: An example that demonstrates the use of the SecurityLookup function of the Bloomberg Bridge to implement a search with typeahead for Bloomberg sercurities, which may be used to set the context of launchpad groups.
+- **[Security finder example](../src/components/SecurityFinder)**: An example that demonstrates the use of the SecurityLookup function of the Bloomberg Bridge to implement a search with typeahead for Bloomberg securities, which may be used to set the context of launchpad groups, perform commands or add to worksheets. It can also receive context via the Finsemble Linker and help you resolve it to Bloomberg Security
 
 ## Installation
 This project contains:
@@ -64,7 +64,7 @@ In order to use the Javascript and Typescript examples, you can either copy the 
 
 ### Files
 ```
-finsmble-bloomberg
+finsemble-bloomberg
 |   .gitignore                   - gitignore file configured for both javascript and .Net projects
 |   BloombergIntegration.sln     - Visual studio solution for building the .Net Bloomberg Bridge app  
 |   finsemble.config.json        - Watch script config and Finsemble examples config imports 
@@ -100,10 +100,10 @@ finsmble-bloomberg
     |           BloombergBridgeClient.ts - Typescript client class and preload for use with BloombergBridge
     |
     └───components
-    |   └───Bloomberg Bridge         - Congfigs for launching the Bloomberg Bridge
+    |   └───Bloomberg Bridge         - Configs for launching the Bloomberg Bridge
     |   └───Bloomberg Terminal       - Example config for launching the Bloomberg terminal
+    |   └───SecurityFinder           - Security lookup example, demonstrating a realistic use-case
     |   └───testBloomberg            - Test component demonstrating use of all API functions
-    |   └───SecurityFinder           - Coming soon!
     |
     └───services                     
         └───BloombergFDC3Service     - Coming soon!
@@ -121,13 +121,13 @@ To use the watch script:
 
 3) If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project. If you intend to build an debug the \(.Net\) BloombergBridge, also set the value of the `$bloombergBridgeFolder` variable to point to the [BloombergBridge folder](../BloombergBridge) in this project \(see the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables\).
 
-4) To use the SecurityFinder example, you will also need to install a dependency in your seed project by running:
-```
-npm install react-autosuggest
-```
-
-5) Run `npm install` then run `npm run watch` in the _finsemble-bloomberg_ project's directory
+4) Run `npm install` then run `npm run watch` in the _finsemble-bloomberg_ project's directory
 **this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds*
+
+5) To build and run the SecurityFinder example, you will also need to install dependencies in your seed project by running:
+    ```
+	npm install react-tabs react-select react-autosuggest
+	```
 
 6) Your seed project directory has now been updated with the source files from the integration, run `npm run dev` in your Finsemble seed project's directory to build and run locally.
 
@@ -165,10 +165,10 @@ To manually install the integration into your Finsemble project:
     ```Javascript
     import BloombergBridgeClient from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
     ```
-    
-	**Note:** To use the SecurityFinder example, you will also need to install a dependency in your seed project by running:
-	```
-	npm install react-autosuggest
+
+6) To build and run the SecurityFinder example, you will also need to install dependencies in your project by running:
+    ```
+	npm install react-tabs react-select react-autosuggest
 	```
 
 ## Building and Deploying the Bloomberg Bridge
@@ -244,6 +244,20 @@ FSBL.Clients.BloombergBridgeClient
 For the purposes of the following examples you can create a reference to it as follows:
 ```Javascript
 let bbg = FSBL.Clients.BloombergBridgeClient;
+```
+
+As setup of the client occurs when the Finsemble clients are themselves ready (on teh FSBLReady event), the preload will dispatch its own event when the BloombergBridgeClient is ready: `BloombergBridgeClientReady`. To avoid race conditions, you should wait on this event, rather than `FSBLReady`, in your components, e.g.:
+
+```Javascript
+window.addEventListener("BloombergBridgeClientReady", BBGReady);
+
+function BBGReady() {
+	//Do your setup, which can assume both FSBL and the BloombergBridgeClient are ready e.g.:
+	ReactDOM.render(
+		<SecurityFinder />,
+		document.getElementById('root')
+	);
+}
 ```
 
 #### Instantiating the BloombergBridgeClient
