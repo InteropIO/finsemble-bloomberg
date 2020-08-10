@@ -246,7 +246,7 @@ For the purposes of the following examples you can create a reference to it as f
 let bbg = FSBL.Clients.BloombergBridgeClient;
 ```
 
-As setup of the client occurs when the Finsemble clients are themselves ready (on teh FSBLReady event), the preload will dispatch its own event when the BloombergBridgeClient is ready: `BloombergBridgeClientReady`. To avoid race conditions, you should wait on this event, rather than `FSBLReady`, in your components, e.g.:
+As setup of the client occurs when the Finsemble clients are themselves ready (on the FSBLReady event), the preload will dispatch its own event when the BloombergBridgeClient is ready: `BloombergBridgeClientReady`. To avoid race conditions, you should wait on this event, rather than `FSBLReady`, in your components, e.g.:
 
 ```Javascript
 window.addEventListener("BloombergBridgeClientReady", BBGReady);
