@@ -1,5 +1,5 @@
 {
-  "seedProjectDirectory": "../finsemble-seed",
+  "seedProjectDirectory": "../client-POCs/Finsemble-CreditSuisse-POC",
   "bloombergBridgeFolder": "C:/Users/admin/Documents/code/finsemble-bloomberg/BloombergBridge",
   "importConfig": [
     "$applicationRoot/components/Bloomberg Terminal/config.json",

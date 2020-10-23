@@ -4,7 +4,9 @@
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
     "watch": "node ./fpe-scripts/watch.js",
-    "docs": "npx typedoc"
+    "docs": "npx typedoc",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lintTS": "tsc --noemit && eslint . --ext .ts,.tsx"
   },
   "keywords": [
     "Finsemble",
@@ -17,16 +19,24 @@
     "node": ">=10"
   },
   "devDependencies": {
+    "@finsemble/finsemble-core": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.5.0",
+    "@typescript-eslint/parser": "^4.5.0",
     "chokidar": "^3.4.0",
+    "eslint": "^7.11.0",
+    "eslint-config-airbnb-typescript": "^12.0.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "fs-extra": "^9.0.0",
     "typedoc": "^0.17.7",
-    "typedoc-plugin-markdown": "^2.3.1"
+    "typedoc-plugin-markdown": "^2.3.1",
+    "typescript": "^4.0.3"
   },
   "dependencies": {
-    "@chartiq/finsemble": "^4.3.0",
     "@types/node": "^14.0.13",
     "react-autosuggest": "^10.0.2",
-    "react-tabs": "^3.1.1",
-    "typescript": "^3.9.5"
+    "react-tabs": "^3.1.1"
   }
 }
