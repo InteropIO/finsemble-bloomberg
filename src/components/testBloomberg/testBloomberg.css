@@ -6,9 +6,8 @@ body {
 	font-weight: var(--procMonitor-font-weight);
 	font-family: var(--font-family);
 	color: var(--procMonitor-font-color);
-	background-color: var(--procMonitor-background-color);
+	background-color: var(--core-primary-2);
 	user-select: none;
-	background-color: var(--content-background-color);
 }
 
 #container {
