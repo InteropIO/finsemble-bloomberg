@@ -6,5 +6,10 @@
 			"alias": "bloomberg_bridge",
 			"target": "BloombergBridge.exe"
 		}
-	]
+	],
+	"finsemble": {
+		"custom": {
+            "bloombergBridgeFolder": "C:/Users/admin/Documents/code/finsemble-bloomberg/BloombergBridge"
+        }
+	}
 }

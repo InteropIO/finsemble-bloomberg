@@ -1,15 +1,19 @@
 {
 	"compilerOptions": {
-		"target": "es2017",
-		"module": "commonjs",
-		"noImplicitAny": true,
-		"removeComments": true,
-		"preserveConstEnums": true,
-		"sourceMap": true,
 		"allowJs": true,
-		"types": [
-			"@chartiq/finsemble"
-		],
+		"allowSyntheticDefaultImports": true,
+		"jsx": "react",
+		"moduleResolution": "node",
+		"noImplicitAny": true,
+		"preserveConstEnums": true,
+		"removeComments": true,
+		"sourceMap": true,
+		"strict": true,
+		"target": "es2017",
+		"typeRoots": [
+			"node_modules/@types",
+			"node_modules/@finsemble/finsemble-core/types"
+		]
 	},
 	"typedocOptions": {
 		"out": "./docs",
@@ -17,5 +21,9 @@
 		"inputFiles": "./src/clients",
 		"mode": "modules",
 		"media": "./docs_src/media",
-	}
+	},
+	"include": [
+		"src/**/*"
+	],
+	"exclude": []
 }

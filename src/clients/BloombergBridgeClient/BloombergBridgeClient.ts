@@ -1,16 +1,21 @@
-import type { IRouterClient, RouterMessage } from '@chartiq/finsemble/dist/types/clients/IRouterClient';
-import type { ILogger } from '@chartiq/finsemble/dist/types/clients/ILogger';
 
-/** Timeout in milliseconds for terminal connection checks that will cause a checkConnection 
+
+import "@finsemble/finsemble-core"
+import { ILogger } from "clients/ILogger";
+import { IRouterClient, RouterMessage } from "clients/IRouterClient";
+
+// import type { ILogger } from "clients/ILogger";
+
+/** Timeout in milliseconds for terminal connection checks that will cause a checkConnection
  * call to fail. */
-const CONNECTION_CHECK_TIMEOUT: number = 1000;
+const CONNECTION_CHECK_TIMEOUT = 1000;
 // tslint:disable:no-console
 
 /**
  * Interface representing an event handler for connection events, which are fired
  * when the BloombergBridge connects or disconnects from the terminal.
  */
-interface BBGConnectionEventListener {
+interface BBGConnectionEventListener extends StandardCallback {
     (
         /** Errors received from Terminal connect - most likely on registration of
          * the listener. */
@@ -27,14 +32,14 @@ interface BBGConnectionEventListener {
 /**
  * Interface representing an event handler for Bloomberg group events.
  */
-interface BBGGroupEventListener {
+interface BBGGroupEventListener extends StandardCallback {
     (
-        /** Errors received from Terminal connect - most likely on registration of 
+        /** Errors received from Terminal connect - most likely on registration of
          * the listener. */
         err: (string | Error),
-        /** Details relating to BlpComponentContextChangedEventArgs messages received from 
-         * Terminal connect. These will usually relate to single group and reflect changes 
-         * in the group's context or creation of a group, which will generate context changed 
+        /** Details relating to BlpComponentContextChangedEventArgs messages received from
+         * Terminal connect. These will usually relate to single group and reflect changes
+         * in the group's context or creation of a group, which will generate context changed
          * event, but for a group that did not previously exist.*/
         response: RouterMessage<{ group: BBGGroup, groups: BBGGroup[] }>,
     ): void;
@@ -67,17 +72,17 @@ interface BBGGroup {
 /**
  * Client class for communicating with the Finsemble Bloomberg Bridge over the the Finsemble Router,
  * which in turn communicates with the Bloomberg Terminal via the Terminal Connect and BLP APIs.
- * 
+ *
  * This Class may either be imported into code and initialized by passing in an instance
- * of the Finsemble RouterClient and Logger (e.g. in Finsemble Custom Desktop Service) or 
+ * of the Finsemble RouterClient and Logger (e.g. in Finsemble Custom Desktop Service) or
  * used as a preload to be applied to a component, where it will be automatically initialized
  * via instances of the RouterClient and Logger referenced from `FSBL.Clients`.
  */
 export default class BloombergBridgeClient {
-    private connectionEventListener: BBGConnectionEventListener = null;
-    private groupEventListener: BBGGroupEventListener = null;
-    private routerClient: IRouterClient = null;
-    private logger: ILogger = null;
+    private connectionEventListener: BBGConnectionEventListener | null = null;
+    private groupEventListener: BBGGroupEventListener | null = null;
+    private routerClient: IRouterClient | null = null;
+    private logger: ILogger | null = null;
 
     /**
      * BloombergBridgeClient constructor.
@@ -90,7 +95,7 @@ export default class BloombergBridgeClient {
 	 * ```Javascript
 	 * let bbg = new BloombergBridgeClient(FSBL.Clients.RouterClient, FSBL.Clients.Logger);
 	 * ```
-	 * 
+	 *
 	 * Instantiating the client in a Finsemble service:
 	 * ```Javascript
 	 * const Finsemble = require("@chartiq/finsemble");
@@ -141,7 +146,7 @@ export default class BloombergBridgeClient {
         }
 
         console.log('Added new event listener for Bloomberg connection events.');
-        this.connectionEventListener = (err, response) => {
+        this.connectionEventListener = (err: any, response: any) => {
             if (err) {
                 console.error('Received Bloomberg connection error: ', err);
             } else {
@@ -149,7 +154,7 @@ export default class BloombergBridgeClient {
             }
             cb(err, response);
         };
-        this.routerClient.addListener('BBG_connection_status', this.connectionEventListener);
+        this.routerClient?.addListener('BBG_connection_status', this.connectionEventListener);
     }
 
     /**
@@ -161,7 +166,7 @@ export default class BloombergBridgeClient {
      */
     removeConnectionEventListener() {
         if (this.connectionEventListener) {
-            this.routerClient.removeListener('BBG_connection_status', this.connectionEventListener);
+            this.routerClient?.removeListener('BBG_connection_status', this.connectionEventListener);
             console.log('Removed Bloomberg connection event listener');
         } else {
             console.warn('Tried to remove non-existent connection event listener');
@@ -170,7 +175,7 @@ export default class BloombergBridgeClient {
 
 
     /**
-     * Set a handler function for Launchpad group context changed events, which 
+     * Set a handler function for Launchpad group context changed events, which
      * are fired when a group's context changes or a new group is created.
      *
      * Note that only one handler function is permitted, hence calling
@@ -196,7 +201,7 @@ export default class BloombergBridgeClient {
             this.removeGroupEventListener();
         }
         console.log('Set new listener for Bloomberg group context events...');
-        this.groupEventListener = (err, response) => {
+        this.groupEventListener = (err: any, response: any) => {
             if (err) {
                 console.error('Received Bloomberg group context error: ', err);
             } else {
@@ -204,7 +209,7 @@ export default class BloombergBridgeClient {
             }
             cb(err, response);
         };
-        this.routerClient.addListener('BBG_group_context_events', this.groupEventListener);
+        this.routerClient?.addListener('BBG_group_context_events', this.groupEventListener);
     }
 
     /**
@@ -216,7 +221,7 @@ export default class BloombergBridgeClient {
      */
     removeGroupEventListener() {
         if (this.groupEventListener) {
-            this.routerClient.removeListener('BBG_group_context_events', this.groupEventListener);
+            this.routerClient?.removeListener('BBG_group_context_events', this.groupEventListener);
             console.log('Removed group context event listener');
         } else {
             console.warn('Tried to remove non-existent group context event listener');
@@ -228,7 +233,7 @@ export default class BloombergBridgeClient {
      * logged in.
      * @param cb Callback for connection response that will return response as true if we are
      * connected and logged in.
-	 * @example 
+	 * @example
 	 * ```Javascript
 	 * let checkConnectionHandler = (err, loggedIn) => {
 	 *     if (!err && loggedIn) {
@@ -240,7 +245,7 @@ export default class BloombergBridgeClient {
 	 * bbg.checkConnection(checkConnectionHandler);
 	 * ```
      */
-    checkConnection(cb: (err: string | CallbackError | Error, response: boolean) => void) {
+    checkConnection(cb: (err: string | CallbackError | Error | null, response: boolean | null) => void) {
         console.log('Checking connection status...');
 
         // if we don't get a response something is wrong
@@ -249,7 +254,7 @@ export default class BloombergBridgeClient {
             cb('Connection check timeout', null);
         }, CONNECTION_CHECK_TIMEOUT);
 
-        this.routerClient.query('BBG_connection_status', {}, (err: string | CallbackError | Error, resp: { data?: {loggedIn: boolean}}) => {
+        void this.routerClient?.query('BBG_connection_status', {}, (err, resp: { data?: { loggedIn: boolean } }) => {
             clearTimeout(timeout);
             if (err) {
                 console.warn('Received error when checking connection status: ', err);
@@ -277,11 +282,12 @@ export default class BloombergBridgeClient {
      */
     queryBloombergBridge(
         message: { function: string },
-        cb: (err: string | Error, response: { }) => void,
+        // cb: (err: string | Error, response: unknown) => void,
+        cb: StandardCallback,
     ) {
         console.log('BBG_run_terminal_function query:', message);
-        this.logger.log('BBG_run_terminal_function query:', message);
-        this.routerClient.query('BBG_run_terminal_function', message, this.apiResponseHandler(cb));
+        this.logger?.log('BBG_run_terminal_function query:', message);
+        void this.routerClient?.query('BBG_run_terminal_function', message, this.apiResponseHandler(cb));
     }
 
     /**
@@ -291,23 +297,23 @@ export default class BloombergBridgeClient {
      * @param cb Callback
 	 * @private
      */
-    apiResponseHandler(cb: (err: string | Error, response: { status: boolean }) => void) {
-        return (err: string | Error, response: { data: { status: boolean } }) => {
+    apiResponseHandler(cb: StandardCallback) {
+        return (err: StandardError, response: { data: { status: boolean } }) => {
             if (err) {
                 const errMsg = 'Error returned by BBG_run_terminal_function: ';
                 console.error(errMsg, err);
-                this.logger.error(errMsg, err);
+                this.logger?.error(errMsg, err);
                 cb(err, null);
             } else if (!response || !response.data || !response.data.status) {
                 const errMsg = 'Negative status returned by BBG_run_terminal_function: ';
                 console.warn(errMsg, response);
-				this.logger.warn(errMsg, response);
+                this.logger?.warn(errMsg, response);
                 cb('Command returned negative status', null);
             } else {
                 const msg = 'BBG_run_terminal_function successful, response: ';
                 // tslint:disable-next-line:no-magic-numbers
                 console.log(msg + JSON.stringify(response.data, null, 2));
-                this.logger.log(msg, response);
+                this.logger?.log(msg, response);
                 cb(null, response.data);
             }
         };
@@ -342,7 +348,7 @@ export default class BloombergBridgeClient {
         securities: string[],
         panel: string,
         tails: string,
-        cb: (err: string | Error, response: { status: boolean }) => void,
+        cb: (err: StandardError, response: { status: boolean }) => void,
     ) {
         const message = {
             function: 'RunFunction',
@@ -382,7 +388,7 @@ export default class BloombergBridgeClient {
     runCreateWorksheet(
         worksheetName: string,
         securities: string[],
-        cb: (err: string | Error, response: { status: boolean, worksheet: BBGWorksheet }) => void,
+        cb: (err: StandardError, response: { status: boolean, worksheet: BBGWorksheet }) => void,
     ) {
         const message = {
             function: 'CreateWorksheet',
@@ -418,7 +424,7 @@ export default class BloombergBridgeClient {
      */
     runGetAllWorksheets(
         cb: (
-            err: string | Error,
+            err: StandardError,
             response: { status: boolean, worksheets: BBGWorksheet[] },
         ) => void,
     ) {
@@ -453,7 +459,7 @@ export default class BloombergBridgeClient {
      */
     runGetWorksheet(
         worksheetId: string,
-        cb: (err: string | Error, response: { status: boolean, worksheet: BBGWorksheet }) => void,
+        cb: (err: StandardError, response: { status: boolean, worksheet: BBGWorksheet }) => void,
     ) {
         const message = {
             function: 'GetWorksheet',
@@ -490,7 +496,7 @@ export default class BloombergBridgeClient {
     runReplaceWorksheet(
         worksheetId: string,
         securities: string[],
-        cb: (err: string | Error, response: { status: boolean, worksheet: BBGWorksheet }) => void,
+        cb: (err: StandardError, response: { status: boolean, worksheet: BBGWorksheet }) => void,
     ) {
         const message = {
             function: 'ReplaceWorksheet',
@@ -526,7 +532,7 @@ export default class BloombergBridgeClient {
 	 * ```
      */
     runGetAllGroups(
-        cb: (err: string | Error, response: { status: boolean, groups: BBGGroup[] }) => void,
+        cb: (err: StandardError, response: { status: boolean, groups: BBGGroup[] }) => void,
     ) {
         const message = {
             function: 'GetAllGroups',
@@ -559,7 +565,7 @@ export default class BloombergBridgeClient {
      */
     runGetGroupContext(
         groupName: string,
-        cb: (err: string | Error, response: { status: boolean, group: BBGGroup }) => void,
+        cb: (err: StandardError, response: { status: boolean, group: BBGGroup }) => void,
     ) {
         const message = {
             function: 'GetGroupContext',
@@ -583,7 +589,7 @@ export default class BloombergBridgeClient {
 	 *     if (!err) {
 	 * 	       // You may wish to retrieve the current state of Launchpad group here as Bloomberg
 	 *         // will resolve any security your set and may therefore its value may differ from
-	 *         // what you sent. 
+	 *         // what you sent.
 	 *         bbg.runGetGroupContext(groupName, (err2, response2) => { ... });
 	 *     } else {
 	 *         console.error("Error returned from runSetGroupContext", err);
@@ -595,7 +601,7 @@ export default class BloombergBridgeClient {
         groupName: string,
         value: string,
         cookie: string | null,
-        cb: (err: string | Error, response: { status: boolean}) => void,
+        cb: (err: StandardError, response: { status: boolean }) => void,
     ) {
         const message: {function: string, name: string, value: string, cookie?: string} = {
             function: 'SetGroupContext',
@@ -611,8 +617,8 @@ export default class BloombergBridgeClient {
     }
 
     /**
-     * Search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return 
-	 * results in around ~120-150ms and maybe used, for example, to power an autocomplete or 
+     * Search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return
+	 * results in around ~120-150ms and maybe used, for example, to power an autocomplete or
 	 * typeahead search.
      * @param security The string to lookup a security for
      * @param cb Callback
@@ -637,7 +643,7 @@ export default class BloombergBridgeClient {
      */
     runSecurityLookup(
         security: string,
-        cb: (err: string | Error,
+        cb: (err: StandardError,
             response: { status: boolean, results: [{name: string, type: string}] }) => void,
     ) {
         const message: { function: string, security: string } = {
