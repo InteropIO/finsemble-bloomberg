@@ -1,5 +1,5 @@
 {
-  "seedProjectDirectory": "../finsemble-seed",
+  "seedProjectDirectory": "../Finsemble-ManGroup-POC",
   "importConfig": [
     "$applicationRoot/components/Bloomberg Terminal/config.json",
     "$applicationRoot/components/Bloomberg Bridge/config.json",

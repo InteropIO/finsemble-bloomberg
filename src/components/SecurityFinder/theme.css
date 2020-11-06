@@ -103,7 +103,7 @@
 }
 
 .react-tabs__tab--selected {
-	background-color: var(--accent-primary-2);
+	background-color: var(--core-primary);
 	border-color: var(--core-primary-3);
 	color: white;
 	border-radius: 5px 5px 0 0;
@@ -258,7 +258,7 @@
 	transition: all .2s ease;
 }
 #status{
-	color: var(--core-primary);
+	color: var(--core-secondary);
 	font-size: 12px;
 	padding: 5px 0 0 0;
 }
