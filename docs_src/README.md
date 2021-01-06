@@ -1,4 +1,4 @@
-[![Finsemble Logo](https://documentation.chartiq.com/finsemble/styles/img/Finsemble_Logo_Dark.svg)](https://documentation.chartiq.com/finsemble/)
+![Finsemble Logo](https://documentation.finsemble.com/styles/img/Finsemble+Cosaic.svg)
 
 ## Finsemble's Bloomberg Terminal Connect Integration
 Welcome to Finsemble's integration with [Bloomberg Terminal Connect](https://www.bloomberg.com/terminal-connect/), which enables Finsemble components and services to interoperate with Bloomberg panels or Launchpad components, allowing you to build powerful workflows for your users that avoid data re-entry and copy/paste errors.
