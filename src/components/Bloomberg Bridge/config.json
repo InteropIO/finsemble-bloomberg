@@ -43,7 +43,7 @@
 		},
 		"Bloomberg Bridge Release": {
 			"window": {
-				"id": "Bloomberg Bridge Release",
+				"id": "Bloomberg Bridge",
 				"windowType": "native",
 				"alias": "bloomberg_bridge",
 				"arguments": "",
@@ -58,7 +58,8 @@
 				"width": 300
 			},
 			"component": {
-				"spawnOnStartup": false
+				"spawnOnStartup": false,
+				"displayName": "Bloomberg Bridge"
 			},
 			"foreign": {
 				"services": {

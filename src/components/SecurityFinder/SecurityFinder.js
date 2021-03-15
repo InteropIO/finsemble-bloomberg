@@ -41,7 +41,9 @@ class SecurityFinder extends React.Component {
 			worksheet: null,
 			worksheets: [],
 			worksheetError: "",
-			worksheetSuccess: ""
+			worksheetSuccess: "",
+			linkerToLaunchpad: true,
+			launchpadToLinker: true
 		};
 
 		this.handleTabSelected = this.handleTabSelected.bind(this);
@@ -64,6 +66,9 @@ class SecurityFinder extends React.Component {
 		this.getWorksheets = this.getWorksheets.bind(this);
 		this.handleWorksheetInput = this.handleWorksheetInput.bind(this);
 		this.handleAddToWorksheet = this.handleAddToWorksheet.bind(this);
+
+		this.handleLinkerToLaunchpad = this.handleLinkerToLaunchpad.bind(this);
+		this.handleLaunchpadToLinker = this.handleLaunchpadToLinker.bind(this);
 
 		this.setupConnectionLifecycleChecks();
 		this.subscribeToLinker();
@@ -105,7 +110,7 @@ class SecurityFinder extends React.Component {
 		this.checkConnection();
 	};
 
-	loadSuggestions(value) {
+	loadSuggestions(value, cb) {
 		//could cancel a previous request here
 
 		this.setState({
@@ -133,6 +138,7 @@ class SecurityFinder extends React.Component {
 					suggestions: securities
 				});
 			}
+			if (cb) { cb();}
 		});
 	}
 
@@ -142,8 +148,8 @@ class SecurityFinder extends React.Component {
 		});
 	};
 
-	onSuggestionsFetchRequested = ({ value }) => {
-		this.loadSuggestions(value);
+	onSuggestionsFetchRequested = ({ value }, cb) => {
+		this.loadSuggestions(value, cb);
 	};
 
 	// Autosuggest will call this function every time you need to clear suggestions.
@@ -227,7 +233,29 @@ class SecurityFinder extends React.Component {
 
 	setupGroupEventListener() {
 		FSBL.Clients.BloombergBridgeClient.setGroupEventListener((err, resp) => {
-			//ignore events - just refresh the groups list
+			if (this.state.launchpadToLinker) {
+				//push context to linker (from any Launchpad group) if its a security
+				let logEntry = "\n";
+				let logFn = console.log;
+				if (err) {
+					logEntry += "Error: " + JSON.stringify(err, null, 2) + "\n---";
+					logFn = console.error;
+				} else if (resp.data.group && resp.data.group.type == "monitor") {
+					logEntry += "Ignoring Monitor event\n" + JSON.stringify(resp.data, null, 2) + "\n---";
+				} else if (resp.data.group && resp.data.group.type == "security") {
+					this.setState({ value: resp.data.group.value, suppressLinkerLoops: null });
+					logEntry += "Received security " + resp.data.group.value + " from group: " + 
+						JSON.stringify(resp.data.group, null, 2) + "\n---";
+					this.handleLinkerPublish();
+					this.onSuggestionsFetchRequested({ value: resp.data.group.value, reason: 'input-changed' });
+				} else {
+					logEntry += "Ignoring unrecognized event:\n" + JSON.stringify(resp.data, null, 2) + "\n---";
+					logFn = console.warn;
+				}
+				logFn(logEntry);
+			}
+
+			//refresh the groups list
 			this.getLaunchPadGroups();
 		});
 	};
@@ -274,15 +302,21 @@ class SecurityFinder extends React.Component {
 					//assume we are receiving a basic string via the linker and set it as the search term
 					console.log("received via linker: ", data, envelope);
 					this.setState({ value: data, suppressLinkerLoops: null });
-					this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' });
+					this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' }, () => {
+						if (this.state.linkerToLaunchpad) {
+							//if we got suggestions back, push the value to the selected launchpad group:
+							if (this.state.suggestions && this.state.suggestions[0]){
+								this.handleSetGroupContext();
+							}
+						}
+					});
 				}
 			}
 		});
 	}
 
 	handleLinkerPublish() {
-		if (this.state.launchPadGroup && this.state.value) {
-
+		if (this.state.value) {
 			//just publish the first token as a ticker symbol
 			let value = this.state.value;
 			if (value.indexOf(' ') > -1) {
@@ -410,6 +444,22 @@ class SecurityFinder extends React.Component {
 		return true;
 	}
 
+	handleLinkerToLaunchpad(changeEvent) {
+		this.setState(prevState => {
+			return {	
+				linkerToLaunchpad: !prevState.linkerToLaunchpad
+			};
+		});
+	}
+
+	handleLaunchpadToLinker(changeEvent) {
+		this.setState(prevState => {
+			return {
+				launchpadToLinker: !prevState.launchpadToLinker
+			}
+		});
+	}
+
 	render() {
 		const {
 			value, suggestions,
@@ -417,7 +467,8 @@ class SecurityFinder extends React.Component {
 			commandMnemonic, commandPanel, commandTails, commandError, commandSuccess,
 			launchPadGroup, launchPadGroups, groupError, groupSuccess,
 			linkerError, linkerSuccess,
-			worksheet, worksheets, worksheetError, worksheetSuccess
+			worksheet, worksheets, worksheetError, worksheetSuccess,
+			launchpadToLinker, linkerToLaunchpad
 		} = this.state;
 
 		// Autosuggest will pass through all these props to the input.
@@ -550,15 +601,28 @@ class SecurityFinder extends React.Component {
 						<TabPanel>
 							<div className="controlsColumn">
 								<div className="controlsRow">
-									<label className="inputLabel flex-dont-grow">
-										Publish via Finsemble Linker:&nbsp;
+									<label className="inputLabel">
+										<input
+											type="checkbox"
+											name="linkerToLaunchpadCheckbox"
+											onChange={this.handleLinkerToLaunchpad}
+											defaultChecked={true}
+											className="form-check-input"
+										/>
+										Auto-publish Linker shares to selected Launchpad group
 									</label>
 								</div>
-								<div className="controlsRow justify-flex-start">
-									<button className="button" id="runCommandButton" onClick={this.handleLinkerPublish}>publish</button>
-									&nbsp;
-									<label id="linkerError" className="errorLabel">{linkerError}</label>
-									<label id="linkerSuccess" className="successLabel">{linkerSuccess}</label>
+								<div className="controlsRow">
+									<label className="inputLabel">
+										<input
+											type="checkbox"
+											name="launchpadToLinkerCheckbox"
+											onChange={this.handleLaunchpadToLinker}
+											defaultChecked={true}
+											className="form-check-input"
+										/>
+										Auto-publish all Launchpad events to Linker
+									</label>
 								</div>
 							</div>
 						</TabPanel>
