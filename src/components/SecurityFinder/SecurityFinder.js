@@ -2,6 +2,7 @@ import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import Select from 'react-select'
+import { fdc3Check, fdc3OnReady } from './utils'
 
 /** When a suggestion is clicked, Autosuggest needs to populate the input
  *  field based on the clicked suggestion (such that the search will return
@@ -294,28 +295,48 @@ class SecurityFinder extends React.Component {
 	};
 
 	subscribeToLinker() {
-		FSBL.Clients.LinkerClient.subscribe("symbol", (data, envelope) => {
-			if (!envelope.originatedHere()) {
-				//As we're modifying the symbol for sharing, we should suppress any copies of it we receive back
-				let suppressLinkerLoops = this.state.suppressLinkerLoops;
-				if (!suppressLinkerLoops || (Date.now() - suppressLinkerLoops.time > 1500) || suppressLinkerLoops.value != data) {
-					//assume we are receiving a basic string via the linker and set it as the search term
-					console.log("received via linker: ", data, envelope);
-					this.setState({ value: data, suppressLinkerLoops: null });
-					this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' }, () => {
-						if (this.state.linkerToLaunchpad) {
-							//if we got suggestions back, push the value to the selected launchpad group:
-							if (this.state.suggestions && this.state.suggestions[0]){
-								this.handleSetGroupContext();
-							}
-						}
-					});
-				}
-			}
-		});
+        if (window.usingFDC3) {
+            fdc3OnReady(
+                () => fdc3.addContextListener(context => {
+                    if (context.type === 'fdc3.instrument') {
+                        //setContext(context.id.ticker)
+                        data = context.id.BBG
+                        this.setState({ value: data, suppressLinkerLoops: null });
+                        this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' }, () => {
+                            if (this.state.linkerToLaunchpad) {
+                                //if we got suggestions back, push the value to the selected launchpad group:
+                                if (this.state.suggestions && this.state.suggestions[0]){
+                                    this.handleSetGroupContext();
+                                }
+                            }
+                        });
+                    }
+                })
+            )
+        } else {
+            FSBL.Clients.LinkerClient.subscribe("symbol", (data, envelope) => {
+                if (!envelope.originatedHere()) {
+                    //As we're modifying the symbol for sharing, we should suppress any copies of it we receive back
+                    let suppressLinkerLoops = this.state.suppressLinkerLoops;
+                    if (!suppressLinkerLoops || (Date.now() - suppressLinkerLoops.time > 1500) || suppressLinkerLoops.value != data) {
+                        //assume we are receiving a basic string via the linker and set it as the search term
+                        console.log("received via linker: ", data, envelope);
+                        this.setState({ value: data, suppressLinkerLoops: null });
+                        this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' }, () => {
+                            if (this.state.linkerToLaunchpad) {
+                                //if we got suggestions back, push the value to the selected launchpad group:
+                                if (this.state.suggestions && this.state.suggestions[0]){
+                                    this.handleSetGroupContext();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
 	}
 
-	handleLinkerPublish() {
+	handleLinkerPublish() {        
 		if (this.state.value) {
 			//just publish the first token as a ticker symbol
 			let value = this.state.value;
@@ -323,20 +344,38 @@ class SecurityFinder extends React.Component {
 				value = value.substring(0, value.indexOf(' '));
 			}
 
-			FSBL.Clients.LinkerClient.publish({ dataType: "symbol", data: value }, (err, resp) => {
-				this.setState({
-					suppressLinkerLoops: {
-						value, time: Date.now()
-					}
-				});
-				if (err) {
-					console.error(`Unable to publish via linker, error: `, err);
-					this.setState({ linkerError: "No LaunchPad group selected", linkerSuccess: "" });
-				} else {
-					console.log(`${value} published via linker to topic 'symbol'`, resp);
-					this.setState({ linkerError: "", linkerSuccess: `${value} published to topic 'symbol'` });
-				}
-			});
+            if (window.usingFDC3) {
+                fdc3OnReady(() => fdc3.broadcast({
+                    "type": "fdc3.instrument",
+                    "name": this.state.value,
+                    "id": {
+                        "ticker": value,
+                        "BBG": this.state.value
+                    }
+                }));
+                // fdc3OnReady(
+                //     () => fdc3.addIntentListener('Bloomberg', context => {
+                //         if (context.type === 'fdc3.instrument') {
+                //             setContext(context.id.ticker)
+                //         }
+                //     })
+                // )
+            } else{
+                FSBL.Clients.LinkerClient.publish({ dataType: "symbol", data: value }, (err, resp) => {
+                    this.setState({
+                        suppressLinkerLoops: {
+                            value, time: Date.now()
+                        }
+                    });
+                    if (err) {
+                        console.error(`Unable to publish via linker, error: `, err);
+                        this.setState({ linkerError: "No LaunchPad group selected", linkerSuccess: "" });
+                    } else {
+                        console.log(`${value} published via linker to topic 'symbol'`, resp);
+                        this.setState({ linkerError: "", linkerSuccess: `${value} published to topic 'symbol'` });
+                    }
+                });
+            }
 		} else if (!this.state.value) {
 			console.error(`Unable to publish to linker, no security value set`);
 			this.setState({ linkerError: "No security value set, search for a security first", linkerSuccess: "" });
