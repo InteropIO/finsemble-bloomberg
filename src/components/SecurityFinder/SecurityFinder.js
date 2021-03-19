@@ -295,7 +295,7 @@ class SecurityFinder extends React.Component {
 	};
 
 	subscribeToLinker() {
-        if (window.usingFDC3) {
+        if (fdc3Check()) {
             fdc3OnReady(
                 () => fdc3.addContextListener(context => {
                     if (context.type === 'fdc3.instrument') {
@@ -344,7 +344,7 @@ class SecurityFinder extends React.Component {
 				value = value.substring(0, value.indexOf(' '));
 			}
 
-            if (window.usingFDC3) {
+            if (fdc3Check()) {
                 fdc3OnReady(() => fdc3.broadcast({
                     "type": "fdc3.instrument",
                     "name": this.state.value,
