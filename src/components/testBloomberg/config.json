@@ -42,8 +42,7 @@
 						"persistWindowState": true
 					},
 					"Toolbar": {
-						"iconClass": "testBloomberg",
-						"iconURL": "http://localhost:3375/assets/img/Finsemble_Taskbar_Icon.png"
+						"iconURL": "$applicationRoot/components/testBloomberg/Finsemble_Taskbar_Icon.png"
 					}
 				}
 			}
