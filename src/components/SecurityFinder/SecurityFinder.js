@@ -2,6 +2,7 @@ import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import Select from 'react-select'
+import { fdc3Check, fdc3OnReady } from './fdc3Utils'
 
 /** When a suggestion is clicked, Autosuggest needs to populate the input
  *  field based on the clicked suggestion (such that the search will return
@@ -42,8 +43,8 @@ class SecurityFinder extends React.Component {
 			worksheets: [],
 			worksheetError: "",
 			worksheetSuccess: "",
-			linkerToLaunchpad: true,
-			launchpadToLinker: true
+			finsembleToLaunchpad: true,
+			launchpadToFinsemble: true
 		};
 
 		this.handleTabSelected = this.handleTabSelected.bind(this);
@@ -60,25 +61,28 @@ class SecurityFinder extends React.Component {
 		this.setupGroupEventListener = this.setupGroupEventListener.bind(this);
 		this.handleNoOptionMessage = this.handleNoOptionMessage.bind(this);
 
-		this.subscribeToLinker = this.subscribeToLinker.bind(this);
-		this.handleLinkerPublish = this.handleLinkerPublish.bind(this);
+		this.subscribeToLinker = this.subscribeToContext.bind(this);
+		this.handleLinkerPublish = this.handleContextPublish.bind(this);
 
 		this.getWorksheets = this.getWorksheets.bind(this);
 		this.handleWorksheetInput = this.handleWorksheetInput.bind(this);
 		this.handleAddToWorksheet = this.handleAddToWorksheet.bind(this);
 
-		this.handleLinkerToLaunchpad = this.handleLinkerToLaunchpad.bind(this);
-		this.handleLaunchpadToLinker = this.handleLaunchpadToLinker.bind(this);
+		this.handleFinsembleToLaunchpad = this.handleFinsembleToLaunchpad.bind(this);
+		this.handleLaunchpadToFinsemble = this.handleLaunchpadToFinsemble.bind(this);
 
 		this.setupConnectionLifecycleChecks();
-		this.subscribeToLinker();
+		this.subscribeToContext();
 	}
 
+	/**
+	 * Checks the connection to the BloombergBride and performs setup tasks if we've just connected.
+	 */
 	checkConnection() {
 		FSBL.Clients.BloombergBridgeClient.checkConnection((err, resp) => {
 			if (!err && resp === true) {
 				if (!this.state.isConnected) {
-					//we are connecting
+					//we are connecting, setup LaunchPad group lsiteners
 					this.getLaunchPadGroups();
 					this.setupGroupEventListener();
 				}
@@ -100,6 +104,9 @@ class SecurityFinder extends React.Component {
 		});
 	};
 
+	/**
+	 * Setup an event listener and periodic checks on the BloombergBridge connection.
+	 */
 	setupConnectionLifecycleChecks() {
 		//listen for connection events (listen/transmit)
 		FSBL.Clients.BloombergBridgeClient.setConnectionEventListener(this.checkConnection);
@@ -110,6 +117,11 @@ class SecurityFinder extends React.Component {
 		this.checkConnection();
 	};
 
+	/**
+	 * Load suggestions of resolved securities based on the text input.
+	 * @param {*} value Input text to attempt to resolve
+	 * @param {*} cb Optional callback to run once suggestions are received
+	 */
 	loadSuggestions(value, cb) {
 		//could cancel a previous request here
 
@@ -152,18 +164,24 @@ class SecurityFinder extends React.Component {
 		this.loadSuggestions(value, cb);
 	};
 
-	// Autosuggest will call this function every time you need to clear suggestions.
+	/** 
+	 * Autosuggest will call this function every time you need to clear suggestions.
+	 */ 
 	onSuggestionsClearRequested = () => {
 		this.setState({
 			suggestions: []
 		});
 	};
 
+	/** Handler function for terminal command panel input fields. */
 	handleCommandPanelInput(event) {
 		const name = event.target.name;
 		this.setState({ [name]: event.target.value });
 	};
 
+	/**
+	 * Executes a BloombergTerminal function on a Bloomberg panel.
+	 */
 	handleCommandExecute() {
 		if (this.state.isConnected && this.state.value) {
 			const mnemonic = this.state.commandMnemonic;
@@ -195,6 +213,9 @@ class SecurityFinder extends React.Component {
 		}
 	};
 
+	/**  
+	 * Retrieve the current set of LaunchPad groups and selects a group if none are selected.
+	*/
 	getLaunchPadGroups() {
 		FSBL.Clients.BloombergBridgeClient.runGetAllGroups((err, response) => {
 			if (response && response.groups && Array.isArray(response.groups)) {
@@ -204,7 +225,7 @@ class SecurityFinder extends React.Component {
 				});
 				let _state = { groupError: "", launchPadGroups: launchPadGroups };
 				//if no group is selected, select one
-				if (!this.state.launchPadGroup && launchPadGroups.length > 0) {
+				if ((!this.state.launchPadGroup || this.state.launchPadGroup === "") && launchPadGroups.length > 0) {
 					_state.launchPadGroup = launchPadGroups[0];
 				}
 				//if the selected group doesn't exist deselect it
@@ -231,23 +252,33 @@ class SecurityFinder extends React.Component {
 		});
 	};
 
+	/** Setup a listener for all Launchpad group events. 
+	 * Security events will automatically be published as context via Finsemble APIs (Linker or FDC3)
+	 * and used to search for securities. Note that the channel fo linker/FDC3 channel integration
+	 * must be selected on the SecurityFinder's vai the menu on the titlebar. */
 	setupGroupEventListener() {
 		FSBL.Clients.BloombergBridgeClient.setGroupEventListener((err, resp) => {
-			if (this.state.launchpadToLinker) {
-				//push context to linker (from any Launchpad group) if its a security
+			//push context to Finsemble context APIs (Linker or FDC3) if its a security
+			    //Note this reacts to *all* LaunchPad groups as no filter is offered in the UI
+			if (this.state.launchpadToFinsemble) {
+				
 				let logEntry = "\n";
 				let logFn = console.log;
+
 				if (err) {
 					logEntry += "Error: " + JSON.stringify(err, null, 2) + "\n---";
 					logFn = console.error;
+
 				} else if (resp.data.group && resp.data.group.type == "monitor") {
 					logEntry += "Ignoring Monitor event\n" + JSON.stringify(resp.data, null, 2) + "\n---";
+
 				} else if (resp.data.group && resp.data.group.type == "security") {
 					this.setState({ value: resp.data.group.value, suppressLinkerLoops: null });
 					logEntry += "Received security " + resp.data.group.value + " from group: " + 
 						JSON.stringify(resp.data.group, null, 2) + "\n---";
-					this.handleLinkerPublish();
+					this.handleContextPublish();
 					this.onSuggestionsFetchRequested({ value: resp.data.group.value, reason: 'input-changed' });
+					
 				} else {
 					logEntry += "Ignoring unrecognized event:\n" + JSON.stringify(resp.data, null, 2) + "\n---";
 					logFn = console.warn;
@@ -260,16 +291,29 @@ class SecurityFinder extends React.Component {
 		});
 	};
 
+	/**
+	 * Handler for Launchpad group selection on the LaunchPad tab.
+	 * @param {*} value 
+	 */
 	handleLaunchPadGroupInput(value) {
 		this.setState({ launchPadGroup: value });
 	};
 
+	/**
+	 * Handler for no option available messages on Select boxes. Currently no-op.
+	 */
 	handleNoOptionMessage() {
 		// this.setState({ launchPadGroup: "", groupError: "No LaunchPad groups", groupSuccess: "" });
 	}
 
+	/**
+	 * Sets the context of the currently selected Launchpad group using the current security
+	 * string value in the security finder. Also used for auto-context sharing when the checkbox
+	 * if selected on the Linker/FDC3 tab.
+	 */
 	handleSetGroupContext() {
 		if (this.state.isConnected) {
+			//A launchpad group must be selected on the Launchpad tab and there must be a security string value
 			if (this.state.launchPadGroup && this.state.value) {
 				FSBL.Clients.BloombergBridgeClient.runSetGroupContext(this.state.launchPadGroup.value, this.state.value, null, (err, data) => {
 					if (err) {
@@ -293,56 +337,98 @@ class SecurityFinder extends React.Component {
 		}
 	};
 
-	subscribeToLinker() {
-		FSBL.Clients.LinkerClient.subscribe("symbol", (data, envelope) => {
-			if (!envelope.originatedHere()) {
-				//As we're modifying the symbol for sharing, we should suppress any copies of it we receive back
-				let suppressLinkerLoops = this.state.suppressLinkerLoops;
-				if (!suppressLinkerLoops || (Date.now() - suppressLinkerLoops.time > 1500) || suppressLinkerLoops.value != data) {
-					//assume we are receiving a basic string via the linker and set it as the search term
-					console.log("received via linker: ", data, envelope);
-					this.setState({ value: data, suppressLinkerLoops: null });
-					this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' }, () => {
-						if (this.state.linkerToLaunchpad) {
-							//if we got suggestions back, push the value to the selected launchpad group:
-							if (this.state.suggestions && this.state.suggestions[0]){
-								this.handleSetGroupContext();
-							}
-						}
-					});
-				}
-			}
-		});
+	/**
+	 * Subscribe to the Finsemble context API (either Linker or FDC3). When context is received
+	 * it is used to perform a search and *may* also be used to set the context of the currently
+	 * selected Launchpad Group on the Launchpad tab.
+	 */
+	subscribeToContext() {
+        if (fdc3Check()) {
+            fdc3OnReady(
+                () => fdc3.addContextListener(context => {
+                    if (context.type === 'fdc3.instrument') {
+                        //setContext(context.id.ticker)
+                        let data = context.id.BBG ? context.id.BBG : context.id.ticker;
+                        this.setState({ value: data, suppressLinkerLoops: null });
+                        this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' }, () => {
+                            if (this.state.finsembleToLaunchpad) {
+                                //if we got suggestions back, push the value to the selected launchpad group:
+                                if (this.state.suggestions && this.state.suggestions[0]){
+                                    this.handleSetGroupContext();
+                                }
+                            }
+                        });
+                    }
+                })
+            )
+        } else {
+            FSBL.Clients.LinkerClient.subscribe("symbol", (data, envelope) => {
+                if (!envelope.originatedHere()) {
+                    //As we're modifying the symbol for sharing, we should suppress any copies of it we receive back
+                    let suppressLinkerLoops = this.state.suppressLinkerLoops;
+                    if (!suppressLinkerLoops || (Date.now() - suppressLinkerLoops.time > 1500) || suppressLinkerLoops.value != data) {
+                        //assume we are receiving a basic string via the linker and set it as the search term
+                        console.log("received via linker: ", data, envelope);
+                        this.setState({ value: data, suppressLinkerLoops: null });
+                        this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' }, () => {
+                            if (this.state.finsembleToLaunchpad) {
+                                //if we got suggestions back, push the value to the selected launchpad group:
+                                if (this.state.suggestions && this.state.suggestions[0]){
+                                    this.handleSetGroupContext();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
 	}
 
-	handleLinkerPublish() {
+	/**
+	 * Publish the current security value to Finsemble context APIs (linker or FDC3)
+	 */
+	handleContextPublish() {        
 		if (this.state.value) {
 			//just publish the first token as a ticker symbol
-			let value = this.state.value;
-			if (value.indexOf(' ') > -1) {
-				value = value.substring(0, value.indexOf(' '));
+			let tickerValue = this.state.value;
+			if (tickerValue.indexOf(' ') > -1) {
+				tickerValue = tickerValue.substring(0, tickerValue.indexOf(' '));
 			}
 
-			FSBL.Clients.LinkerClient.publish({ dataType: "symbol", data: value }, (err, resp) => {
-				this.setState({
-					suppressLinkerLoops: {
-						value, time: Date.now()
-					}
-				});
-				if (err) {
-					console.error(`Unable to publish via linker, error: `, err);
-					this.setState({ linkerError: "No LaunchPad group selected", linkerSuccess: "" });
-				} else {
-					console.log(`${value} published via linker to topic 'symbol'`, resp);
-					this.setState({ linkerError: "", linkerSuccess: `${value} published to topic 'symbol'` });
-				}
-			});
+            if (fdc3Check()) {
+                fdc3OnReady(() => fdc3.broadcast({
+                    "type": "fdc3.instrument",
+                    "name": this.state.value,
+                    "id": {
+                        "ticker": tickerValue,
+                        "BBG": this.state.value
+                    }
+                }));
+            } else{
+                FSBL.Clients.LinkerClient.publish({ dataType: "symbol", data: tickerValue }, (err, resp) => {
+                    this.setState({
+                        suppressLinkerLoops: {
+                            value: tickerValue, time: Date.now()
+                        }
+                    });
+                    if (err) {
+                        console.error(`Unable to publish via linker, error: `, err);
+                        this.setState({ linkerError: "No LaunchPad group selected", linkerSuccess: "" });
+                    } else {
+                        console.log(`${tickerValue} published via linker to topic 'symbol'`, resp);
+                        this.setState({ linkerError: "", linkerSuccess: `${tickerValue} published to topic 'symbol'` });
+                    }
+                });
+            }
 		} else if (!this.state.value) {
 			console.error(`Unable to publish to linker, no security value set`);
 			this.setState({ linkerError: "No security value set, search for a security first", linkerSuccess: "" });
 		}
 	}
 
+	/**
+	 * Retrieve the current list of worksheets from the terminal.
+	 */
 	getWorksheets() {
 		if (this.state.isConnected) {
 			FSBL.Clients.BloombergBridgeClient.runGetAllWorksheets((err, response) => {
@@ -384,10 +470,17 @@ class SecurityFinder extends React.Component {
 		}
 	};
 
+	/**
+	 * Handler function for the worksheet name select menu.
+	 * @param {*} value 
+	 */
 	handleWorksheetInput(value) {
 		this.setState({ worksheet: value });
 	};
 
+	/**
+	 * Adds the current security value to the selected worksheet
+	 */
 	handleAddToWorksheet() {
 		if (this.state.isConnected) {
 			if (this.state.worksheet && this.state.value) {
@@ -436,6 +529,14 @@ class SecurityFinder extends React.Component {
 		}
 	};
 
+	/**
+	 * Handler function for the selection of tabs at the bottom of the component.
+	 * Triggers retrieval of the lsit of worksheets when the worksheet tab is selected.
+	 * @param {*} index 
+	 * @param {*} lastIndex 
+	 * @param {*} event 
+	 * @returns 
+	 */
 	handleTabSelected(index, lastIndex, event) {
 		if (index == 2) {
 			//selected worksheets
@@ -444,18 +545,26 @@ class SecurityFinder extends React.Component {
 		return true;
 	}
 
-	handleLinkerToLaunchpad(changeEvent) {
+	/**
+	 * Handler function for the Finsemble-to-Launchpad sharing checkbox
+	 * @param {*} changeEvent 
+	 */
+	handleFinsembleToLaunchpad(changeEvent) {
 		this.setState(prevState => {
 			return {	
-				linkerToLaunchpad: !prevState.linkerToLaunchpad
+				finsembleToLaunchpad: !prevState.linkerToLaunchpad
 			};
 		});
 	}
 
-	handleLaunchpadToLinker(changeEvent) {
+	/**
+	 * Handler function for the Launchpad-to-Finsemble sharing checkbox
+	 * @param {*} changeEvent 
+	 */
+	handleLaunchpadToFinsemble(changeEvent) {
 		this.setState(prevState => {
 			return {
-				launchpadToLinker: !prevState.launchpadToLinker
+				launchpadToFinsemble: !prevState.launchpadToFinsemble
 			}
 		});
 	}
@@ -468,7 +577,7 @@ class SecurityFinder extends React.Component {
 			launchPadGroup, launchPadGroups, groupError, groupSuccess,
 			linkerError, linkerSuccess,
 			worksheet, worksheets, worksheetError, worksheetSuccess,
-			launchpadToLinker, linkerToLaunchpad
+			launchpadToFinsemble, finsembleToLaunchpad
 		} = this.state;
 
 		// Autosuggest will pass through all these props to the input.
@@ -504,10 +613,10 @@ class SecurityFinder extends React.Component {
 					<Tabs
 						onSelect={this.handleTabSelected}>
 						<TabList>
-							<Tab>LaunchPad Groups</Tab>
+							<Tab>LaunchPad</Tab>
 							<Tab>Commands</Tab>
 							<Tab>Worksheets</Tab>
-							<Tab>Linker</Tab>
+							<Tab>Link Context</Tab>
 						</TabList>
 
 						<TabPanel>
@@ -605,11 +714,11 @@ class SecurityFinder extends React.Component {
 										<input
 											type="checkbox"
 											name="linkerToLaunchpadCheckbox"
-											onChange={this.handleLinkerToLaunchpad}
+											onChange={this.handleFinsembleToLaunchpad}
 											defaultChecked={true}
 											className="form-check-input"
 										/>
-										Auto-publish Linker shares to selected Launchpad group
+										{fdc3Check() ? "FDC3" : "Linker"} context broadcasts &lt;-&gt; selected Launchpad group
 									</label>
 								</div>
 								<div className="controlsRow">
@@ -617,11 +726,11 @@ class SecurityFinder extends React.Component {
 										<input
 											type="checkbox"
 											name="launchpadToLinkerCheckbox"
-											onChange={this.handleLaunchpadToLinker}
+											onChange={this.handleLaunchpadToFinsemble}
 											defaultChecked={true}
 											className="form-check-input"
 										/>
-										Auto-publish all Launchpad events to Linker
+										All Launchpad group's security events &lt;-&gt; {fdc3Check() ? "FDC3" : "Linker"}
 									</label>
 								</div>
 							</div>
