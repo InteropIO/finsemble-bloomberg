@@ -82,7 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Bloomberglp.Blpapi">
-      <HintPath>..\..\Bloomberg BLP API\bin\Bloomberglp.Blpapi.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\blp\blpAPI\bin\Bloomberglp.Blpapi.dll</HintPath>
     </Reference>
     <Reference Include="Bloomberglp.TerminalApiEx">
       <HintPath>..\..\..\..\..\..\..\..\..\blp\TerminalAPISDK\lib\Bloomberglp.TerminalApiEx.dll</HintPath>
