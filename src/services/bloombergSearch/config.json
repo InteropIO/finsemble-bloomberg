@@ -1,0 +1,16 @@
+{
+    "$schema": "../../node_modules/@finsemble/finsemble-core/configs/schemas/fileBasedSchemas/servicesFile.schema.json",
+    "services": {
+        "bloombergSearchService": {
+            "bootParams": {
+                "stage": "user",
+                "stopOnFailure": false,
+                "autoStart": true,
+                "customFailureMessage": null,
+                "timeout": 10000
+            },
+            "name": "bloombergSearchService",
+            "html": "$applicationRoot/services/bloombergSearch/bloombergSearch.html"
+        }
+    }
+}
