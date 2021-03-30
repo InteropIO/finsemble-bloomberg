@@ -76,10 +76,7 @@ namespace BloombergBridge
 				}
 				catch (Exception err)
 				{
-					FSBL.RPC("Logger.error", new List<JToken>
-					{
-						"Bloomberg API registration check failed"
-					});
+					FSBL.Logger.Error("Bloomberg API registration check failed");
 				}
 				if (!_isRegistered)
 				{
@@ -93,10 +90,7 @@ namespace BloombergBridge
 					catch (Exception err)
 					{
 						_isRegistered = false;
-						FSBL.RPC("Logger.warn", new List<JToken>
-						{
-							"Bloomberg API registration failed"
-						});
+						FSBL.Logger.Warn("Bloomberg API registration failed");
 					}
 				}
 				if (_isRegistered)
@@ -108,10 +102,7 @@ namespace BloombergBridge
 					catch (Exception err)
 					{
 						_isLoggedIn = false;
-						FSBL.RPC("Logger.warn", new List<JToken>
-						{
-							"Bloomberg API isLoggedIn call failed"
-						});
+						FSBL.Logger.Warn("Bloomberg API isLoggedIn call failed");
 					}
 				}
 				else
@@ -123,10 +114,6 @@ namespace BloombergBridge
 				_isLoggedIn = checkForConnectionStatusChange(_isRegistered, _isLoggedIn);
 				Thread.Sleep(1000);
 			}
-			FSBL.RPC("Logger.log", new List<JToken>
-			{
-				"Bloomberg API connection monitor exiting"
-			});
 		}
 
 		/// <summary>
@@ -151,7 +138,7 @@ namespace BloombergBridge
 				connectionStatus.Add("registered", isRegistered);
 				connectionStatus.Add("loggedIn", isLoggedIn);
 				FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
-				FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg connection status changed: ", connectionStatus });
+				FSBL.Logger.Log("Bloomberg connection status changed: ", connectionStatus);
 
 				if (isLoggedIn) //we've just logged in
 				{
@@ -167,11 +154,7 @@ namespace BloombergBridge
 					catch (Exception err)
 					{
 						_isLoggedIn = false;
-						FSBL.RPC("Logger.error", new List<JToken>
-							{
-								"Error occurred during post-login setup: ",
-								err.Message
-							});
+						FSBL.Logger.Error("Error occurred during post-login setup: ", err.Message);
 					}
 				}
 				else
@@ -187,11 +170,7 @@ namespace BloombergBridge
 					}
 					catch (Exception err)
 					{
-						FSBL.RPC("Logger.debug", new List<JToken>
-							{
-								"Exception occurred during disposal of security finder:",
-								err.Message
-							});
+						FSBL.Logger.Debug("Exception occurred during disposal of security finder:", err.Message);
 					}
 				}
 			}
@@ -209,7 +188,7 @@ namespace BloombergBridge
 		/// <param name="e"></param>
 		private static void OnConnected(object sender, EventArgs e)
 		{
-			FSBL.RPC("Logger.log", new List<JToken> { "Bloomberg bridge connected to Finsemble." });
+			FSBL.Logger.Log("Bloomberg bridge connected to Finsemble.");
 
 			//setup Router endpoints
 			addResponders();
@@ -275,7 +254,7 @@ namespace BloombergBridge
 		private static void BlpTerminal_ComponentGroupEvent(object sender, BlpGroupEventArgs e)
 		{
 			Type type = e.GetType();
-			FSBL.RPC("Logger.debug", new List<JToken> { "Received Bloomberg group event type: ", type.FullName });
+			FSBL.Logger.Debug("Received Bloomberg group event type: ", type.FullName);
 
 			BlpGroupContextChangedEventArgs context = e as BlpGroupContextChangedEventArgs;
 			if (context != null)
@@ -301,7 +280,7 @@ namespace BloombergBridge
 				}
 				output.Add("externalSource", context.ExternalSource);
 
-				FSBL.RPC("Logger.log", new List<JToken> { "Group Context changed event: ", output });
+				FSBL.Logger.Log("Group Context changed event: ", output);
 
 				FSBL.RouterClient.Transmit("BBG_group_context_events", output);
 			}
@@ -312,7 +291,7 @@ namespace BloombergBridge
 		/// </summary>
 		private static void addResponders()
 		{
-			FSBL.RPC("Logger.log", new List<JToken> { "Setting up query responders" });
+			FSBL.Logger.Log("Setting up query responders");
 			try
 			{
 				FSBL.RouterClient.AddResponder("BBG_connection_status", (fsbl_sender, queryMessage) =>
@@ -328,7 +307,7 @@ namespace BloombergBridge
 			catch (Exception err)
 			{
 				Console.WriteLine(err);
-				FSBL.RPC("Logger.error", new List<JToken> { "Error occurred while setting up query responders: ", err.Message });
+				FSBL.Logger.Error("Error occurred while setting up query responders: ", err.Message );
 			}
 		}
 
@@ -337,7 +316,7 @@ namespace BloombergBridge
 		/// </summary>
 		private static void removeResponders()
 		{
-			FSBL.RPC("Logger.log", new List<JToken> { "Removing query responders" });
+			FSBL.Logger.Log("Removing query responders");
 			FSBL.RouterClient.RemoveResponder("BBG_connection_status", true);
 			FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function", true);
 
@@ -358,15 +337,15 @@ namespace BloombergBridge
 			if (queryMessage.error != null)
 			{
 				//failed to register the query responder properly
-				FSBL.RPC("Logger.error", new List<JToken> { "Error received by BBG_connection_status query responder: ", queryMessage.error });
+				FSBL.Logger.Error("Error received by BBG_connection_status query responder: ", queryMessage.error );
 			} else {
 				JObject connectionStatus = new JObject();
 				connectionStatus.Add("registered", isRegistered);
 				connectionStatus.Add("loggedIn", isLoggedIn);
-				queryMessage.sendQueryMessage(connectionStatus);
+				queryMessage.sendQueryMessage(new FinsembleEventResponse(connectionStatus,null));
 
 				Console.WriteLine("Responded to BBG_connection_status query: " + connectionStatus.ToString());
-				FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_connection_status query: ", connectionStatus });
+				FSBL.Logger.Log("Responded to BBG_connection_status query: ", connectionStatus);
 			}
 			
 		}
@@ -386,7 +365,7 @@ namespace BloombergBridge
 			connectionStatus.Add("loggedIn", isLoggedIn);
 			FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
 			Console.WriteLine("Transmitted connection status after disconnect: " + connectionStatus.ToString());
-			FSBL.RPC("Logger.log", new List<JToken> { "Transmitted connection status after disconnect: ", connectionStatus });
+			FSBL.Logger.Log("Transmitted connection status after disconnect: ", connectionStatus);
 		}
 
 		/// <summary>
@@ -398,7 +377,7 @@ namespace BloombergBridge
 			if (queryMessage.error != null)
 			{
 				//failed to register the query responder properly
-				FSBL.RPC("Logger.error", new List<JToken> { "Error received by BBG_run_terminal_function query responder: ", queryMessage.error });
+				FSBL.Logger.Error("Error received by BBG_run_terminal_function query responder: ", queryMessage.error);
 			}
 			else
 			{
@@ -409,7 +388,7 @@ namespace BloombergBridge
 					queryData = queryMessage.response?["data"];
 					if (queryData != null)
 					{
-						FSBL.RPC("Logger.log", new List<JToken> { "Received query: ", queryData });
+						FSBL.Logger.Debug("Received query: ", queryData);
 						BBG_execute_terminal_function(queryResponse, queryData);
 					}
 					else
@@ -430,9 +409,9 @@ namespace BloombergBridge
 				}
 
 				//return the response
-				queryMessage.sendQueryMessage(queryResponse);
+				queryMessage.sendQueryMessage(new FinsembleEventResponse(queryResponse, null));
 				Console.WriteLine("Responded to BBG_run_terminal_function query: " + queryResponse.ToString());
-				FSBL.RPC("Logger.log", new List<JToken> { "Responded to BBG_run_terminal_function query: ", queryData, "Response: ", queryResponse });
+				FSBL.Logger.Debug("Responded to BBG_run_terminal_function query: ", queryData, "Response: ", queryResponse );
 			}
 		}
 		/// <summary>
@@ -679,21 +658,51 @@ namespace BloombergBridge
 			}
 		}
 
+		private static System.Timers.Timer debounceTimer = null;
+		private static DateTimeOffset lastQueryTime = DateTimeOffset.UtcNow;
+		private const int SET_GROUP_CONTEXT_THROTTLE = 1200;
 		private static void SetGroupContext(JObject queryResponse, JToken queryData)
 		{
 			if (validateQueryData("SetGroupContext", queryData, new string[] { "name", "value" }, null, queryResponse))
 			{
-				if (queryData["cookie"] != null && queryData["cookie"].ToString() != "")
+				DateTimeOffset now = DateTimeOffset.UtcNow;
+				TimeSpan ts = now.Subtract(lastQueryTime);
+				if (ts.TotalMilliseconds < SET_GROUP_CONTEXT_THROTTLE)
 				{
-					BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString(), queryData["cookie"].ToString());
+					if (debounceTimer != null)
+					{
+						debounceTimer.Stop();
+					}
+					debounceTimer = new System.Timers.Timer();
+					debounceTimer.Interval = SET_GROUP_CONTEXT_THROTTLE - ts.TotalMilliseconds;
+					debounceTimer.Elapsed += async (sender2, args2) =>
+					{
+						debounceTimer.Stop();
+						DoSetGroupContext(queryResponse, queryData);
+					};
+					debounceTimer.Start();
 				}
 				else
 				{
-					BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString());
+					DoSetGroupContext(queryResponse, queryData);
 				}
-
-				queryResponse.Add("status", true);
 			}
+		}
+
+		private static void DoSetGroupContext(JObject queryResponse, JToken queryData)
+		{
+			//save time of last set to allow debouncing   
+			lastQueryTime = DateTimeOffset.UtcNow;
+
+			if (queryData["cookie"] != null && queryData["cookie"].ToString() != "")
+			{
+				BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString(), queryData["cookie"].ToString());
+			}
+			else
+			{
+				BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString());
+			}
+			queryResponse.Add("status", true);
 		}
 
 		private static void SecurityLookup(JObject queryResponse, JToken queryData)
