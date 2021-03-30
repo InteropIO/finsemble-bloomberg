@@ -114,7 +114,6 @@ namespace BloombergBridge
 				_isLoggedIn = checkForConnectionStatusChange(_isRegistered, _isLoggedIn);
 				Thread.Sleep(1000);
 			}
-			FSBL.Logger.Log("Bloomberg API connection monitor exiting");
 		}
 
 		/// <summary>
@@ -661,7 +660,7 @@ namespace BloombergBridge
 
 		private static System.Timers.Timer debounceTimer = null;
 		private static DateTimeOffset lastQueryTime = DateTimeOffset.UtcNow;
-		private const int SET_GROUP_CONTEXT_THROTTLE = 1000;
+		private const int SET_GROUP_CONTEXT_THROTTLE = 1200;
 		private static void SetGroupContext(JObject queryResponse, JToken queryData)
 		{
 			if (validateQueryData("SetGroupContext", queryData, new string[] { "name", "value" }, null, queryResponse))
@@ -678,8 +677,8 @@ namespace BloombergBridge
 					debounceTimer.Interval = SET_GROUP_CONTEXT_THROTTLE - ts.TotalMilliseconds;
 					debounceTimer.Elapsed += async (sender2, args2) =>
 					{
-						DoSetGroupContext(queryResponse, queryData);
 						debounceTimer.Stop();
+						DoSetGroupContext(queryResponse, queryData);
 					};
 					debounceTimer.Start();
 				}
