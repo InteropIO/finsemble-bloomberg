@@ -153,7 +153,7 @@ class BloombergSearchService extends Finsemble.baseService {
                                     //N.b. this is replying on Bloomberg to resolve the name to a valid Bloomberg security string (e.g. TSLA = TSLA US Equity)
                                  bbg.runSetGroupContext(group.name, item.bbgSecurity, null, (err, data) => {
                                     if (err) {
-                                        Finsemble.Clients.Logger.error(`Error received from runSetGroupContext, group: ${group.name}, value: ${bbgSecurity}, error: `, err);
+                                        Finsemble.Clients.Logger.error(`Error received from runSetGroupContext, group: ${group.name}, value: ${item.bbgSecurity}, error: `, err);
                                     }
                                 });
                             });
