@@ -199,7 +199,7 @@ class BloombergSearchService extends Finsemble.baseService {
             if (!err && resp === true) {
                 connectedToBbg = true;
             } else if (err) {
-                Finsemble.Clients.Logger.error("Error received when checking connection", err);
+                Finsemble.Clients.Logger.warn("Error received when checking connection", err);
                 connectedToBbg = false;
             } else {
                 Finsemble.Clients.Logger.debug("Negative response when checking connection: ", resp);
