@@ -24,8 +24,11 @@ namespace BloombergBridge
 		private static Finsemble FSBL = null;
 
 		private static bool shutdown = false;
+		private static bool connect = true;
 		private static bool isRegistered = false;
 		private static bool isLoggedIn = false;
+		private static bool remote = false;
+		private static string remoteAddress = null;
 
 		private static SecurityLookup secFinder = null;
 
@@ -69,49 +72,85 @@ namespace BloombergBridge
 			{
 				bool _isRegistered = false;
 				bool _isLoggedIn = false;
+				bool _remote = false;
+				string _remoteAddress = null;
 
-				try
-				{
-					_isRegistered = BlpApi.IsRegistered;
+				if (!connect)
+                { //we've been told to not even try and connect
+					_isRegistered = false;
+					_isLoggedIn = false;
+					_remoteAddress = null;
 				}
-				catch (Exception err)
-				{
-					FSBL.Logger.Error("Bloomberg API registration check failed");
-				}
-				if (!_isRegistered)
-				{
+				else
+                { //go ahead and try to connect
 					try
 					{
-						//try to register
-						BlpApi.Register();
-						BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
 						_isRegistered = BlpApi.IsRegistered;
 					}
 					catch (Exception err)
 					{
-						_isRegistered = false;
-						FSBL.Logger.Warn("Bloomberg API registration failed");
+						FSBL.Logger.Error("Bloomberg API registration check failed");
 					}
-				}
-				if (_isRegistered)
-				{
-					try
+					if (!_isRegistered)
 					{
-						_isLoggedIn = BlpTerminal.IsLoggedIn();
-					}
-					catch (Exception err)
-					{
-						_isLoggedIn = false;
-						FSBL.Logger.Warn("Bloomberg API isLoggedIn call failed");
-					}
-				}
-				else
-				{
-					//can't be logged in if not connected to the BlpApi
-					_isLoggedIn = false;
-				}
+						try
+						{
+							//retrieve configuration from Finsemble
+							FSBL.ConfigClient.GetValue(new JObject { ["field"] = "finsemble.custom.bloomberg" }, (routerClient, response) =>
+							{
+								if (response.error != null)
+								{
+									FSBL.Logger.Warn(new JToken[] { "Error occurred while retrieving Bloomberg remote config...", response.error });
+								} 
+								if (response.response?["data"] != null && response.response?["data"]?["remote"] != null)
+                                { //possible remote connection
+									FSBL.Logger.Debug(new JToken[] { "Received remote config", response.response?["data"] });
+									if (bool.Parse(response.response?["data"]?["remote"].ToString()) &&
+										response.response?["data"]?["remoteAddress"] != null)
+                                    {
+										_remote = true;
+										_remoteAddress = response.response?["data"]?["remoteAddress"].ToString();
+									}
+								}
 
-				_isLoggedIn = checkForConnectionStatusChange(_isRegistered, _isLoggedIn);
+								//try to register
+								if (_remote)
+                                {
+									BlpApi.RegisterRemote(_remoteAddress);
+								} else
+                                {
+									BlpApi.Register();
+								}
+								BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
+								_isRegistered = BlpApi.IsRegistered;
+							});
+						}
+						catch (Exception err)
+						{
+							_isRegistered = false;
+							FSBL.Logger.Warn("Bloomberg API registration failed");
+						}
+					}
+					if (_isRegistered)
+					{
+						try
+						{
+							_isLoggedIn = BlpTerminal.IsLoggedIn();
+						}
+						catch (Exception err)
+						{
+							_isLoggedIn = false;
+							FSBL.Logger.Warn("Bloomberg API isLoggedIn call failed");
+						}
+					}
+					else
+					{
+						//can't be logged in if not connected to the BlpApi
+						_isLoggedIn = false;
+					}
+				}
+				_isLoggedIn = checkForConnectionStatusChange(_isRegistered, _isLoggedIn, _remote, _remoteAddress);
+
 				Thread.Sleep(1000);
 			}
 		}
@@ -122,21 +161,37 @@ namespace BloombergBridge
 		/// <param name="_isRegistered"></param>
 		/// <param name="_isLoggedIn"></param>
 		/// <returns>_isLogged, will be returned false if there are any errors in setting up after a login event</returns>
-		private static bool checkForConnectionStatusChange(bool _isRegistered, bool _isLoggedIn)
+		private static bool checkForConnectionStatusChange(bool _isRegistered, bool _isLoggedIn, bool _remote, string _remoteAddress)
 		{
 			bool statusChange = false;
-			if (_isRegistered != isRegistered || _isLoggedIn != isLoggedIn)
+			if (_isRegistered != isRegistered || _isLoggedIn != isLoggedIn || _remote != remote || _remoteAddress != remoteAddress)
 			{
 				//status change
 				isRegistered = _isRegistered;
 				isLoggedIn = _isLoggedIn;
+				remote = _remote;
+				remoteAddress = _remoteAddress;
+
 				statusChange = true;
 			}
 			if (statusChange)
 			{
 				JObject connectionStatus = new JObject();
+				connectionStatus.Add("connect", connect);
 				connectionStatus.Add("registered", isRegistered);
 				connectionStatus.Add("loggedIn", isLoggedIn);
+				if (isRegistered)
+                {
+					if (!remote)
+					{
+						connectionStatus.Add("connectedTo", "localhost");
+					}
+					else
+					{
+						connectionStatus.Add("connectedTo", remoteAddress);
+					}
+				}
+				
 				FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
 				FSBL.Logger.Log("Bloomberg connection status changed: ", connectionStatus);
 
@@ -208,7 +263,6 @@ namespace BloombergBridge
 		{
 			shutdown = true;
 			removeResponders();
-		
 		}
 
 		/// <summary>
@@ -294,6 +348,11 @@ namespace BloombergBridge
 			FSBL.Logger.Log("Setting up query responders");
 			try
 			{
+				FSBL.RouterClient.AddResponder("BBG_connect", (fsbl_sender, queryMessage) =>
+				{
+					BBG_connect(queryMessage);
+				});
+
 				FSBL.RouterClient.AddResponder("BBG_connection_status", (fsbl_sender, queryMessage) =>
 				{
 					BBG_connection_status(queryMessage);
@@ -317,6 +376,7 @@ namespace BloombergBridge
 		private static void removeResponders()
 		{
 			FSBL.Logger.Log("Removing query responders");
+			FSBL.RouterClient.RemoveResponder("BBG_connect", true);
 			FSBL.RouterClient.RemoveResponder("BBG_connection_status", true);
 			FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function", true);
 
@@ -326,6 +386,47 @@ namespace BloombergBridge
 				secFinder.Dispose();
 				secFinder = null;
 			}
+		}
+
+		/// <summary>
+		/// Query responder to instruct the bridge to attempt connection or disconnect from the terminal
+		/// </summary>
+		/// <param name="queryMessage"></param>
+		private static void BBG_connect(FinsembleQueryArgs queryMessage)
+		{
+			if (queryMessage.error != null)
+			{
+				//failed to register the query responder properly
+				FSBL.Logger.Error("Error received by BBG_connect query responder: ", queryMessage.error);
+			}
+			else
+			{
+				JObject queryResponse = new JObject();
+				JToken queryData = queryMessage.response?["data"];
+				if (queryData != null)
+				{
+					FSBL.Logger.Debug("Received query: ", queryData);
+                    try
+                    {
+						bool _connect = queryData.Value<bool>("connect");
+						connect = _connect;
+						queryResponse.Add("status", true);
+						queryResponse.Add("message", "BloombergBridge connect state = " + connect);
+					} catch (Exception err)
+                    {
+						queryResponse.Add("status", false);
+						queryResponse.Add("message", "Exception occurred while processing bbg_connect query, message: " + err.Message);
+					}
+				}
+				else
+				{
+					queryResponse.Add("status", false);
+					queryResponse.Add("message", "Invalid request: no query data");
+				}
+
+				queryMessage.sendQueryMessage(new FinsembleEventResponse(queryResponse, null));
+			}
+
 		}
 
 		/// <summary>
@@ -342,6 +443,17 @@ namespace BloombergBridge
 				JObject connectionStatus = new JObject();
 				connectionStatus.Add("registered", isRegistered);
 				connectionStatus.Add("loggedIn", isLoggedIn);
+				if (isRegistered)
+				{
+					if (!remote)
+					{
+						connectionStatus.Add("connectedTo", "localhost");
+					}
+					else
+					{
+						connectionStatus.Add("connectedTo", remoteAddress);
+					}
+				}
 				queryMessage.sendQueryMessage(new FinsembleEventResponse(connectionStatus,null));
 
 				Console.WriteLine("Responded to BBG_connection_status query: " + connectionStatus.ToString());

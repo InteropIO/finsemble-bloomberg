@@ -8,7 +8,9 @@ import { IRouterClient, RouterMessage } from "clients/IRouterClient";
 
 /** Timeout in milliseconds for terminal connection checks that will cause a checkConnection
  * call to fail. */
-const CONNECTION_CHECK_TIMEOUT = 1000;
+ const CONNECTION_CHECK_TIMEOUT = 1000;
+ /** Timeout in milliseconds for setting the connect state. */
+  const SET_CONNECT_STATE_TIMEOUT = 2500;
 // tslint:disable:no-console
 
 /**
@@ -229,6 +231,45 @@ export default class BloombergBridgeClient {
     }
 
     /**
+     * Set the connection state for Bloomberg bridge. Note that the remote connection config
+     * should only be changed while disconnected, as it is read when attempting to connect.
+     * @param connect Boolean flag indicating whether the bridge should connect to Bloomberg. 
+     * If set false while connected, the bridge will automatically disconnect.
+     * @param cb Optional callback that will return response as true if we have successfully set the 
+     * connect states.
+	 * @example
+	 * ```Javascript
+	 * bbg.setConnectState(true);
+     * bbg.setConnectState(false, (err, resp) => { ... });
+	 * ```
+     */
+    setConnectState(connect: boolean, cb?: StandardCallback) {
+        console.log('Setting connection state to: ' + connect);
+
+        // if we don't get a response something is wrong
+        const timeout = setTimeout(() => {
+            console.log('BBG_connect call timed-out', null);
+            if (cb) { cb('Set Connect state timeout', null); }
+        }, SET_CONNECT_STATE_TIMEOUT);
+
+        void this.routerClient?.query('BBG_connect', {connect: connect}, (err, resp: { data?: { status: boolean, message: string } }) => {
+            clearTimeout(timeout);
+            if (err) {
+                console.warn('Received error when setting connect state: ', err);
+                if (cb) { cb(err, false); }
+            } else {
+                if (resp && resp.data && resp.data['status']) {
+                    console.log('Connection state set to: ', connect);
+                    if (cb) { cb(null, true); }
+                } else {
+                    console.log('Received negative or empty response when setting connection state: ', resp);
+                    if (cb) { cb('Received negative or empty response when setting connection state: ' + resp?.data?.['message'], null); }
+                }
+            }
+        });
+    }
+
+    /**
      * Check that Bloomberg bridge is connected to the Bloomberg Terminal and that a user is
      * logged in.
      * @param cb Callback for connection response that will return response as true if we are
@@ -245,7 +286,7 @@ export default class BloombergBridgeClient {
 	 * bbg.checkConnection(checkConnectionHandler);
 	 * ```
      */
-    checkConnection(cb: (err: string | CallbackError | Error | null, response: boolean | null) => void) {
+     checkConnection(cb: (err: string | CallbackError | Error | null, response: boolean | null) => void) {
         console.log('Checking connection status...');
 
         // if we don't get a response something is wrong
