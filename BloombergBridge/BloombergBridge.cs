@@ -77,9 +77,12 @@ namespace BloombergBridge
 
 				if (!connect)
                 { //we've been told to not even try and connect
+
 					_isRegistered = false;
 					_isLoggedIn = false;
 					_remoteAddress = null;
+
+					checkForConnectionStatusChange(_isRegistered, _isLoggedIn, _remote, _remoteAddress);
 				}
 				else
                 { //go ahead and try to connect
@@ -91,68 +94,84 @@ namespace BloombergBridge
 					{
 						FSBL.Logger.Error("Bloomberg API registration check failed");
 					}
-					if (!_isRegistered)
+					if (!_isRegistered || !isLoggedIn)
 					{
-						try
+						//retrieve configuration from Finsemble
+						FSBL.ConfigClient.GetValue(new JObject { ["field"] = "finsemble.custom.bloomberg" }, (routerClient, response) =>
 						{
-							//retrieve configuration from Finsemble
-							FSBL.ConfigClient.GetValue(new JObject { ["field"] = "finsemble.custom.bloomberg" }, (routerClient, response) =>
+							if (response.error != null)
 							{
-								if (response.error != null)
-								{
-									FSBL.Logger.Warn(new JToken[] { "Error occurred while retrieving Bloomberg remote config...", response.error });
-								} 
-								if (response.response?["data"] != null && response.response?["data"]?["remote"] != null)
-                                { //possible remote connection
-									FSBL.Logger.Debug(new JToken[] { "Received remote config", response.response?["data"] });
-									if (bool.Parse(response.response?["data"]?["remote"].ToString()) &&
-										response.response?["data"]?["remoteAddress"] != null)
-                                    {
-										_remote = true;
-										_remoteAddress = response.response?["data"]?["remoteAddress"].ToString();
-									}
+								FSBL.Logger.Warn(new JToken[] { "Error occurred while retrieving Bloomberg remote config...", response.error });
+							} else
+                            {
+								FSBL.Logger.Debug(new JToken[] { "Retrieved bloomberg bridge configuration: ", response.response?["data"] });
+							}
+							if (response.response?["data"] != null && response.response?["data"]?["remote"] != null)
+                            { //possible remote connection
+								if (bool.Parse(response.response?["data"]?["remote"].ToString()) &&
+									response.response?["data"]?["remoteAddress"] != null)
+                                {
+									_remote = true;
+									_remoteAddress = response.response?["data"]?["remoteAddress"].ToString();
 								}
+							}
 
-								//try to register
-								if (_remote)
-                                {
-									BlpApi.RegisterRemote(_remoteAddress);
-								} else
-                                {
-									BlpApi.Register();
+							//try to register
+							if (!_isRegistered)
+                            {
+								try
+								{
+									FSBL.Logger.Debug(new JToken[] { "Attempting registration..." });
+									if (_remote)
+									{
+										BlpApi.RegisterRemote(_remoteAddress);
+									}
+									else
+									{
+										BlpApi.Register();
+									}
+									BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
+									_isRegistered = BlpApi.IsRegistered;
 								}
-								BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
-								_isRegistered = BlpApi.IsRegistered;
-							});
-						}
-						catch (Exception err)
-						{
-							_isRegistered = false;
-							FSBL.Logger.Warn("Bloomberg API registration failed");
-						}
-					}
-					if (_isRegistered)
-					{
-						try
-						{
-							_isLoggedIn = BlpTerminal.IsLoggedIn();
-						}
-						catch (Exception err)
-						{
-							_isLoggedIn = false;
-							FSBL.Logger.Warn("Bloomberg API isLoggedIn call failed");
-						}
-					}
-					else
-					{
-						//can't be logged in if not connected to the BlpApi
-						_isLoggedIn = false;
+								catch (Exception err)
+								{
+									_isRegistered = false;
+									FSBL.Logger.Debug(new JToken[] { "Bloomberg API registration failed: ", err.Message });
+								}
+							}
+							
+							if (_isRegistered)
+							{
+								FSBL.Logger.Debug(new JToken[] { "Registration successful, checking log in status..." });
+
+								try
+								{
+									_isLoggedIn = BlpTerminal.IsLoggedIn();
+								}
+								catch (Exception err)
+								{
+									_isLoggedIn = false;
+									FSBL.Logger.Warn("Bloomberg API isLoggedIn call failed");
+								}
+							}
+							else
+							{
+								//can't be logged in if not connected to the BlpApi
+								_isLoggedIn = false;
+								FSBL.Logger.Debug(new JToken[] { "Registration failed." });
+							}
+
+							checkForConnectionStatusChange(_isRegistered, _isLoggedIn, _remote, _remoteAddress);
+						});
+					} else
+                    {
+						FSBL.Logger.Debug(new JToken[] { "Registered and logged in to terminal." });
 					}
 				}
-				_isLoggedIn = checkForConnectionStatusChange(_isRegistered, _isLoggedIn, _remote, _remoteAddress);
 
-				Thread.Sleep(1000);
+				Thread.Sleep(2000);
 			}
+			FSBL.Logger.Log(new JToken[] { "Exited connection monitoring loop." });
 		}
 
 		/// <summary>
@@ -161,7 +180,7 @@ namespace BloombergBridge
 		/// <param name="_isRegistered"></param>
 		/// <param name="_isLoggedIn"></param>
 		/// <returns>_isLogged, will be returned false if there are any errors in setting up after a login event</returns>
-		private static bool checkForConnectionStatusChange(bool _isRegistered, bool _isLoggedIn, bool _remote, string _remoteAddress)
+		private static void checkForConnectionStatusChange(bool _isRegistered, bool _isLoggedIn, bool _remote, string _remoteAddress)
 		{
 			bool statusChange = false;
 			if (_isRegistered != isRegistered || _isLoggedIn != isLoggedIn || _remote != remote || _remoteAddress != remoteAddress)
@@ -229,8 +248,6 @@ namespace BloombergBridge
 					}
 				}
 			}
-
-			return _isLoggedIn;
 		}
 
 		/// <summary>
@@ -441,6 +458,7 @@ namespace BloombergBridge
 				FSBL.Logger.Error("Error received by BBG_connection_status query responder: ", queryMessage.error );
 			} else {
 				JObject connectionStatus = new JObject();
+				connectionStatus.Add("connect", connect);
 				connectionStatus.Add("registered", isRegistered);
 				connectionStatus.Add("loggedIn", isLoggedIn);
 				if (isRegistered)

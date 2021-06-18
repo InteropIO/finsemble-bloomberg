@@ -6,7 +6,6 @@
                 "stage": "user",
                 "stopOnFailure": false,
                 "autoStart": true,
-                "customFailureMessage": null,
                 "timeout": 10000
             },
             "name": "bloombergSearchService",
