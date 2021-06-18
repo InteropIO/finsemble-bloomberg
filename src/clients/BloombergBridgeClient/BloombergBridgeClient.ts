@@ -8,7 +8,7 @@ import { IRouterClient, RouterMessage } from "clients/IRouterClient";
 
 /** Timeout in milliseconds for terminal connection checks that will cause a checkConnection
  * call to fail. */
- const CONNECTION_CHECK_TIMEOUT = 1000;
+ const CONNECTION_CHECK_TIMEOUT = 1500;
  /** Timeout in milliseconds for setting the connect state. */
   const SET_CONNECT_STATE_TIMEOUT = 2500;
 // tslint:disable:no-console
@@ -172,7 +172,7 @@ export default class BloombergBridgeClient {
             console.log('Removed Bloomberg connection event listener');
         } else {
             console.warn('Tried to remove non-existent connection event listener');
-        }
+        } 
     }
 
 
@@ -291,22 +291,22 @@ export default class BloombergBridgeClient {
 
         // if we don't get a response something is wrong
         const timeout = setTimeout(() => {
-            console.log('BBG_connection_status check timed-out', null);
+            console.error('BBG_connection_status check timed-out. Is the BLoomberg Bridge running?', null);
             cb('Connection check timeout', null);
         }, CONNECTION_CHECK_TIMEOUT);
 
         void this.routerClient?.query('BBG_connection_status', {}, (err, resp: { data?: { loggedIn: boolean } }) => {
             clearTimeout(timeout);
             if (err) {
-                console.warn('Received error when checking connection status: ', err);
+                console.warn('Received error when checking connection status. Is the BLoomberg Bridge running?', err);
                 cb(err, false);
             } else {
                 if (resp && resp.data && resp.data['loggedIn']) {
-                    console.log('Received connection status: ', resp.data);
+                    console.debug('Received connection status: ', resp.data);
                     cb(null, true);
                 } else {
-                    console.log('Received negative or empty response when checking connection status: ', resp);
-                    cb('Received negative or empty response when checking connection status', null);
+                    console.debug('Received negative or empty response when checking connection status: ', resp);
+                    cb(null, false);
                 }
             }
         });
