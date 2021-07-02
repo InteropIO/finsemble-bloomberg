@@ -1,3 +1,4 @@
 [
-	"BloombergBridgeClient.ts"
+	"BloombergBridgeClient.ts",
+	"BloombergBridgePreload.ts"
 ]

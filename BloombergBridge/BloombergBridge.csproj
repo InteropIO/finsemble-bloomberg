@@ -32,7 +32,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -81,11 +81,13 @@
     <Folder Include="docfx_project\src\" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Bloomberglp.Blpapi">
-      <HintPath>..\..\..\..\..\..\blp\blpAPI\bin\Bloomberglp.Blpapi.dll</HintPath>
+    <Reference Include="Bloomberglp.Blpapi, Version=3.16.6.1, Culture=neutral, PublicKeyToken=ec3efa8c033c2bc5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\blp\blpAPI.3.16.1.1\bin\Bloomberglp.Blpapi.dll</HintPath>
     </Reference>
-    <Reference Include="Bloomberglp.TerminalApiEx">
-      <HintPath>..\..\..\..\..\..\..\..\..\blp\TerminalAPISDK\lib\Bloomberglp.TerminalApiEx.dll</HintPath>
+    <Reference Include="Bloomberglp.TerminalApiEx, Version=2.4.1.0, Culture=neutral, PublicKeyToken=51f5d93763bdb58e, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\blp\TerminalAPISDK\lib.x64\Bloomberglp.TerminalApiEx.dll</HintPath>
     </Reference>
     <Reference Include="DotNetZip, Version=1.13.7.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
       <HintPath>..\packages\DotNetZip.1.13.7\lib\net40\DotNetZip.dll</HintPath>

@@ -17,24 +17,23 @@ import { IRouterClient, RouterMessage } from "clients/IRouterClient";
  * Interface representing an event handler for connection events, which are fired
  * when the BloombergBridge connects or disconnects from the terminal.
  */
-interface BBGConnectionEventListener extends StandardCallback {
+ export interface BBGConnectionEventListener extends StandardCallback {
     (
         /** Errors received from Terminal connect - most likely on registration of
          * the listener. */
         err: (string | Error),
-        /** Flags indicating if the BloombergBridge is registered with the terminal
-         * through terminal connect and whether the user is logged in. Both flags
-         * need to be true for any of the client functions, other than checkConnection
-         * to function.
+        /** Flags indicating if the BloombergBridge is enabled, whether it is registered 
+         * with the terminal through terminal connect and, if connected, to what address. 
+         * `registered` be true for any of the client functions to work.
         */
-        response: RouterMessage<{ registered: boolean, loggedIn: boolean }>,
+        response: RouterMessage<{ registered: boolean, enabled: boolean, connectedTo: string }>,
     ): void;
 }
 
 /**
  * Interface representing an event handler for Bloomberg group events.
  */
-interface BBGGroupEventListener extends StandardCallback {
+ export interface BBGGroupEventListener extends StandardCallback {
     (
         /** Errors received from Terminal connect - most likely on registration of
          * the listener. */
@@ -50,7 +49,7 @@ interface BBGGroupEventListener extends StandardCallback {
 /**
  * Interface representing a Bloomberg worksheet.
  */
-interface BBGWorksheet {
+ export interface BBGWorksheet {
     /** The name of the worksheet (non-unique). */
     id: string;
     /** The name of the worksheet assigned by the Bloomberg terminal and globally unique. */
@@ -65,7 +64,7 @@ interface BBGWorksheet {
  * the form 'Group-A'.
  * @param {string} value the current value of the group.
  */
-interface BBGGroup {
+export interface BBGGroup {
     type: string;
     name: string;
     value: string;
@@ -80,7 +79,7 @@ interface BBGGroup {
  * used as a preload to be applied to a component, where it will be automatically initialized
  * via instances of the RouterClient and Logger referenced from `FSBL.Clients`.
  */
-export default class BloombergBridgeClient {
+export class BloombergBridgeClient {
     private connectionEventListener: BBGConnectionEventListener | null = null;
     private groupEventListener: BBGGroupEventListener | null = null;
     private routerClient: IRouterClient | null = null;
@@ -133,7 +132,7 @@ export default class BloombergBridgeClient {
 	 * @example
 	 * ```Javascript
 	 * let connectionEventHandler = (err, resp) => {
-	 *     if (!err && resp && resp.loggedIn) {
+	 *     if (!err && resp && resp.registered) {
 	 *         showConnectedIcon();
 	 *     } else {
 	 *         showDisconnectedIcon();
@@ -231,9 +230,10 @@ export default class BloombergBridgeClient {
     }
 
     /**
-     * Set the connection state for Bloomberg bridge. Note that the remote connection config
-     * should only be changed while disconnected, as it is read when attempting to connect.
-     * @param connect Boolean flag indicating whether the bridge should connect to Bloomberg. 
+     * Set the connection state for Bloomberg bridge, i.e. whether it is enabled or not. 
+     * Note that the remote connection config should only be changed while the connection is 
+     * disabled or disconnected, as it is read when attempting to connect.
+     * @param enabled Boolean flag indicating whether the bridge should connect to Bloomberg. 
      * If set false while connected, the bridge will automatically disconnect.
      * @param cb Optional callback that will return response as true if we have successfully set the 
      * connect states.
@@ -243,41 +243,40 @@ export default class BloombergBridgeClient {
      * bbg.setConnectState(false, (err, resp) => { ... });
 	 * ```
      */
-    setConnectState(connect: boolean, cb?: StandardCallback) {
-        console.log('Setting connection state to: ' + connect);
+    setEnabled(enabled: boolean, cb?: StandardCallback) {
+        console.log('Setting enabled to: ' + enabled);
 
         // if we don't get a response something is wrong
         const timeout = setTimeout(() => {
             console.log('BBG_connect call timed-out', null);
-            if (cb) { cb('Set Connect state timeout', null); }
+            if (cb) { cb('Set enabled timeout', null); }
         }, SET_CONNECT_STATE_TIMEOUT);
 
-        void this.routerClient?.query('BBG_connect', {connect: connect}, (err, resp: { data?: { status: boolean, message: string } }) => {
+        void this.routerClient?.query('BBG_connect', {connect: enabled}, (err, resp: { data?: { status: boolean, message: string } }) => {
             clearTimeout(timeout);
             if (err) {
-                console.warn('Received error when setting connect state: ', err);
+                console.warn('Received error when setting enabled: ', err);
                 if (cb) { cb(err, false); }
             } else {
                 if (resp && resp.data && resp.data['status']) {
-                    console.log('Connection state set to: ', connect);
+                    console.log('enabled set to: ', enabled);
                     if (cb) { cb(null, true); }
                 } else {
-                    console.log('Received negative or empty response when setting connection state: ', resp);
-                    if (cb) { cb('Received negative or empty response when setting connection state: ' + resp?.data?.['message'], null); }
+                    console.log('Received negative or empty response when setting enabled: ', resp);
+                    if (cb) { cb('Received negative or empty response when setting enabled: ' + resp?.data?.['message'], null); }
                 }
             }
         });
     }
 
     /**
-     * Check that Bloomberg bridge is connected to the Bloomberg Terminal and that a user is
-     * logged in.
+     * Check that Bloomberg bridge is connected to the Bloomberg Terminal.
      * @param cb Callback for connection response that will return response as true if we are
-     * connected and logged in.
+     * connected.
 	 * @example
 	 * ```Javascript
-	 * let checkConnectionHandler = (err, loggedIn) => {
-	 *     if (!err && loggedIn) {
+	 * let checkConnectionHandler = (err, registered) => {
+	 *     if (!err && registered) {
 	 *         showConnectedIcon();
 	 *     } else {
 	 *         showDisconnectedIcon();
@@ -295,13 +294,13 @@ export default class BloombergBridgeClient {
             cb('Connection check timeout', null);
         }, CONNECTION_CHECK_TIMEOUT);
 
-        void this.routerClient?.query('BBG_connection_status', {}, (err, resp: { data?: { loggedIn: boolean } }) => {
+        void this.routerClient?.query('BBG_connection_status', {}, (err, resp: { data?: { registered: boolean } }) => {
             clearTimeout(timeout);
             if (err) {
                 console.warn('Received error when checking connection status. Is the BLoomberg Bridge running?', err);
                 cb(err, false);
             } else {
-                if (resp && resp.data && resp.data['loggedIn']) {
+                if (resp && resp.data && resp.data['registered']) {
                     console.debug('Received connection status: ', resp.data);
                     cb(null, true);
                 } else {
@@ -339,17 +338,17 @@ export default class BloombergBridgeClient {
 	 * @private
      */
     apiResponseHandler(cb: StandardCallback) {
-        return (err: StandardError, response: { data: { status: boolean } }) => {
+        return (err: StandardError, response: { data: { status: boolean, message?: string } }) => {
             if (err) {
                 const errMsg = 'Error returned by BBG_run_terminal_function: ';
                 console.error(errMsg, err);
                 this.logger?.error(errMsg, err);
                 cb(err, null);
-            } else if (!response || !response.data || !response.data.status) {
-                const errMsg = 'Negative status returned by BBG_run_terminal_function: ';
+            } else if (!response || !response.data || !response?.data.status) {
+                const errMsg = response?.data?.message ? response.data.message : 'Negative status returned by BBG_run_terminal_function: ';
                 console.warn(errMsg, response);
                 this.logger?.warn(errMsg, response);
-                cb('Command returned negative status', null);
+                cb(errMsg, null);
             } else {
                 const msg = 'BBG_run_terminal_function successful, response: ';
                 // tslint:disable-next-line:no-magic-numbers
@@ -694,21 +693,4 @@ export default class BloombergBridgeClient {
 
         this.queryBloombergBridge(message, cb);
     }
-}
-
-/**
- * Automated setup function enabling use as preload on a Finsemble component.
- */
-const setupBloombergBridgeClient = () => {
-    console.log("Setting up BloombergBridgeClient");
-	(FSBL as any).Clients.BloombergBridgeClient = new BloombergBridgeClient((FSBL as any).Clients.Router, (FSBL as any).Clients.Logger);
-	window.dispatchEvent(new Event('BloombergBridgeClientReady'));
-};
-
-// Startup pattern for preload. Preloads can come in any order, so we need to wait on either the window event or the
-// FSBL event
-if ((window as any).FSBL && (FSBL as any).addEventListener) {
-    (FSBL as any).addEventListener("onReady", setupBloombergBridgeClient);
-} else {
-    window.addEventListener("FSBLReady", setupBloombergBridgeClient);
 }

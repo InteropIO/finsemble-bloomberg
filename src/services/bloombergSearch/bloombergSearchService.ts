@@ -1,5 +1,5 @@
 const Finsemble = require("@finsemble/finsemble-core");
-import BloombergBridgeClient from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+import {BloombergBridgeClient} from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
 
 Finsemble.Clients.Logger.start();
 Finsemble.Clients.Logger.log("BloombergSearch Service starting up");

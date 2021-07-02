@@ -26,7 +26,6 @@ namespace BloombergBridge
 		private static bool shutdown = false;
 		private static bool connect = true;
 		private static bool isRegistered = false;
-		private static bool isLoggedIn = false;
 		private static bool remote = false;
 		private static string remoteAddress = null;
 
@@ -61,144 +60,100 @@ namespace BloombergBridge
 			// Block main thread until worker is finished.
 			autoEvent.WaitOne();
 		}
-
+		
 		/// <summary>
 		/// Function that attempts to connect to the bloomberg terminal and then monitor the connection
 		/// until told to shutdown. Cycles once per second.
 		/// </summary>
 		private static void connectionMonitorThread()
 		{
+			bool _remote = remote;
+			string _remoteAddress = remoteAddress;
 			while (!shutdown)
 			{
 				bool _isRegistered = false;
-				bool _isLoggedIn = false;
-				bool _remote = false;
-				string _remoteAddress = null;
 
 				if (!connect)
-                { //we've been told to not even try and connect
+				{ //we've been told to not even try and connect
 
 					_isRegistered = false;
-					_isLoggedIn = false;
-					_remoteAddress = null;
 
-					checkForConnectionStatusChange(_isRegistered, _isLoggedIn, _remote, _remoteAddress);
+					checkForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
 				}
 				else
-                { //go ahead and try to connect
+				{ //go ahead and try to connect
 					try
 					{
 						_isRegistered = BlpApi.IsRegistered;
+						checkForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
 					}
 					catch (Exception err)
 					{
 						FSBL.Logger.Error("Bloomberg API registration check failed");
 					}
-					if (!_isRegistered || !isLoggedIn)
+
+					//try to register
+					if (!_isRegistered)
 					{
-						//retrieve configuration from Finsemble
-						FSBL.ConfigClient.GetValue(new JObject { ["field"] = "finsemble.custom.bloomberg" }, (routerClient, response) =>
+						try
 						{
-							if (response.error != null)
+							if (remote)
 							{
-								FSBL.Logger.Warn(new JToken[] { "Error occurred while retrieving Bloomberg remote config...", response.error });
-							} else
-                            {
-								FSBL.Logger.Debug(new JToken[] { "Retrieved bloomberg bridge configuration: ", response.response?["data"] });
-							}
-							if (response.response?["data"] != null && response.response?["data"]?["remote"] != null)
-                            { //possible remote connection
-								if (bool.Parse(response.response?["data"]?["remote"].ToString()) &&
-									response.response?["data"]?["remoteAddress"] != null)
-                                {
-									_remote = true;
-									_remoteAddress = response.response?["data"]?["remoteAddress"].ToString();
-								}
-							}
-
-							//try to register
-							if (!_isRegistered)
-                            {
-								try
-								{
-									FSBL.Logger.Debug(new JToken[] { "Attempting registration..." });
-									if (_remote)
-									{
-										BlpApi.RegisterRemote(_remoteAddress);
-									}
-									else
-									{
-										BlpApi.Register();
-									}
-									BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
-									_isRegistered = BlpApi.IsRegistered;
-								}
-								catch (Exception err)
-								{
-									_isRegistered = false;
-									FSBL.Logger.Debug(new JToken[] { "Bloomberg API registration failed: ", err.Message });
-								}
-							}
-							
-							if (_isRegistered)
-							{
-								FSBL.Logger.Debug(new JToken[] { "Registration successful, checking log in status..." });
-
-								try
-								{
-									_isLoggedIn = BlpTerminal.IsLoggedIn();
-								}
-								catch (Exception err)
-								{
-									_isLoggedIn = false;
-									FSBL.Logger.Warn("Bloomberg API isLoggedIn call failed");
-								}
+								FSBL.Logger.Debug(new JToken[] { "Attempting remote registration with address: ", remoteAddress });
+								BlpApi.RegisterRemote(remoteAddress);
 							}
 							else
 							{
-								//can't be logged in if not connected to the BlpApi
-								_isLoggedIn = false;
-								FSBL.Logger.Debug(new JToken[] { "Registration failed." });
+								FSBL.Logger.Debug(new JToken[] { "Attempting local registration..." });
+								BlpApi.Register();
 							}
-
-							checkForConnectionStatusChange(_isRegistered, _isLoggedIn, _remote, _remoteAddress);
-						});
-					} else
-                    {
+							BlpApi.Disconnected += new System.EventHandler(BlpApi_Disconnected);
+							_isRegistered = BlpApi.IsRegistered;
+						}
+						catch (Exception err)
+						{
+							_isRegistered = false;
+							FSBL.Logger.Debug(new JToken[] { "Bloomberg API registration failed: ", err.ToString() });
+						}
+					}
+					else
+					{
 						FSBL.Logger.Debug(new JToken[] { "Registered and logged in to terminal." });
 					}
+
+					checkForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
 				}
+				_remote = remote;
+				_remoteAddress = remoteAddress;
 
 				Thread.Sleep(2000);
 			}
 			FSBL.Logger.Log(new JToken[] { "Exited connection monitoring loop." });
 		}
 
-		/// <summary>
-		/// Utility function called by connectionMonitorThread to detect a change in the connection status.
-		/// </summary>
-		/// <param name="_isRegistered"></param>
-		/// <param name="_isLoggedIn"></param>
-		/// <returns>_isLogged, will be returned false if there are any errors in setting up after a login event</returns>
-		private static void checkForConnectionStatusChange(bool _isRegistered, bool _isLoggedIn, bool _remote, string _remoteAddress)
+        /// <summary>
+        /// Utility function called by connectionMonitorThread to detect a change in the connection status.
+        /// </summary>
+        /// <param name="_isRegistered"></param>
+        /// <param name="_remote"></param>
+        /// <param name="_remoteAddress"></param>
+        private static void checkForConnectionStatusChange(bool _isRegistered, bool _remote, string _remoteAddress)
 		{
 			bool statusChange = false;
-			if (_isRegistered != isRegistered || _isLoggedIn != isLoggedIn || _remote != remote || _remoteAddress != remoteAddress)
+			if (_isRegistered != isRegistered || _remote != remote || _remoteAddress != remoteAddress)
 			{
 				//status change
 				isRegistered = _isRegistered;
-				isLoggedIn = _isLoggedIn;
-				remote = _remote;
-				remoteAddress = _remoteAddress;
+
+				//don't set remote or remoteAddress as the config listener and connection monitor thread will handle that
 
 				statusChange = true;
 			}
 			if (statusChange)
 			{
 				JObject connectionStatus = new JObject();
-				connectionStatus.Add("connect", connect);
+				connectionStatus.Add("enabled", connect);
 				connectionStatus.Add("registered", isRegistered);
-				connectionStatus.Add("loggedIn", isLoggedIn);
 				if (isRegistered)
                 {
 					if (!remote)
@@ -214,7 +169,7 @@ namespace BloombergBridge
 				FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
 				FSBL.Logger.Log("Bloomberg connection status changed: ", connectionStatus);
 
-				if (isLoggedIn) //we've just logged in
+				if (isRegistered) //we've just logged in
 				{
 					try
 					{
@@ -222,12 +177,18 @@ namespace BloombergBridge
 						BlpTerminal.GroupEvent += BlpTerminal_ComponentGroupEvent;
 
 						//setup security finder
-						secFinder = new SecurityLookup();
-						secFinder.Init();
+						if (remote)
+                        {
+							//the Bloomberg DAPI only supports local connections, hence SecurityLookup can't be initialized
+                        } else
+                        {
+							secFinder = new SecurityLookup();
+							secFinder.Init();
+						}
 					}
 					catch (Exception err)
 					{
-						_isLoggedIn = false;
+						isRegistered = false;
 						FSBL.Logger.Error("Error occurred during post-login setup: ", err.Message);
 					}
 				}
@@ -265,9 +226,50 @@ namespace BloombergBridge
 			//setup Router endpoints
 			addResponders();
 
-			//start up connection monitor thread
-			Thread thread = new Thread(new ThreadStart(connectionMonitorThread));
-			thread.Start();
+			//Handler function for received configuration values
+			EventHandler<FinsembleEventArgs> ConfigHandler = (routerClient, response) =>
+			{
+				if (response.error != null)
+				{
+					FSBL.Logger.Warn(new JToken[] { "Error occurred while receiving Bloomberg remote config...", response.error });
+				}
+				else
+				{
+					FSBL.Logger.Debug(new JToken[] { "Received bloomberg bridge configuration: ", response.response?["data"] });
+				}
+				JToken data = response.response?["data"];
+				//handle different return data from ConfigClient.GetValue and COnfigClient.AddListner
+				if (data?["value"] != null)
+                {
+					data = data?["value"];
+				}
+				if (data != null && data?["remote"] != null)
+				{ //possible remote connection
+					if (bool.Parse(data?["remote"].ToString()) &&
+						data?["remoteAddress"] != null)
+					{
+						remote = true;
+						remoteAddress = data?["remoteAddress"].ToString();
+					} else
+                    {
+						remote = false;
+					}
+				}
+				if (data != null && data?["enabled"] != null)
+				{
+					connect = bool.Parse(data?["enabled"].ToString());
+				}
+			};
+
+			//retrieve the initial config
+			FSBL.ConfigClient.GetValue(new JObject { ["field"] = "finsemble.custom.bloomberg" }, ConfigHandler);
+
+			//subscribe to changes in the config
+			FSBL.ConfigClient.AddListener(new JObject { ["field"] = "finsemble.custom.bloomberg" }, ConfigHandler, (routerClient, response) => {
+				//start up connection monitor thread
+				Thread thread = new Thread(new ThreadStart(connectionMonitorThread));
+				thread.Start();
+			});
 		}
 
 		/// <summary>
@@ -392,10 +394,14 @@ namespace BloombergBridge
 		/// </summary>
 		private static void removeResponders()
 		{
-			FSBL.Logger.Log("Removing query responders");
-			FSBL.RouterClient.RemoveResponder("BBG_connect", true);
-			FSBL.RouterClient.RemoveResponder("BBG_connection_status", true);
-			FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function", true);
+			try
+			{
+				FSBL.Logger.Log("Removing query responders");
+				FSBL.RouterClient.RemoveResponder("BBG_connect", true);
+				FSBL.RouterClient.RemoveResponder("BBG_connection_status", true);
+				FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function", true);
+			}
+			catch (Exception err) { }
 
 			//dispose of security finder
 			if (secFinder != null)
@@ -458,9 +464,8 @@ namespace BloombergBridge
 				FSBL.Logger.Error("Error received by BBG_connection_status query responder: ", queryMessage.error );
 			} else {
 				JObject connectionStatus = new JObject();
-				connectionStatus.Add("connect", connect);
+				connectionStatus.Add("enabled", connect);
 				connectionStatus.Add("registered", isRegistered);
-				connectionStatus.Add("loggedIn", isLoggedIn);
 				if (isRegistered)
 				{
 					if (!remote)
@@ -489,10 +494,9 @@ namespace BloombergBridge
 		{
 			//status change
 			isRegistered = false;
-			isLoggedIn = false;
 			JObject connectionStatus = new JObject();
+			connectionStatus.Add("enabled", connect);
 			connectionStatus.Add("registered", isRegistered);
-			connectionStatus.Add("loggedIn", isLoggedIn);
 			FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
 			Console.WriteLine("Transmitted connection status after disconnect: " + connectionStatus.ToString());
 			FSBL.Logger.Log("Transmitted connection status after disconnect: ", connectionStatus);
@@ -513,7 +517,7 @@ namespace BloombergBridge
 			{
 				JObject queryResponse = new JObject();
 				JToken queryData = null;
-				if (isRegistered && isLoggedIn)
+				if (isRegistered)
 				{
 					queryData = queryMessage.response?["data"];
 					if (queryData != null)
@@ -530,12 +534,7 @@ namespace BloombergBridge
 				else if (!isRegistered)
 				{
 					queryResponse.Add("status", false);
-					queryResponse.Add("message", "Not registered with the Bloomberg BlpApi");
-				}
-				else if (!isLoggedIn)
-				{
-					queryResponse.Add("status", false);
-					queryResponse.Add("message", "Not Logged into Bloomberg terminal");
+					queryResponse.Add("message", "Not registered with the Bloomberg Terminal");
 				}
 
 				//return the response
@@ -837,45 +836,51 @@ namespace BloombergBridge
 
 		private static void SecurityLookup(JObject queryResponse, JToken queryData)
 		{
-			if (validateQueryData("SecurityLookup", queryData, new string[] { "security" }, null, queryResponse))
-			{
-
-				JArray resultsArr = new JArray();
-				//needs to be surrounded by a lock or mutex as the SecurityLookup code only supports single threaded ops
-				//  the alternative is to setup a securityFinder object for each query then dispose of it after:
-				//    var secFinder = new SecurityLookup();
-				//    secFinder.Init();
-				//      do query
-				//    secFinder.Dispose();
-				//    secFinder = null;
-				lock (secFinder)
+			if (remote)
+            {
+				queryResponse.Add("status", false);
+				queryResponse.Add("message", "Security lookup is a function of the Bloomberg Desktop API (DAPI) which is only supported for local connections. You are connected to a remote terminal");
+			} 
+			else
+            {
+				if (validateQueryData("SecurityLookup", queryData, new string[] { "security" }, null, queryResponse))
 				{
-					secFinder.Query(queryData["security"].ToString(), 10);
-					IList<string> results = secFinder.GetResults();
 
-					//convert the results into the security name and Type
-					//  results typically look like this: AAPL US<equity>
-					//  when we need to output: { name: "AAPL US", type: "Equity" }
-					for (int i = 0; i < results.Count; i++)
+					JArray resultsArr = new JArray();
+					//needs to be surrounded by a lock or mutex as the SecurityLookup code only supports single threaded ops
+					//  the alternative is to setup a securityFinder object for each query then dispose of it after:
+					//    var secFinder = new SecurityLookup();
+					//    secFinder.Init();
+					//      do query
+					//    secFinder.Dispose();
+					//    secFinder = null;
+					lock (secFinder)
 					{
-						string result = results[i];
-						JObject resultObj = new JObject();
-						int typeStartIndex = result.LastIndexOf('<');
-						if (typeStartIndex > -1)
-						{
-							resultObj.Add("name", result.Substring(0, typeStartIndex).Trim());
-							resultObj.Add("type", char.ToUpper(result[typeStartIndex + 1]) + result.Substring(typeStartIndex + 2, result.Length - (typeStartIndex + 2) - 1));
-						}
-						resultsArr.Add(resultObj);
-					}
-				}
+						secFinder.Query(queryData["security"].ToString(), 10);
+						IList<string> results = secFinder.GetResults();
 
-				queryResponse.Add("status", true);
-				queryResponse.Add("results", resultsArr);
+						//convert the results into the security name and Type
+						//  results typically look like this: AAPL US<equity>
+						//  when we need to output: { name: "AAPL US", type: "Equity" }
+						for (int i = 0; i < results.Count; i++)
+						{
+							string result = results[i];
+							JObject resultObj = new JObject();
+							int typeStartIndex = result.LastIndexOf('<');
+							if (typeStartIndex > -1)
+							{
+								resultObj.Add("name", result.Substring(0, typeStartIndex).Trim());
+								resultObj.Add("type", char.ToUpper(result[typeStartIndex + 1]) + result.Substring(typeStartIndex + 2, result.Length - (typeStartIndex + 2) - 1));
+							}
+							resultsArr.Add(resultObj);
+						}
+					}
+
+					queryResponse.Add("status", true);
+					queryResponse.Add("results", resultsArr);
+				}
 			}
 		}
-
-		
 
 
 		//-----------------------------------------------------------------------
