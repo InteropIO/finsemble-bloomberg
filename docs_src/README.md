@@ -4,12 +4,13 @@
 Welcome to Finsemble's integration with [Bloomberg Terminal Connect](https://www.bloomberg.com/terminal-connect/), which enables Finsemble components and services to interoperate with Bloomberg panels or Launchpad components, allowing you to build powerful workflows for your users that avoid data re-entry and copy/paste errors.
 
 Specifically, the integration enables:
-- Finsemble to execute command functions in a Bloomberg Panel
+- Connection to a local or remote Bloomberg terminal
+- Execution of functions in a Bloomberg Panel
 - Bi-directional data sharing between Bloomberg worksheets and Finsemble
 - Bi-directional data sharing between Launchpad groups and Finsemble
-- Search functions for Bloomberg security definitions (as provided by the SECF function), e.g. `TSLA US Equity` or ``
+- Search functions for Bloomberg security definitions (available for local conneciton only, via Bloomberg DAPI)
 
-By using this integration with Finsemble, you can provide these capabilities to your applications. Your Finsembilized components can drive context in the Bloomberg Terminal or react to context changes received from it.
+By using this integration with Finsemble, your custom applications can drive context in the Bloomberg Terminal or react to context changes received from it.
 
 To use the integration you will need access to both a Bloomberg Terminal and license for Terminal Connect. For more information on Terminal Connect, run `TMCT`**\<GO\>** in your Bloomberg terminal. For help designing your integration, contact the Finsemble [Solutions Engineering team](mailto:support@finsemble.com). 
 
@@ -19,6 +20,10 @@ To use the integration you will need access to both a Bloomberg Terminal and lic
   * [Files](#files)
   * [Installation via the watch script](#installation-via-the-watch-script)
   * [Manual installation](#manual-installation)
+- [Working with a Remote terminal](#working-with-a-remote-terminal)
+  * [Remote connection requirements](#remote-connection-requirements)
+  * [Configuring the terminal location](#configuring-the-terminal-location)
+  * [Connection status and config UIs](#connection-status-and-config-uis)
 - [Building and Deploying the Bloomberg Bridge](#building-and-deploying-the-bloomberg-bridge)
   * [Prerequisites](#prerequisites)
   * [Build the integration](#build-the-integration)
@@ -33,7 +38,7 @@ To use the integration you will need access to both a Bloomberg Terminal and lic
 
 
 ## How it works
-The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect and the BLP API. The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](../src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
+The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect and the Bloomberg Desktop API (DAPI). The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](../src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into the FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
 
 Documentation for the Typescript client implementation can be found [here](modules/_bloombergbridgeclient_.md).
 
@@ -45,9 +50,8 @@ A number of examples of using the integration are provided:
 - **[Bloomberg Bridge](../src/components/Bloomberg%20Bridge)**: Example component configurations for launching the native bridge application.
 - **[testBloomberg](../src/components/testBloomberg)**: A test component demonstrating use of all API functions.
 - **[Bloomberg Terminal](../src/components/Bloomberg%20Terminal)**: An example configuration for launching the Bloomberg terminal itself
-- **[Coming Soon: Desktop service for FDC3 integration](#)**: An example service that works with the FDC3 channel matcher service to facilitate context sharing with FDC3 system channels in Finsemble and provides an example of instrument/security translation that may be required. See the [Finsemble FDC3 Implementation](https://github.com/ChartIQ/finsemble-fdc3) project for more details on the FDC3 channel matcher service.
-- **[Security finder example](../src/components/SecurityFinder)**: An example that demonstrates the use of the SecurityLookup function of the Bloomberg Bridge to implement a search with typeahead for Bloomberg securities, which may be used to set the context of launchpad groups, perform commands or add to worksheets. It can also receive context via the Finsemble Linker and help you resolve it to Bloomberg Security
-
+- **[Security finder example](../src/components/SecurityFinder)**: An example that demonstrates the use of the SecurityLookup function of the Bloomberg Bridge to implement a search with typeahead for Bloomberg securities, which may be used to set the context of launchpad groups, perform commands or add to worksheets. It can also receive context via the Finsemble Linker and help you resolve it to Bloomberg Security.
+Please note that this example can only be used with a local Bloomberg terminal as the security lookup function is provided by the Bloomberg Desktop API (DAPI) which is only supported locally. However, similar functionality can be implemented via the Bloomberg Server API (SAPI).
 
 
 ## Installation
@@ -96,7 +100,8 @@ finsemble-bloomberg
     |
     └───clients
     |   └───BloombergBridgeClient        
-    |           BloombergBridgeClient.ts - Typescript client class and preload for use with BloombergBridge
+    |           BloombergBridgeClient.ts  - Typescript client class for use with BloombergBridge
+    |           BloombergBridgePreload.ts - Preload script that adds the client to `FSBL.Clients`
     |
     └───components
     |   └───Bloomberg Bridge         - Configs for launching the Bloomberg Bridge
@@ -154,21 +159,78 @@ To manually install the integration into your Finsemble project:
     - `components['Bloomberg Bridge'].component.spawnOnStartup = true`
     - `components['Bloomberg Bridge'].foreign.components['App Launcher'].launchableByUser = false`
 
-4) Copy the _[src/clients/BloombergBridgeClient/BloombergBridgeClient.ts](../src/clients/BloombergBridgeClient/BloombergBridgeClient.ts)_ file into your project at an appropriate location (e.g. _/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts_). This can then be imported into components or services that you build. 
+4) Copy the _[src/clients/BloombergBridgeClient/BloombergBridgeClient.ts](../src/clients/BloombergBridgeClient/BloombergBridgeClient.ts)_ file into your project at an appropriate location (e.g. _/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts_). This can then be imported into components or services that you build. You may also wish to copy the preload file, _[src/clients/BloombergBridgeClient/BloombergBridgePreload.ts](../src/clients/BloombergBridgeClient/BloombergBridgePreload.ts)_, into your project if you intend to preload, rather than import the client into your applications.
 
 5) If you wish to incorporate any of the supplied examples into your project, copy their folders from [src/components/](../src/components/) or [src/services/](../src/services/) into your project. Each contains: 
     - a _config.json_ file that you should import or copy into your project.
     - a _finsemble.webpack.json_ file that works with the Finsemble seed project's build system. If you are using a different build, ensure that the component is built by it.
 
-    **Note:** Most of the examples include an import statement for the BloombergBridgeClient that may need to be updated to use the path to the source file you copied into your project in step 4, e.g.
-    ```Javascript
-    import BloombergBridgeClient from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+    **Note:** The examples include either an import statement for the BloombergBridgeClient, which need to be updated to use the path to the source file you copied into your project in step 4:
+    ```javascript
+    import {BloombergBridgeClient} from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+    ```
+    or use the preload script via their configuration:
+    ```JSON
+    "Bloomberg Security Finder": {
+        "window": {
+            ...
+        },
+        "component": {
+            "preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgePreload.js",
+            ...
     ```
 
 6) To build and run the SecurityFinder example, you will also need to install dependencies in your project by running:
     ```
 	npm install react-tabs react-select react-autosuggest
 	```
+
+## Working with a Remote terminal
+Some traders have multiple computers on their desks. Hence, Bloomberg Terminal Connect supports connecting to a Bloomberg terminal running on a different machine (a remote terminal) so that apps can still integrate with it without having to run on the same device. When working with a remote terminal Bloomberg Bridge should be run on the same machine as your Finsemble desktop and be launched by Finsemble as normal, however it will be configured to register with the remote machine by machine name or IP address.
+
+### Remote connection requirements
+Bloomberg Terminal Connect to allow a connection to a remote terminal, a number of requirements must be satisfied:
+- Both the local and remote machines must be connected to an Active Directory and be logged into the same user account,
+- TCP Port 445 must be open on the remote machine
+- UDP ports 137 & 139 must be on the remote machine.
+For further details on conneciton requirements please refer to the 'Bloomberg Terminal Connect API getting started guide'.
+
+N.B. The `runSecurityLookup` is implemented via the Bloomberg Desktop API (DAPI), which only supports local connections. Hence, this function will return an error when run over a remote connections. Similar functionality maybe be implemented for remote connections via the Bloomberg Server API (SAPI).
+
+### Configuring the terminal location
+The Bloomberg Bridge application will monitor a number of configuration settings to determine whether it is making a remote connection and to what address. These are:
+- `finsemble.custom.bloomberg.enabled` (default `true`): determines whether the Bloomberg Bridge should be connected to the Terminal. Set to `false` before updating other settings at runtime, then set to `true` to connect to a new host. 
+- `finsemble.custom.bloomberg.remote` (default `false`): Enables connection to a remote machine. If false the value of `remoteAddress` will be assumed to be `"localhost"`.
+- `finsemble.custom.bloomberg.remoteAddress` (default `null`): The machine name or IP address of the remote machine with a terminal running on it. 
+
+These config values may be set via dynamic configuration, on behalf of the user. To do so, import configuration of the following format via `ConfigClient.processAndSet`:
+
+```JSON
+{
+	"finsemble": {
+		"custom": {
+            "bloomberg": {
+				"enabled": true,
+				"remote": true,
+				"remoteAddress": "mymachine.somedomain.com"
+			}
+        }
+	}
+}
+```
+
+An example configuration is also provided in _[finsemble.manifest.json](../finsemble.manifest.json).
+
+Alternatively, a preference panel is provided allowing configuration of these values by the user at runtime with persistence across sessions.
+
+### Connection status and config UIs
+TODO: add overview of UIs with image and explanation
+
+#### Installing the preference panel
+TODO: add preference panel installation instructions
+
+#### Installing the connection status icon
+TODO: add connection status indicator installation instructions
 
 ## Building and Deploying the Bloomberg Bridge
 The Bloomberg Bridge application should be built using Terminal Connect and BLP API DLL files distributed by Bloomberg. It can then either be deployed to a known path on your users machines, or delivered via a Finsemble app asset, which will be downloaded and installed automatically by Finsemble.
@@ -195,7 +257,7 @@ An example appAsset for the Bridge is provided in _/hosted_ directory.
 - Rebuild the project (which will install NuGet dependencies automatically)
 
 ### Running the BloombergBridge from a local path
-
+For debugging purposes a configuration referencing a local Bloomberg Bridge build is provided, see the 'Bloomberg Bridge Debug' configuration in _[src/components/Bloomberg%20Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_. This configuration makes use of a `$bloombergBridgeFolder` variable in the `path` element that should be set in your manifest file. 
 
 ### Produce an appAsset for deployment by Finsemble
 - Run a Release build
@@ -209,7 +271,7 @@ An example appAsset for the Bridge is provided in _/hosted_ directory.
             ...
             {
                 "src": "http://localhost:3375/hosted/BloombergBridgeRelease.zip",
-                "version": "1.0",
+                "version": "1.2.0",
                 "alias": "bloomberg_bridge",
                 "target": "BloombergBridge.exe"
             }
@@ -223,11 +285,11 @@ An example appAsset for the Bridge is provided in _/hosted_ directory.
 ## Using the Bloomberg Bridge Client
 The native bridge application \(BloombergBridge\) exposes an API over the Finsemble router that provides access to each of its functions. For convenience, a Typescript client is supplied allowing you to call each of these functions. The client may  be imported (or required) into your source files, e.g.:
 ```Javascript
-import BloombergBridgeClient from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+import {BloombergBridgeClient} from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
 ```
 (ensuring that you correct the path to the file as it exists in your project).
 
-Alternatively, it may be used as a preload, by building the Typescript file and then setting the `component.preload` field of your component's configuration to the path to the compiled client. If you are using Finsemble seed project's build system, the Typescript file will be be automatically built for you and output to the _/dist/clients/BloombergBridgeClient_ folder. If you use a different build system, be sure to build the Typescript file before trying to preload it.
+Alternatively, a preload script is provided that will import the client and set up an instance at `FSBL.Clients.BloombergBridgeClient`. This can be used by building the Typescript file and then setting the `component.preload` field of your component's configuration to the path to the compiled preload script. If you are using Finsemble seed project's build system, the Typescript file will be be automatically built for you and output to the _/dist/clients/BloombergBridgeClient_ folder. If you use a different build system, be sure to build the Typescript file before trying to preload it.
 Please ensure that either the full path to the preload is added to the `trustedPreloads` array in your manifest file or `window.options.securityPolicy = 'trusted'` is set in your component config or Finsemble may prevent the preload if your component is loaded from a different domain to the one used to host Finsemble, see Finsemble's [security policies documentation](https://documentation.chartiq.com/finsemble/tutorial-SecurityPolicies.html) for more details.
 
 Documentation for: 
@@ -237,7 +299,7 @@ Documentation for:
 ### Examples
 
 #### Using the preloaded BloombergBridgeClient
-If you use the BloombergBridgeClient as a preload in your component, it will be instantiated for you at:
+If you use the BloombergBridgeClient preload in your component, it will be instantiated for you at:
 ```Javascript
 FSBL.Clients.BloombergBridgeClient
 ```
@@ -246,7 +308,7 @@ For the purposes of the following examples you can create a reference to it as f
 let bbg = FSBL.Clients.BloombergBridgeClient;
 ```
 
-As setup of the client occurs when the Finsemble clients are themselves ready (on teh FSBLReady event), the preload will dispatch its own event when the BloombergBridgeClient is ready: `BloombergBridgeClientReady`. To avoid race conditions, you should wait on this event, rather than `FSBLReady`, in your components, e.g.:
+As setup of the client occurs when the Finsemble clients are themselves ready (on the FSBLReady event), the preload will dispatch its own event when the BloombergBridgeClient is ready: `BloombergBridgeClientReady`. To avoid race conditions, you should wait on this event, rather than `FSBLReady`, in your components, e.g.:
 
 ```Javascript
 window.addEventListener("BloombergBridgeClientReady", BBGReady);

@@ -1,4 +1,4 @@
-import {BBGConnectionEventListener, BBGGroupEventListener, BBGWorksheet, BBGGroup, BloombergBridgeClient} from "./BloombergBridgeClient";
+import {BloombergBridgeClient} from "./BloombergBridgeClient";
 
 /**
  * Automated setup function enabling use as preload on a Finsemble component.

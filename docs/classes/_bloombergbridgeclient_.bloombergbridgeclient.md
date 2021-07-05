@@ -44,6 +44,7 @@ via instances of the RouterClient and Logger referenced from `FSBL.Clients`.
 * [runSecurityLookup](_bloombergbridgeclient_.bloombergbridgeclient.md#runsecuritylookup)
 * [runSetGroupContext](_bloombergbridgeclient_.bloombergbridgeclient.md#runsetgroupcontext)
 * [setConnectionEventListener](_bloombergbridgeclient_.bloombergbridgeclient.md#setconnectioneventlistener)
+* [setEnabled](_bloombergbridgeclient_.bloombergbridgeclient.md#setenabled)
 * [setGroupEventListener](_bloombergbridgeclient_.bloombergbridgeclient.md#setgroupeventlistener)
 
 ## Constructors
@@ -52,7 +53,7 @@ via instances of the RouterClient and Logger referenced from `FSBL.Clients`.
 
 \+ **new BloombergBridgeClient**(`routerClient?`: IRouterClient, `logger?`: ILogger): *[BloombergBridgeClient](_bloombergbridgeclient_.bloombergbridgeclient.md)*
 
-*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:86](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L86)*
 
 BloombergBridgeClient constructor.
 
@@ -82,41 +83,41 @@ Name | Type | Description |
 
 ### `Private` connectionEventListener
 
-• **connectionEventListener**: *[BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md)* = null
+• **connectionEventListener**: *[BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md) | null* = null
 
-*Defined in [BloombergBridgeClient.ts:77](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L77)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:83](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L83)*
 
 ___
 
 ### `Private` groupEventListener
 
-• **groupEventListener**: *[BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md)* = null
+• **groupEventListener**: *[BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md) | null* = null
 
-*Defined in [BloombergBridgeClient.ts:78](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L78)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:84](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L84)*
 
 ___
 
 ### `Private` logger
 
-• **logger**: *ILogger* = null
+• **logger**: *ILogger | null* = null
 
-*Defined in [BloombergBridgeClient.ts:80](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L80)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:86](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L86)*
 
 ___
 
 ### `Private` routerClient
 
-• **routerClient**: *IRouterClient* = null
+• **routerClient**: *IRouterClient | null* = null
 
-*Defined in [BloombergBridgeClient.ts:79](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L79)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:85](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L85)*
 
 ## Methods
 
 ### `Private` apiResponseHandler
 
-▸ **apiResponseHandler**(`cb`: function): *(Anonymous function)*
+▸ **apiResponseHandler**(`cb`: StandardCallback): *(Anonymous function)*
 
-*Defined in [BloombergBridgeClient.ts:294](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L294)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:340](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L340)*
 
 Internal function used to return a call back that will wrap the supplied callback and log all
 responses
@@ -124,21 +125,9 @@ from the Bloomberg Bridge to aid debugging.
 
 **Parameters:**
 
-▪ **cb**: *function*
-
-Callback
-
-▸ (`err`: string | Error, `response`: object): *void*
-
-**Parameters:**
-
-▪ **err**: *string | Error*
-
-▪ **response**: *object*
-
-Name | Type |
------- | ------ |
-`status` | boolean |
+Name | Type | Description |
+------ | ------ | ------ |
+`cb` | StandardCallback | Callback |
 
 **Returns:** *(Anonymous function)*
 
@@ -148,15 +137,14 @@ ___
 
 ▸ **checkConnection**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:243](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L243)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:288](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L288)*
 
-Check that Bloomberg bridge is connected to the Bloomberg Terminal and that a user is
-logged in.
+Check that Bloomberg bridge is connected to the Bloomberg Terminal.
 
 **`example`** 
 ```Javascript
-let checkConnectionHandler = (err, loggedIn) => {
-    if (!err && loggedIn) {
+let checkConnectionHandler = (err, registered) => {
+    if (!err && registered) {
         showConnectedIcon();
     } else {
         showDisconnectedIcon();
@@ -170,16 +158,16 @@ bbg.checkConnection(checkConnectionHandler);
 ▪ **cb**: *function*
 
 Callback for connection response that will return response as true if we are
-connected and logged in.
+connected.
 
-▸ (`err`: string | CallbackError | Error, `response`: boolean): *void*
+▸ (`err`: string | CallbackError | Error | null, `response`: boolean | null): *void*
 
 **Parameters:**
 
 Name | Type |
 ------ | ------ |
-`err` | string &#124; CallbackError &#124; Error |
-`response` | boolean |
+`err` | string &#124; CallbackError &#124; Error &#124; null |
+`response` | boolean &#124; null |
 
 **Returns:** *void*
 
@@ -187,9 +175,9 @@ ___
 
 ### `Private` queryBloombergBridge
 
-▸ **queryBloombergBridge**(`message`: object, `cb`: function): *void*
+▸ **queryBloombergBridge**(`message`: object, `cb`: StandardCallback): *void*
 
-*Defined in [BloombergBridgeClient.ts:278](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L278)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:323](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L323)*
 
 Internal function used to send a Query to the BBG_run_terminal_function responder of
 BloombergBridge,
@@ -205,18 +193,9 @@ Name | Type | Description |
 ------ | ------ | ------ |
 `function` | string | Required field that determines which function to run. |
 
-▪ **cb**: *function*
+▪ **cb**: *StandardCallback*
 
 Callback
-
-▸ (`err`: string | Error, `response`: object): *void*
-
-**Parameters:**
-
-Name | Type |
------- | ------ |
-`err` | string &#124; Error |
-`response` | object |
 
 **Returns:** *void*
 
@@ -226,7 +205,7 @@ ___
 
 ▸ **removeConnectionEventListener**(): *void*
 
-*Defined in [BloombergBridgeClient.ts:162](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L162)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:168](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L168)*
 
 Remove the current connection event handler.
 
@@ -243,7 +222,7 @@ ___
 
 ▸ **removeGroupEventListener**(): *void*
 
-*Defined in [BloombergBridgeClient.ts:217](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L217)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:223](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L223)*
 
 Remove the current group context changed event handler.
 
@@ -260,7 +239,7 @@ ___
 
 ▸ **runBBGCommand**(`mnemonic`: string, `securities`: string[], `panel`: string, `tails`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:340](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L340)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:386](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L386)*
 
 Run a function in one of the 4 Bloomberg panel windows.
 
@@ -303,11 +282,11 @@ Panel number to run the command on (accepts values "1", "2", "3" or
 
 Callback
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
@@ -323,7 +302,7 @@ ___
 
 ▸ **runCreateWorksheet**(`worksheetName`: string, `securities`: string[], `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:382](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L382)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:428](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L428)*
 
 Create a new worksheet with the specified securities and name.
 
@@ -360,11 +339,11 @@ An array of strings representing one or more securities.
 
 Callback
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
@@ -381,7 +360,7 @@ ___
 
 ▸ **runGetAllGroups**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:528](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L528)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:574](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L574)*
 
 Gets a list of all available Launchpad component groups.
 
@@ -412,11 +391,11 @@ bbg.runGetAllGroups((err, response) => {
 
 Callback
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
@@ -433,7 +412,7 @@ ___
 
 ▸ **runGetAllWorksheets**(`cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:419](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L419)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:465](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L465)*
 
 Retrieve all worksheets for the user.
 
@@ -462,11 +441,11 @@ bbg.runGetAllWorksheets((err, response) => {
 
 Callback
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
@@ -483,7 +462,7 @@ ___
 
 ▸ **runGetGroupContext**(`groupName`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:560](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L560)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:606](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L606)*
 
 Returns details of a Launchpad component group by name.
 
@@ -515,11 +494,11 @@ The name of the component group to retrieve.
 
 Callback
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
@@ -536,7 +515,7 @@ ___
 
 ▸ **runGetWorksheet**(`worksheetId`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:454](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L454)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:500](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L500)*
 
 Retrieve a specific worksheet by id.
 
@@ -568,11 +547,11 @@ Worksheet ID to retrieve.
 
 Callback
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
@@ -589,7 +568,7 @@ ___
 
 ▸ **runReplaceWorksheet**(`worksheetId`: string, `securities`: string[], `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:490](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L490)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:536](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L536)*
 
 Replaces a specific worksheet by ID with a new list of securities.
 
@@ -625,11 +604,11 @@ bbg.runReplaceWorksheet(worksheetId, securities, (err, response) => {
 });
 ```
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
@@ -646,7 +625,7 @@ ___
 
 ▸ **runSecurityLookup**(`security`: string, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:638](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L638)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:684](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L684)*
 
 Search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return
 results in around ~120-150ms and maybe used, for example, to power an autocomplete or
@@ -681,17 +660,17 @@ The string to lookup a security for
 
 Callback
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
 Name | Type |
 ------ | ------ |
-`results` | [object] |
+`results` | [] |
 `status` | boolean |
 
 **Returns:** *void*
@@ -702,7 +681,7 @@ ___
 
 ▸ **runSetGroupContext**(`groupName`: string, `value`: string, `cookie`: string | null, `cb`: function): *void*
 
-*Defined in [BloombergBridgeClient.ts:594](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L594)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:640](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L640)*
 
 Set the context value of a Launchpad group by name.
 
@@ -740,11 +719,11 @@ a group to set the context of. Pass null if not required.
 
 Callback
 
-▸ (`err`: string | Error, `response`: object): *void*
+▸ (`err`: StandardError, `response`: object): *void*
 
 **Parameters:**
 
-▪ **err**: *string | Error*
+▪ **err**: *StandardError*
 
 ▪ **response**: *object*
 
@@ -760,7 +739,7 @@ ___
 
 ▸ **setConnectionEventListener**(`cb`: [BBGConnectionEventListener](../interfaces/_bloombergbridgeclient_.bbgconnectioneventlistener.md)): *void*
 
-*Defined in [BloombergBridgeClient.ts:138](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L138)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:144](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L144)*
 
 Set a handler function for connection events.
 
@@ -770,7 +749,7 @@ this multiple times will simply replace the existing handler.
 **`example`** 
 ```Javascript
 let connectionEventHandler = (err, resp) => {
-    if (!err && resp && resp.loggedIn) {
+    if (!err && resp && resp.registered) {
         showConnectedIcon();
     } else {
         showDisconnectedIcon();
@@ -789,11 +768,38 @@ Name | Type | Description |
 
 ___
 
+###  setEnabled
+
+▸ **setEnabled**(`enabled`: boolean, `cb?`: StandardCallback): *void*
+
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:246](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L246)*
+
+Set the connection state for Bloomberg bridge, i.e. whether it is enabled or not.
+Note that the remote connection config should only be changed while the connection is
+disabled or disconnected, as it is read when attempting to connect.
+
+**`example`** 
+```Javascript
+bbg.setConnectState(true);
+bbg.setConnectState(false, (err, resp) => { ... });
+```
+
+**Parameters:**
+
+Name | Type | Description |
+------ | ------ | ------ |
+`enabled` | boolean | Boolean flag indicating whether the bridge should connect to Bloomberg. If set false while connected, the bridge will automatically disconnect. |
+`cb?` | StandardCallback | Optional callback that will return response as true if we have successfully set the connect states. |
+
+**Returns:** *void*
+
+___
+
 ###  setGroupEventListener
 
 ▸ **setGroupEventListener**(`cb`: [BBGGroupEventListener](../interfaces/_bloombergbridgeclient_.bbggroupeventlistener.md)): *void*
 
-*Defined in [BloombergBridgeClient.ts:194](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L194)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:200](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L200)*
 
 Set a handler function for Launchpad group context changed events, which
 are fired when a group's context changes or a new group is created.

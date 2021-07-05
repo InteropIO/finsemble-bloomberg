@@ -11,6 +11,7 @@
 		"custom": {
             "bloombergBridgeFolder": "C:/Users/admin/Documents/code/finsemble-bloomberg/BloombergBridge",
 			"bloomberg": {
+				"enabled": true,
 				"remote": false,
 				"remoteAddress": ""
 			}

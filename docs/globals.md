@@ -7,3 +7,4 @@
 ### Modules
 
 * ["BloombergBridgeClient"](modules/_bloombergbridgeclient_.md)
+* ["BloombergBridgePreload"](modules/_bloombergbridgepreload_.md)
