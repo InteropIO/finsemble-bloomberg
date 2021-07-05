@@ -657,9 +657,12 @@ export class BloombergBridgeClient {
     }
 
     /**
-     * Search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return
+     * Search for Bloomberg securities via the Bloomberg Bridge and DAPI, which will return
 	 * results in around ~120-150ms and maybe used, for example, to power an autocomplete or
 	 * typeahead search.
+     * Note that because this functionality is provided by the Bloomberg DAPI, it is only
+     * supported when connecting to a Bloomberg Terminal running on the same machine as the
+     * Bloomberg Bridge and Finsemble.
      * @param security The string to lookup a security for
      * @param cb Callback
 	 * @example

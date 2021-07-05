@@ -27,7 +27,7 @@ the form 'Group-A'.
 
 • **name**: *string*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:69](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L69)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:69](https://github.com/ChartIQ/finsemble-bloomberg/blob/c007b59/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L69)*
 
 ___
 
@@ -35,7 +35,7 @@ ___
 
 • **type**: *string*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:68](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L68)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:68](https://github.com/ChartIQ/finsemble-bloomberg/blob/c007b59/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L68)*
 
 ___
 
@@ -43,4 +43,4 @@ ___
 
 • **value**: *string*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:70](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L70)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:70](https://github.com/ChartIQ/finsemble-bloomberg/blob/c007b59/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L70)*

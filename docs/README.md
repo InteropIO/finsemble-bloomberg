@@ -221,7 +221,7 @@ These config values may be set via dynamic configuration, on behalf of the user.
 }
 ```
 
-An example configuration is also provided in _[finsemble.manifest.json](../finsemble.manifest.json).
+An example configuration is also provided in _[finsemble.manifest.json](../finsemble.manifest.json)_.
 
 Alternatively, a preference panel is provided allowing configuration of these values by the user at runtime with persistence across sessions.
 

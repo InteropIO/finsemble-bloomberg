@@ -14,7 +14,7 @@
 
 ▸ **setupBloombergBridgeClient**(): *void*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgePreload.ts:6](https://github.com/ChartIQ/finsemble-bloomberg/blob/28ddd4b/src/clients/BloombergBridgeClient/BloombergBridgePreload.ts#L6)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgePreload.ts:6](https://github.com/ChartIQ/finsemble-bloomberg/blob/c007b59/src/clients/BloombergBridgeClient/BloombergBridgePreload.ts#L6)*
 
 Automated setup function enabling use as preload on a Finsemble component.
 
