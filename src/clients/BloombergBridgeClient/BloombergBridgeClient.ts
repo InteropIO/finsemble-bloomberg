@@ -56,6 +56,8 @@ import { IRouterClient, RouterMessage } from "clients/IRouterClient";
     name: string;
     /** A flag indicating the Worksheet's IsActive status. */
     isActive: boolean;
+    /** The list of securities appearing in the worksheet. */
+    securities: string[];
 }
 
 /**
