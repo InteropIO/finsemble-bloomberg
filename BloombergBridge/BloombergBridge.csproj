@@ -43,13 +43,14 @@
     <DocumentationFile>bin\Debug\BloombergBridge.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -81,13 +82,13 @@
     <Folder Include="docfx_project\src\" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Bloomberglp.Blpapi, Version=3.16.6.1, Culture=neutral, PublicKeyToken=ec3efa8c033c2bc5, processorArchitecture=MSIL">
+    <Reference Include="Bloomberglp.Blpapi, Version=3.16.1.1, Culture=neutral, PublicKeyToken=ec3efa8c033c2bc5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\blp\blpAPI.3.16.1.1\bin\Bloomberglp.Blpapi.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\blp\blpapi_dotnet_3.16.6.1\bin\net452\Bloomberglp.Blpapi.dll</HintPath>
     </Reference>
-    <Reference Include="Bloomberglp.TerminalApiEx, Version=2.4.1.0, Culture=neutral, PublicKeyToken=51f5d93763bdb58e, processorArchitecture=x86">
+    <Reference Include="Bloomberglp.TerminalApiEx, Version=2.4.1.0, Culture=neutral, PublicKeyToken=51f5d93763bdb58e, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\blp\TerminalAPISDK\lib.x64\Bloomberglp.TerminalApiEx.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\blp\TerminalAPISDK\lib\Bloomberglp.TerminalApiEx.dll</HintPath>
     </Reference>
     <Reference Include="DotNetZip, Version=1.13.7.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
       <HintPath>..\packages\DotNetZip.1.13.7\lib\net40\DotNetZip.dll</HintPath>
