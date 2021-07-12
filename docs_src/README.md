@@ -59,7 +59,8 @@ This project contains:
 - A .Net solution for building the Bloomberg Bridge
 - a Typescript client to work with the API exposed by Bloomberg Bridge 
 - a number of javascript examples, such as a test component and an example service for integrating BBG LaunchPad groups with FDC3 channels.
-- a watch script that can install the proejct files in a copy of the Finsemble seed project for you.
+- an optional Toolbar component that shows the status of the Bloomberg connection and a Preferences panel for the user to manage the settings 
+- a watch script that can install the project files in a copy of the Finsemble seed project for you.
 
 Please note that the Bloomberg bridge must be deployed to your user's machines for use, see [Producing an appAsset for deployment by Finsemble](#produce-an-appasset-for-deployment-by-finsemble) for instructions on creating an asset and details of how Finsemble can deploy the asset for you. 
 
@@ -104,6 +105,7 @@ finsemble-bloomberg
     |           BloombergBridgePreload.ts - Preload script that adds the client to `FSBL.Clients`
     |
     └───components
+    |   └───bbgHelpers               - The Toolbar and User Preferences code 
     |   └───Bloomberg Bridge         - Configs for launching the Bloomberg Bridge
     |   └───Bloomberg Terminal       - Example config for launching the Bloomberg terminal
     |   └───SecurityFinder           - Security lookup example, demonstrating a realistic use-case
@@ -224,13 +226,88 @@ An example configuration is also provided in _[finsemble.manifest.json](../finse
 Alternatively, a preference panel is provided allowing configuration of these values by the user at runtime with persistence across sessions.
 
 ### Connection status and config UIs
-TODO: add overview of UIs with image and explanation
+The Bloomberg status button in the toolbar, when clicked, will open the Finsemble Preferences to the Bloomberg section. The status will show either green (connected successfullly), orange (disconnected, but bridge is running), or red (error, bridge is likely not running).
+
+![Bloomberg Status](./media/bbg_status.png)
+
+Open the Preferences Panel via the Toolbar > File Menu > Preferences, or by clicking on the Bloomberg status button in the toolbar. In there you will see:
+
+![Bloomberg Preferences](./media/bbg_prefs.png)
+
+- The _"Show Status in Toolbar"_ toggle, defaults to true if not set in the manifest, controls whether or not the Bloomberg Status shows in the Toolbar or not.
+- The _"Enabled"_ toggle controls whether or not the Bloomberg Bridge is connected to a running Bloomberg Terminal Connect instance.
+- The _"Connection Type"_ radio buttons allow switching between:
+    - _Local:_ the Bloomberg Terminal Connect is running on the same machine as Finsemble.
+    - _Remote:_ the Bloomberg Terminal Connect instance is running on another machine, in which case that machine's IP address is entered in the _Address_ field.
+
+These will reflect changes pushed via the manifest for Finsemble, or if not in the manifest, will just use the defaults.
+
+**NOTE:** when the connection is _Enabled_, the Connection Type will be disabled. If you need to make changes via the UI, you should first untick the _Enabled_ flag so the connection disconnects first.
 
 #### Installing the preference panel
-TODO: add preference panel installation instructions
-
+- in your project, in _src/components/userPreferences/UserPreferences.tsx_ modify the following:
+    - In the [imports](./media/bbg_prefs_include.png), add:
+    ```TypeScript
+        import { BloombergPreferences } from "../bbgHelpers/BloombergPreferences";
+    ```
+    - in the _sections_ const, add [this line](./media/bbg_prefs_sections_line.png) (and a comma on the previous line):
+    ```TypeScript
+        "Bloomberg Terminal Connect": BloombergPreferences
+    ```
 #### Installing the connection status icon
-TODO: add connection status indicator installation instructions
+- in your project, in _src/components/toolbar/src/Toolbar.tsx_ modify the following:
+    - In the [imports](./media/bbg_toolbar_status_include.png), add: 
+    ```TypeScript
+        import { BloombergStatus } from "../../bbgHelpers/BloombergStatus";
+    ```
+    - Along with the other _useState_ constants, add:
+    ```TypeScript
+        const [showBloomberg, setShowBloomberg] = useState(false);
+    ```
+    - Outside of the _useEffect_ but still in the [Toolbar const](./media/bbg_toolbar_status_function.png), add: 
+    ```TypeScript
+        function BloombergStatusSection() {
+            const bbg = <ToolbarSection className="right">
+                            <div className="divider"></div>
+                                <BloombergStatus />
+                        </ToolbarSection>;
+            return (showBloomberg ? bbg : <></>);
+        }
+    ```
+    - Inside of the _useEffect_ add this async function:
+    ```TypeScript
+        async function fetchBloomberg() {
+            FSBL.Clients.ConfigClient.getValue('finsemble.custom.bloomberg.showStatus', (err: any, value: any) => {
+                if (err) {
+                    FSBL.Clients.Logger.error(`ERR - Could not determine Bloomberg show status: ${err}`);
+                    setShowBloomberg(false);
+                } else if (value) {
+                    setShowBloomberg(true);
+                }
+                else {
+                    setShowBloomberg(false);
+                }
+            });
+        }
+    ```
+    - After the call to _fetchManifest()_ add:
+    ```TypeScript
+        fetchBloomberg();
+         let statusHandler = (err: any, status: any) => {
+            if (err) {
+                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
+            } else {
+                let bbgStatus = typeof status.value == "undefined" ? status : status.value;
+                setShowBloomberg(bbgStatus);
+            }
+        };
+        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
+        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
+    ```
+    - In the _Toolbar_ [return](./media/bbg_toolbar_status_return_tag.png), insert:
+    ```TypeScript
+        <BloombergStatusSection />
+    ```
 
 ## Building and Deploying the Bloomberg Bridge
 The Bloomberg Bridge application should be built using Terminal Connect and BLP API DLL files distributed by Bloomberg. It can then either be deployed to a known path on your users machines, or delivered via a Finsemble app asset, which will be downloaded and installed automatically by Finsemble.
