@@ -132,8 +132,8 @@ To use the watch script:
 
 5) To build and run the SecurityFinder example, you will also need to install dependencies in your seed project by running:
     ```
-	npm install react-tabs react-select react-autosuggest
-	```
+    npm install react-tabs react-select react-autosuggest
+    ```
 
 6) Your seed project directory has now been updated with the source files from the integration, run `npm run dev` in your Finsemble seed project's directory to build and run locally.
 
@@ -184,8 +184,8 @@ To manually install the integration into your Finsemble project:
 
 6) To build and run the SecurityFinder example, you will also need to install dependencies in your project by running:
     ```
-	npm install react-tabs react-select react-autosuggest
-	```
+    npm install react-tabs react-select react-autosuggest
+    ```
 
 ## Working with a Remote terminal
 Some traders have multiple computers on their desks. Hence, Bloomberg Terminal Connect supports connecting to a Bloomberg terminal running on a different machine (a remote terminal) so that apps can still integrate with it without having to run on the same device. When working with a remote terminal Bloomberg Bridge should be run on the same machine as your Finsemble desktop and be launched by Finsemble as normal, however it will be configured to register with the remote machine by machine name or IP address.
@@ -209,15 +209,15 @@ These config values may be set via dynamic configuration, on behalf of the user.
 
 ```JSON
 {
-	"finsemble": {
-		"custom": {
+    "finsemble": {
+        "custom": {
             "bloomberg": {
-				"enabled": true,
-				"remote": true,
-				"remoteAddress": "mymachine.somedomain.com"
-			}
+                "enabled": true,
+                "remote": true,
+                "remoteAddress": "mymachine.somedomain.com"
+            }
         }
-	}
+    }
 }
 ```
 
@@ -304,7 +304,7 @@ These will reflect changes pushed via the manifest for Finsemble, or if not in t
         FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
         FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
     ```
-    - In the _Toolbar_ [return](./media/bbg_toolbar_status_return_tag.png), insert:
+    - In the return statement of the _Toolbar's_ [render function](./media/bbg_toolbar_status_return_tag.png), insert:
     ```TypeScript
         <BloombergStatusSection />
     ```
@@ -391,11 +391,11 @@ As setup of the client occurs when the Finsemble clients are themselves ready (o
 window.addEventListener("BloombergBridgeClientReady", BBGReady);
 
 function BBGReady() {
-	//Do your setup, which can assume both FSBL and the BloombergBridgeClient are ready e.g.:
-	ReactDOM.render(
-		<SecurityFinder />,
-		document.getElementById('root')
-	);
+    //Do your setup, which can assume both FSBL and the BloombergBridgeClient are ready e.g.:
+    ReactDOM.render(
+        <SecurityFinder />,
+        document.getElementById('root')
+    );
 }
 ```
 
