@@ -18,30 +18,25 @@
 ### Variables
 
 * [CONNECTION_CHECK_TIMEOUT](_bloombergbridgeclient_.md#const-connection_check_timeout)
-
-### Functions
-
-* [setupBloombergBridgeClient](_bloombergbridgeclient_.md#const-setupbloombergbridgeclient)
+* [SET_CONNECT_STATE_TIMEOUT](_bloombergbridgeclient_.md#const-set_connect_state_timeout)
 
 ## Variables
 
 ### `Const` CONNECTION_CHECK_TIMEOUT
 
-• **CONNECTION_CHECK_TIMEOUT**: *number* = 1000
+• **CONNECTION_CHECK_TIMEOUT**: *1500* = 1500
 
-*Defined in [BloombergBridgeClient.ts:6](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L6)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:11](https://github.com/ChartIQ/finsemble-bloomberg/blob/6d078ec/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L11)*
 
 Timeout in milliseconds for terminal connection checks that will cause a checkConnection
 call to fail.
 
-## Functions
+___
 
-### `Const` setupBloombergBridgeClient
+### `Const` SET_CONNECT_STATE_TIMEOUT
 
-▸ **setupBloombergBridgeClient**(): *void*
+• **SET_CONNECT_STATE_TIMEOUT**: *2500* = 2500
 
-*Defined in [BloombergBridgeClient.ts:655](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L655)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:13](https://github.com/ChartIQ/finsemble-bloomberg/blob/6d078ec/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L13)*
 
-Automated setup function enabling use as preload on a Finsemble component.
-
-**Returns:** *void*
+Timeout in milliseconds for setting the connect state.

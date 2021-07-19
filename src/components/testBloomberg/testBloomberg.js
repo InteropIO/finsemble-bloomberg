@@ -1,4 +1,4 @@
-import BloombergBridgeClient from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+import {BloombergBridgeClient} from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
 
 let UIReady = false;
 //Setup the BloombergBridgeClient that will be used for all messaging to/from Bloomberg

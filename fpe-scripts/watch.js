@@ -115,6 +115,7 @@ async function updateManifestLocal(seedDirectory, currentFile) {
 		//add the variable for the bloomberg bridge path (for development)
 		if (!seedManifest.finsemble.custom) { seedManifest.finsemble.custom = {};}
 		seedManifest.finsemble.custom.bloombergBridgeFolder = projectManifest.finsemble.custom.bloombergBridgeFolder;
+		seedManifest.finsemble.custom.bloomberg = projectManifest.finsemble.custom.bloomberg;
 
 		const output = await writeJson(seedManifestPath, seedManifest, { spaces: 4 });
 		if (output) console.log('success writing manifest');
@@ -147,3 +148,6 @@ async function updateConfig(seedDirectory, currentFile) {
 	}
 
 }
+
+async function updateToolbar(seedDirectory, currentFile) { }
+async function updatePreferences(seedDirectory, currentFile) { }

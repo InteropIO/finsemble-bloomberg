@@ -27,6 +27,7 @@ class SecurityFinder extends React.Component {
 			suggestions: [],
 			isLoading: false,
 			isConnected: false,
+			isRemote: false,
 			commandMnemonic: "DES",
 			commandPanel: "1",
 			commandTails: "",
@@ -49,6 +50,7 @@ class SecurityFinder extends React.Component {
 
 		this.handleTabSelected = this.handleTabSelected.bind(this);
 
+		this.checkConfig = this.checkConfig.bind(this);
 		this.checkConnection = this.checkConnection.bind(this);
 		this.setupConnectionLifecycleChecks = this.setupConnectionLifecycleChecks.bind(this);
 
@@ -74,6 +76,22 @@ class SecurityFinder extends React.Component {
 		this.setupConnectionLifecycleChecks();
 		this.subscribeToContext();
 	}
+
+	checkConfig() {
+		let configHandler = (err, remote) => {
+			if (err) {
+				FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
+			} else {
+				let isRemote = typeof remote.value == "undefined" ? remote : remote.value;
+				console.log("Connection is configured for a remote terminal: ", remote);
+				this.setState({
+					isRemote: isRemote
+				});
+			}
+		};
+		FSBL.Clients.ConfigClient.getValue({field: "finsemble.custom.bloomberg.remote"}, configHandler);
+		FSBL.Clients.ConfigClient.addListener({field: "finsemble.custom.bloomberg.remote"}, configHandler);
+	};
 
 	/**
 	 * Checks the connection to the BloombergBride and performs setup tasks if we've just connected.
@@ -108,6 +126,9 @@ class SecurityFinder extends React.Component {
 	 * Setup an event listener and periodic checks on the BloombergBridge connection.
 	 */
 	setupConnectionLifecycleChecks() {
+		//check the bridge config as security search is only supported for local connections
+		this.checkConfig();
+		
 		//listen for connection events (listen/transmit)
 		FSBL.Clients.BloombergBridgeClient.setConnectionEventListener(this.checkConnection);
 		//its also possible to poll for connection status,
@@ -115,6 +136,7 @@ class SecurityFinder extends React.Component {
 		setInterval(this.checkConnection, 30000);
 		//do the initial check
 		this.checkConnection();
+
 	};
 
 	/**
@@ -572,7 +594,7 @@ class SecurityFinder extends React.Component {
 	render() {
 		const {
 			value, suggestions,
-			isLoading, isConnected,
+			isLoading, isConnected, isRemote,
 			commandMnemonic, commandPanel, commandTails, commandError, commandSuccess,
 			launchPadGroup, launchPadGroups, groupError, groupSuccess,
 			linkerError, linkerSuccess,
@@ -587,11 +609,12 @@ class SecurityFinder extends React.Component {
 			onChange: this.onChange
 		};
 		const status = (
-			isConnected ? (
-				isLoading ? "Searching..." : (
-					suggestions.length > 0 ? "Select a result" : "Type to search for securities"
-				)
-			) : "Disconnected"
+			isRemote ? "Remote security search not supported!" :
+				isConnected ? (
+					isLoading ? "Searching..." : (
+						suggestions.length > 0 ? "Select a result" : "Type to search for securities"
+					)
+				) : "Disconnected"
 		);
 
 		// Finally, render it!

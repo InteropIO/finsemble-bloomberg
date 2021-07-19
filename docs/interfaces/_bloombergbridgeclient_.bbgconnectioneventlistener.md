@@ -7,13 +7,15 @@ when the BloombergBridge connects or disconnects from the terminal.
 
 ## Hierarchy
 
-* **BBGConnectionEventListener**
+* function
+
+  ↳ **BBGConnectionEventListener**
 
 ## Callable
 
 ▸ (`err`: string | Error, `response`: RouterMessage‹object›): *void*
 
-*Defined in [BloombergBridgeClient.ts:13](https://github.com/ChartIQ/finsemble-bloomberg/blob/ea40ce4/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L13)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:20](https://github.com/ChartIQ/finsemble-bloomberg/blob/6d078ec/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L20)*
 
 Interface representing an event handler for connection events, which are fired
 when the BloombergBridge connects or disconnects from the terminal.
@@ -24,5 +26,21 @@ Name | Type |
 ------ | ------ |
 `err` | string &#124; Error |
 `response` | RouterMessage‹object› |
+
+**Returns:** *void*
+
+▸ (`err`: E, `response?`: R): *void*
+
+Defined in node_modules/@finsemble/finsemble-core/types/index.d.ts:7401
+
+Interface representing an event handler for connection events, which are fired
+when the BloombergBridge connects or disconnects from the terminal.
+
+**Parameters:**
+
+Name | Type |
+------ | ------ |
+`err` | E |
+`response?` | R |
 
 **Returns:** *void*

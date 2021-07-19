@@ -15,7 +15,7 @@
 				"height": 400
 			},
 			"component": {
-				"preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgeClient.js",
+				"preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgePreload.js",
 				"spawnOnStartup": false,
 				"singleton": false,
 				"showDevConsoleOnVisible": false
@@ -67,7 +67,7 @@
 			"component": {
 				"preload": [
 					"$applicationRoot/preloads/FDC3Client.js",
-					"$applicationRoot/clients/BloombergBridgeClient/BloombergBridgeClient.js"
+					"$applicationRoot/clients/BloombergBridgeClient/BloombergBridgePreload.js"
 				],
 				"spawnOnStartup": false,
 				"singleton": false,
