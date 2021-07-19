@@ -148,3 +148,6 @@ async function updateConfig(seedDirectory, currentFile) {
 	}
 
 }
+
+async function updateToolbar(seedDirectory, currentFile) { }
+async function updatePreferences(seedDirectory, currentFile) { }
