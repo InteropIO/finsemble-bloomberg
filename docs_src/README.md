@@ -225,6 +225,7 @@ The Bloomberg Bridge application will monitor a number of configuration settings
 - `finsemble.custom.bloomberg.enabled` (default `true`): determines whether the Bloomberg Bridge should be connected to the Terminal. Set to `false` before updating other settings at runtime, then set to `true` to connect to a new host.
 - `finsemble.custom.bloomberg.remote` (default `false`): Enables connection to a remote machine. If false the value of `remoteAddress` will be assumed to be `"localhost"`.
 - `finsemble.custom.bloomberg.remoteAddress` (default `null`): The machine name or IP address of the remote machine with a terminal running on it.
+- `finsemble.custom.bloomberg.showStatus` (default `false`): Determines whether the Bloomberg connection status icon should be displayed in the toolbar or not.
 
 These config values may be set via dynamic configuration, on behalf of the user. To do so, import configuration of the following format via `ConfigClient.processAndSet`:
 
@@ -245,7 +246,7 @@ These config values may be set via dynamic configuration, on behalf of the user.
 
 An example configuration is also provided in _[finsemble.manifest.json](../finsemble.manifest.json)_.
 
-Alternatively, a preference panel is provided allowing configuration of these values by the user at runtime with persistence across sessions.
+Alternatively, a preference panel is provided allowing configuration of these values by the user at runtime with persistence across sessions. This can be used in conjunction with default settings or settings applied via dynamic configuration, which can then be overridden by user preferences. 
 
 ### Connection status and config UIs
 
