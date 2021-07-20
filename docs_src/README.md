@@ -283,7 +283,7 @@ These will reflect changes pushed via the manifest for Finsemble, or if not in t
 #### Installing the connection status icon
 
 - in your project, in _src/components/toolbar/src/Toolbar.tsx_ modify the following:
-  - In the [imports](./media/bbg_toolbar_status_include.png), add:
+  - In the imports, add:
   ```TypeScript
       import { BloombergStatus } from "../../bbgHelpers/BloombergStatus";
   ```
