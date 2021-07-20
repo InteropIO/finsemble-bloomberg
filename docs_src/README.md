@@ -135,6 +135,7 @@ To use the watch script:
 
 3. If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project. If you intend to build an debug the \(.Net\) BloombergBridge, also set the value of the `$bloombergBridgeFolder` variable to point to the [BloombergBridge folder](../BloombergBridge) in this project \(see the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables\).
 
+
 4. Run `npm install` then run `npm run watch` in the _finsemble-bloomberg_ project's directory \*_this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds_
 
 5. To build and run the SecurityFinder example, you will also need to install dependencies in your seed project by running:
@@ -202,7 +203,7 @@ To manually install the integration into your Finsemble project:
    ```
    npm install react-tabs react-select react-autosuggest
    ```
-
+   
 ## Working with a Remote terminal
 
 Some traders have multiple computers on their desks. Hence, Bloomberg Terminal Connect supports connecting to a Bloomberg terminal running on a different machine (a remote terminal) so that apps can still integrate with it without having to run on the same device. When working with a remote terminal Bloomberg Bridge should be run on the same machine as your Finsemble desktop and be launched by Finsemble as normal, however it will be configured to register with the remote machine by machine name or IP address.
