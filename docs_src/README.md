@@ -260,53 +260,9 @@ These will reflect changes pushed via the manifest for Finsemble, or if not in t
     ```TypeScript
         import { BloombergStatus } from "../../bbgHelpers/BloombergStatus";
     ```
-    - Along with the other _useState_ constants, add:
+    - In the _Toolbar_ [return](./media/bbg_status_toolbar.png), insert:
     ```TypeScript
-        const [showBloomberg, setShowBloomberg] = useState(false);
-    ```
-    - Outside of the _useEffect_ but still in the [Toolbar const](./media/bbg_toolbar_status_function.png), add: 
-    ```TypeScript
-        function BloombergStatusSection() {
-            const bbg = <ToolbarSection className="right">
-                            <div className="divider"></div>
-                                <BloombergStatus />
-                        </ToolbarSection>;
-            return (showBloomberg ? bbg : <></>);
-        }
-    ```
-    - Inside of the _useEffect_ add this async function:
-    ```TypeScript
-        async function fetchBloomberg() {
-            FSBL.Clients.ConfigClient.getValue('finsemble.custom.bloomberg.showStatus', (err: any, value: any) => {
-                if (err) {
-                    FSBL.Clients.Logger.error(`ERR - Could not determine Bloomberg show status: ${err}`);
-                    setShowBloomberg(false);
-                } else if (value) {
-                    setShowBloomberg(true);
-                }
-                else {
-                    setShowBloomberg(false);
-                }
-            });
-        }
-    ```
-    - After the call to _fetchManifest()_ add:
-    ```TypeScript
-        fetchBloomberg();
-         let statusHandler = (err: any, status: any) => {
-            if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
-            } else {
-                let bbgStatus = typeof status.value == "undefined" ? status : status.value;
-                setShowBloomberg(bbgStatus);
-            }
-        };
-        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
-        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
-    ```
-    - In the return statement of the _Toolbar's_ [render function](./media/bbg_toolbar_status_return_tag.png), insert:
-    ```TypeScript
-        <BloombergStatusSection />
+        <BloombergStatus />
     ```
 
 ## Building and Deploying the Bloomberg Bridge
