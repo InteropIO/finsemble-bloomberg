@@ -292,14 +292,14 @@ export class BloombergBridgeClient {
 
         // if we don't get a response something is wrong
         const timeout = setTimeout(() => {
-            console.error('BBG_connection_status check timed-out. Is the BLoomberg Bridge running?', null);
+            console.error('BBG_connection_status check timed-out. Is the Bloomberg Bridge running?', null);
             cb('Connection check timeout', null);
         }, CONNECTION_CHECK_TIMEOUT);
 
         void this.routerClient?.query('BBG_connection_status', {}, (err, resp: { data?: { registered: boolean } }) => {
             clearTimeout(timeout);
             if (err) {
-                console.warn('Received error when checking connection status. Is the BLoomberg Bridge running?', err);
+                console.warn('Received error when checking connection status. Is the Bloomberg Bridge running?', err);
                 cb(err, false);
             } else {
                 if (resp && resp.data && resp.data['registered']) {
