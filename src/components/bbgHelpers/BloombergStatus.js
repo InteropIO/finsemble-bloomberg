@@ -8,10 +8,39 @@ const title = "Bloomberg Preferences";
 const wrapperClasses = "finsemble-toolbar-button";
 
 export const BloombergStatus = () => {
-    //const errText = "Error Determining Bloomberg Status";
-    const [isConnected, setIsConnected] = useState(false);
     const [indicatorColor, setIndicatorColor] = useState("red");
     const [showBloomberg, setShowBloomberg] = useState(false);
+    const [isEnabled, setIsEnabled] = useState(false);
+
+    function checkConnection() {
+        bbg.checkConnection((err, resp) => {
+            if (!err && resp === true) {
+                // connected
+                setIndicatorColor("green");
+            } else if (err) {
+                FSBL.Clients.Logger.debug("Error received when checking connection", err);
+                // There are scenarios where this "error" happens and is totally fine, so report at debug level.
+                // not connected
+                setIndicatorColor("red");
+            } else {
+                FSBL.Clients.Logger.debug("Negative response when checking connection: ", resp);
+                // not connected
+                setIndicatorColor("orange");
+            }
+        });
+    };
+
+    let enabledHandler = (err, enabled) => {
+        checkConnection();
+        if (err) {
+            FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
+        } else {
+            let bbgEnabled = typeof enabled.value == "undefined" ? enabled : enabled.value;
+            setIsEnabled(bbgEnabled);
+        }
+    };
+    FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.enabled" }, enabledHandler);
+    FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.enabled" }, enabledHandler);
 
     const bbgStatusMarker = React.createElement("span", {
         style: {
@@ -51,34 +80,21 @@ export const BloombergStatus = () => {
     </ToolbarSection>;
 
     useEffect(() => {
-        function checkConnection() {
-            bbg.checkConnection((err, resp) => {
-                if (!err && resp === true) {
-                    // connected
-                    setIndicatorColor("green");
-                } else if (err) {
-                    FSBL.Clients.Logger.error("Error received when checking connection", err);
-                    // not connected
-                    setIndicatorColor("red");
-                } else {
-                    FSBL.Clients.Logger.debug("Negative response when checking connection: ", resp);
-                    // not connected
-                    setIndicatorColor("orange");
-                }
-            });
-        };
 
-        try {
-            //do the initial check
-            checkConnection();
-            //listen for connection events (listen/transmit)
-            bbg.setConnectionEventListener(checkConnection);
-            //its also possible to poll for connection status,
-            //  worth doing in case the bridge process is killed off and doesn't get a chance to send an update
-            setInterval(checkConnection, 30000);
-        } catch (e) {
-            FSBL.Clients.Logger.error(`error in bbg prefs: ${e}`);
+        if (isEnabled) {
+            try {
+                //do the initial check
+                checkConnection();
+                //listen for connection events (listen/transmit)
+                bbg.setConnectionEventListener(checkConnection);
+                //its also possible to poll for connection status,
+                //  worth doing in case the bridge process is killed off and doesn't get a chance to send an update
+                setInterval(checkConnection, 30000);
+            } catch (e) {
+                FSBL.Clients.Logger.error(`error in bbg prefs: ${e}`);
+            }
         }
+
     }, []);
 
     useEffect(() => {
@@ -107,8 +123,6 @@ export const BloombergStatus = () => {
         FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
         FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
     }, []);
-
-
 
     return (showBloomberg ? bbgStatus : <></>);
 };
