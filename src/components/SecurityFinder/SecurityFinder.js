@@ -2,7 +2,6 @@ import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import Select from 'react-select'
-import { fdc3Check, fdc3OnReady } from './fdc3Utils'
 
 /** When a suggestion is clicked, Autosuggest needs to populate the input
  *  field based on the clicked suggestion (such that the search will return
@@ -275,12 +274,12 @@ class SecurityFinder extends React.Component {
 	};
 
 	/** Setup a listener for all Launchpad group events. 
-	 * Security events will automatically be published as context via Finsemble APIs (Linker or FDC3)
-	 * and used to search for securities. Note that the channel fo linker/FDC3 channel integration
-	 * must be selected on the SecurityFinder's vai the menu on the titlebar. */
+	 * Security events will automatically be published as context via Finsemble FDC3 APIs
+	 * and used to search for securities. Note that the channel for FDC3 channel integration
+	 * must be selected on the SecurityFinder's via the menu on the titlebar. */
 	setupGroupEventListener() {
 		FSBL.Clients.BloombergBridgeClient.setGroupEventListener((err, resp) => {
-			//push context to Finsemble context APIs (Linker or FDC3) if its a security
+			//push context to Finsemble context FDC3 APIs if its a security
 			    //Note this reacts to *all* LaunchPad groups as no filter is offered in the UI
 			if (this.state.launchpadToFinsemble) {
 				
@@ -331,7 +330,7 @@ class SecurityFinder extends React.Component {
 	/**
 	 * Sets the context of the currently selected Launchpad group using the current security
 	 * string value in the security finder. Also used for auto-context sharing when the checkbox
-	 * if selected on the Linker/FDC3 tab.
+	 * if selected on the FDC3 tab.
 	 */
 	handleSetGroupContext() {
 		if (this.state.isConnected) {
@@ -365,9 +364,7 @@ class SecurityFinder extends React.Component {
 	 * selected Launchpad Group on the Launchpad tab.
 	 */
 	subscribeToContext() {
-        if (fdc3Check()) {
-            fdc3OnReady(
-                () => fdc3.addContextListener(context => {
+        fdc3.addContextListener(context => {
                     if (context.type === 'fdc3.instrument') {
                         //setContext(context.id.ticker)
                         let data = context.id.BBG ? context.id.BBG : context.id.ticker;
@@ -381,33 +378,11 @@ class SecurityFinder extends React.Component {
                             }
                         });
                     }
-                })
-            )
-        } else {
-            FSBL.Clients.LinkerClient.subscribe("symbol", (data, envelope) => {
-                if (!envelope.originatedHere()) {
-                    //As we're modifying the symbol for sharing, we should suppress any copies of it we receive back
-                    let suppressLinkerLoops = this.state.suppressLinkerLoops;
-                    if (!suppressLinkerLoops || (Date.now() - suppressLinkerLoops.time > 1500) || suppressLinkerLoops.value != data) {
-                        //assume we are receiving a basic string via the linker and set it as the search term
-                        console.log("received via linker: ", data, envelope);
-                        this.setState({ value: data, suppressLinkerLoops: null });
-                        this.onSuggestionsFetchRequested({ value: data, reason: 'input-changed' }, () => {
-                            if (this.state.finsembleToLaunchpad) {
-                                //if we got suggestions back, push the value to the selected launchpad group:
-                                if (this.state.suggestions && this.state.suggestions[0]){
-                                    this.handleSetGroupContext();
-                                }
-                            }
-                        });
-                    }
-                }
-            });
-        }
-	}
+        });
+    }
 
 	/**
-	 * Publish the current security value to Finsemble context APIs (linker or FDC3)
+	 * Publish the current security value to Finsemble FDC3 context APIs
 	 */
 	handleContextPublish() {        
 		if (this.state.value) {
@@ -416,32 +391,14 @@ class SecurityFinder extends React.Component {
 			if (tickerValue.indexOf(' ') > -1) {
 				tickerValue = tickerValue.substring(0, tickerValue.indexOf(' '));
 			}
-
-            if (fdc3Check()) {
-                fdc3OnReady(() => fdc3.broadcast({
+            fdc3.broadcast({
                     "type": "fdc3.instrument",
                     "name": this.state.value,
                     "id": {
                         "ticker": tickerValue,
                         "BBG": this.state.value
                     }
-                }));
-            } else{
-                FSBL.Clients.LinkerClient.publish({ dataType: "symbol", data: tickerValue }, (err, resp) => {
-                    this.setState({
-                        suppressLinkerLoops: {
-                            value: tickerValue, time: Date.now()
-                        }
-                    });
-                    if (err) {
-                        console.error(`Unable to publish via linker, error: `, err);
-                        this.setState({ linkerError: "No LaunchPad group selected", linkerSuccess: "" });
-                    } else {
-                        console.log(`${tickerValue} published via linker to topic 'symbol'`, resp);
-                        this.setState({ linkerError: "", linkerSuccess: `${tickerValue} published to topic 'symbol'` });
-                    }
-                });
-            }
+            });
 		} else if (!this.state.value) {
 			console.error(`Unable to publish to linker, no security value set`);
 			this.setState({ linkerError: "No security value set, search for a security first", linkerSuccess: "" });
@@ -741,7 +698,7 @@ class SecurityFinder extends React.Component {
 											defaultChecked={true}
 											className="form-check-input"
 										/>
-										{fdc3Check() ? "FDC3" : "Linker"} context broadcasts &lt;-&gt; selected Launchpad group
+                                        FDC3 context broadcasts &lt;-&gt; selected Launchpad group
 									</label>
 								</div>
 								<div className="controlsRow">
@@ -753,7 +710,7 @@ class SecurityFinder extends React.Component {
 											defaultChecked={true}
 											className="form-check-input"
 										/>
-										All Launchpad group's security events &lt;-&gt; {fdc3Check() ? "FDC3" : "Linker"}
+                                        All Launchpad group's security events &lt;-&gt; FDC3
 									</label>
 								</div>
 							</div>
