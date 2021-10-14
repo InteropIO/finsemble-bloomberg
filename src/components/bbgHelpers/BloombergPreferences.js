@@ -16,51 +16,6 @@ export const BloombergPreferences = () => {
     const [showBloomberg, setShowBloomberg] = useState(false);
 
     useEffect(() => {
-        let statusHandler = (err, status) => {
-            if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
-            } else {
-                let bbgStatus = (typeof status.value == "undefined" || status.value) ? true : false;
-                setShowBloomberg(bbgStatus);
-            }
-        };
-        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
-        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
-
-        let remoteAddressHandler = (err, address) => {
-            if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
-            } else {
-                let remoteAddress = typeof address.value == "undefined" ? address : address.value;
-                setBbgRemoteAddress(remoteAddress);
-            }
-        };
-        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.remoteAddress" }, remoteAddressHandler);
-        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.remoteAddress" }, remoteAddressHandler);
-
-        let remoteHandler = (err, remote) => {
-            if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
-            } else {
-                let bbgRemote = typeof remote.value == "undefined" ? remote : remote.value;
-                setIsRemote(bbgRemote);
-            }
-        };
-        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.remote" }, remoteHandler);
-        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.remote" }, remoteHandler);
-
-        let enabledHandler = (err, enabled) => {
-            checkConnection();
-            if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
-            } else {
-                let bbgEnabled = typeof enabled.value == "undefined" ? enabled : enabled.value;
-                setIsEnabled(bbgEnabled);
-            }
-        };
-        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.enabled" }, enabledHandler);
-        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.enabled" }, enabledHandler);
-
         function checkConnection() {
             bbg.checkConnection((err, resp) => {
                 if (!err && resp === true) {
@@ -69,7 +24,6 @@ export const BloombergPreferences = () => {
                     setIndicatorColor("green");
                 } else if (err) {
                     FSBL.Clients.Logger.debug("Error received when checking connection", err);
-                    // message says error, but should be reported at the debug level, not error as there are many ways it can show that are not true failures
                     setIsConnected(false);
                     setConnectionStatus("Confirm Bloomberg and Bridge are both running.");
                     setIndicatorColor("red");
@@ -82,19 +36,62 @@ export const BloombergPreferences = () => {
             });
         };
 
-        if (isEnabled) {
-            try {
-                //do the initial check
-                checkConnection();
-                //listen for connection events (listen/transmit)
-                bbg.setConnectionEventListener(checkConnection);
-                // its also possible to poll for connection status,
-                //  worth doing in case the bridge process is killed off and doesn't get a chance to send an update
-                setInterval(checkConnection, 30000);
-            } catch (e) {
-                FSBL.Clients.Logger.error(`error in bbg prefs: ${e}`);
-            }
+        try {
+            //do the initial check
+            checkConnection();
+            //listen for connection events (listen/transmit)
+            bbg.setConnectionEventListener(checkConnection);
+            // its also possible to poll for connection status,
+            //  worth doing in case the bridge process is killed off and doesn't get a chance to send an update
+            setInterval(checkConnection, 30000);
+        } catch (e) {
+            FSBL.Clients.Logger.debug(`Error in bbg prefs: ${e}`);
         }
+
+        let statusHandler = (err, status) => {
+            if (err) {
+                FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
+            } else {
+                let bbgStatus = (typeof status.value == "undefined" || status.value) ? true : false;
+                setShowBloomberg(bbgStatus);
+            }
+        };
+        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
+        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
+
+        let remoteAddressHandler = (err, address) => {
+            if (err) {
+                FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
+            } else {
+                let remoteAddress = typeof address.value == "undefined" ? address : address.value;
+                setBbgRemoteAddress(remoteAddress);
+            }
+        };
+        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.remoteAddress" }, remoteAddressHandler);
+        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.remoteAddress" }, remoteAddressHandler);
+
+        let remoteHandler = (err, remote) => {
+            if (err) {
+                FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
+            } else {
+                let bbgRemote = typeof remote.value == "undefined" ? remote : remote.value;
+                setIsRemote(bbgRemote);
+            }
+        };
+        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.remote" }, remoteHandler);
+        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.remote" }, remoteHandler);
+
+        let enabledHandler = (err, enabled) => {
+            checkConnection();
+            if (err) {
+                FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
+            } else {
+                let bbgEnabled = typeof enabled.value == "undefined" ? enabled : enabled.value;
+                setIsEnabled(bbgEnabled);
+            }
+        };
+        FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.enabled" }, enabledHandler);
+        FSBL.Clients.ConfigClient.addListener({ field: "finsemble.custom.bloomberg.enabled" }, enabledHandler);
 
     }, []);
 
@@ -109,7 +106,7 @@ export const BloombergPreferences = () => {
         });
         bbg.setEnabled(_enabled, (err, resp) => {
             if (err) {
-                FSBL.Clients.Logger.error("Error - There was an error setting the Bloomberg connection enabled flag:", err);
+                FSBL.Clients.Logger.debug("Error - There was an error setting the Bloomberg connection enabled flag:", err);
             }
             if (resp) {
                 //connection has been enabled
@@ -302,3 +299,4 @@ export const BloombergPreferences = () => {
         </div>
     </>;
 };
+

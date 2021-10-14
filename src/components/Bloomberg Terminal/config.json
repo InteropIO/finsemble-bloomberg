@@ -1,42 +1,44 @@
 {
-    "Bloomberg Terminal": {
-        "appId": "Bloomberg Terminal",
-        "name": "Bloomberg Terminal",
-        "description": "Open the local Bloomberg Terminal on this machine.",
-        "manifest": {
-            "window": {
-                "path": "C:/blp/Wintrv/wintrv.exe",
-                "addToWorkspace": false,
-                "windowType": "assimilation"
-            },
-            "foreign": {
-                "components": {
-                    "App Launcher": {
-                        "launchableByUser": true
-                    },
-                    "Toolbar": {
-                        "iconClass": "ff-component"
-                    },
-                    "Window Manager": {
-                        "FSBLHeader": false,
-                        "persistWindowState": false
+    "appd": {
+        "Bloomberg Terminal": {
+            "appId": "Bloomberg Terminal",
+            "name": "Bloomberg Terminal",
+            "description": "Open the local Bloomberg Terminal on this machine.",
+            "manifest": {
+                "window": {
+                    "path": "C:/blp/Wintrv/wintrv.exe",
+                    "addToWorkspace": false,
+                    "windowType": "assimilation"
+                },
+                "foreign": {
+                    "components": {
+                        "App Launcher": {
+                            "launchableByUser": true
+                        },
+                        "Toolbar": {
+                            "iconClass": "ff-component"
+                        },
+                        "Window Manager": {
+                            "FSBLHeader": false,
+                            "persistWindowState": false
+                        }
                     }
+                },
+                "interop": {
+                    "rewire": [
+                        {
+                            "contextType": "layout",
+                            "fwd": "#Workspace"
+                        },
+                        {
+                            "contextType": "fdc3.instrument",
+                            "cc": "#Workspace"
+                        }
+                    ]
                 }
             },
-            "interop": {
-                "rewire": [
-                    {
-                        "contextType": "layout",
-                        "fwd": "#Workspace"
-                    },
-                    {
-                        "contextType": "fdc3.instrument",
-                        "cc": "#Workspace"
-                    }
-                ]
-            }
-        },
-        "version": "1.0.0",
-        "tooltip": "Bloomberg Terminal"
+            "version": "1.0.0",
+            "tooltip": "Bloomberg Terminal"
+        }
     }
 }
