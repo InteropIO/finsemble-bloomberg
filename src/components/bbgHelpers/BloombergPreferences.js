@@ -63,7 +63,7 @@ export const BloombergPreferences = () => {
             if (err) {
                 FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
             } else {
-                let remoteAddress = typeof address.value == "undefined" ? address : address.value;
+                let remoteAddress = address?.value ?? "";
                 setBbgRemoteAddress(remoteAddress);
             }
         };
