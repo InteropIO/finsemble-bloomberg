@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Bloomberglp.Blpapi;
 using Bloomberglp.TerminalApiEx;
 using ChartIQ.Finsemble;
+using ChartIQ.Finsemble.Events;
+using ChartIQ.Finsemble.Router;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
