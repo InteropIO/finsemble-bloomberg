@@ -2,7 +2,7 @@
 	"appAssets": [
 		{
 			"src": "http://localhost:3375/hosted/BloombergBridgeRelease.zip",
-			"version": "1.2.2",
+			"version": "5.4.6",
 			"alias": "bloomberg_bridge",
 			"target": "BloombergBridge.exe"
 		}
