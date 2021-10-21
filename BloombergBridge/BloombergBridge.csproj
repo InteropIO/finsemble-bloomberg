@@ -56,6 +56,12 @@
     <StartupObject>
     </StartupObject>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>BloombergBridgeSigningKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="BloombergBridge.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -86,9 +92,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\blp\blpapi_dotnet_3.16.6.1\bin\net452\Bloomberglp.Blpapi.dll</HintPath>
     </Reference>
-    <Reference Include="Bloomberglp.TerminalApiEx, Version=2.4.1.0, Culture=neutral, PublicKeyToken=51f5d93763bdb58e, processorArchitecture=AMD64">
+    <Reference Include="Bloomberglp.TerminalApiEx, Version=1.6.12.0, Culture=neutral, PublicKeyToken=51f5d93763bdb58e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\blp\TerminalAPISDK\lib\Bloomberglp.TerminalApiEx.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\blp\TerminalAPISDK-old\Bloomberglp.TerminalApiEx.dll</HintPath>
     </Reference>
     <Reference Include="DotNetZip, Version=1.13.7.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
       <HintPath>..\packages\DotNetZip.1.13.7\lib\net40\DotNetZip.dll</HintPath>
@@ -99,11 +105,11 @@
     <Reference Include="EventHook, Version=1.4.105.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\EventHook.1.4.105\lib\net45\EventHook.dll</HintPath>
     </Reference>
-    <Reference Include="Finsemble, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Finsemble.5.3.0\lib\net452\Finsemble.dll</HintPath>
+    <Reference Include="Finsemble, Version=5.4.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Finsemble.5.4.6\lib\net452\Finsemble.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=2.0.12.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.12\lib\net45\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
@@ -172,6 +178,7 @@
       <HintPath>..\..\..\..\packages\System.Collections.Specialized.4.3.0\lib\net46\System.Collections.Specialized.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.IO.Compression, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll</HintPath>
       <Private>True</Private>

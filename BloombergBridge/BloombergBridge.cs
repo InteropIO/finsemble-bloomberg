@@ -89,7 +89,7 @@ namespace BloombergBridge
 					}
 					catch (Exception err)
 					{
-						FSBL.Logger.Error("Bloomberg API registration check failed");
+						FSBL.Logger.Error(new JToken[] { "Bloomberg API registration check failed", err.ToString() });
 					}
 
 					//try to register
@@ -517,13 +517,14 @@ namespace BloombergBridge
 			{
 				JObject queryResponse = new JObject();
 				JToken queryData = null;
+				bool debounced = false;
 				if (isRegistered)
 				{
 					queryData = queryMessage.response?["data"];
 					if (queryData != null)
 					{
 						FSBL.Logger.Debug("Received query: ", queryData);
-						BBG_execute_terminal_function(queryResponse, queryData);
+						debounced = BBG_execute_terminal_function(queryMessage, queryResponse, queryData);
 					}
 					else
 					{
@@ -537,20 +538,38 @@ namespace BloombergBridge
 					queryResponse.Add("message", "Not registered with the Bloomberg Terminal");
 				}
 
-				//return the response
-				queryMessage.sendQueryMessage(new FinsembleEventResponse(queryResponse, null));
-				Console.WriteLine("Responded to BBG_run_terminal_function query: " + queryResponse.ToString());
-				FSBL.Logger.Debug("Responded to BBG_run_terminal_function query: ", queryData, "Response: ", queryResponse );
+				//debounced calls need to send the response on their own as they respond asynchronously
+				if (!debounced) {
+					Respond_to_BBG_run_terminal_function(queryMessage, queryResponse, queryData);
+				}
+				
 			}
 		}
+
+		/// <summary>
+		/// Send respnse to a request to run a specified terminal connect command.
+		/// </summary>
+		/// <param name="queryMessage"></param>
+		/// <param name="queryResponse"></param>
+		/// <param name="queryData"></param>
+		private static void Respond_to_BBG_run_terminal_function(FinsembleQueryArgs queryMessage, JObject queryResponse, JToken queryData)
+        {
+			//return the response
+			queryMessage.sendQueryMessage(new FinsembleEventResponse(queryResponse, null));
+			Console.WriteLine("Responded to BBG_run_terminal_function query: " + queryResponse.ToString());
+			FSBL.Logger.Debug("Responded to BBG_run_terminal_function query: ", queryData, "Response: ", queryResponse);
+		}
+
 		/// <summary>
 		/// Utility function called by BBG_run_terminal_function to actually execute each supported terminal function.
 		/// </summary>
+		/// <param name="queryMessage"></param>
 		/// <param name="queryResponse">JObject to add response data to</param>
 		/// <param name="queryData">Optional query data</param>
-		private static void BBG_execute_terminal_function(JObject queryResponse, JToken queryData)
+		private static bool BBG_execute_terminal_function(FinsembleQueryArgs queryMessage, JObject queryResponse, JToken queryData)
 		{
 			string requestedFunction = queryData.Value<string>("function");
+			bool debounced = false;
 			if (requestedFunction != null)
 			{
 				try
@@ -582,7 +601,9 @@ namespace BloombergBridge
 							GetGroupContext(queryResponse, queryData);
 							break;
 						case "SetGroupContext":
-							SetGroupContext(queryResponse, queryData);
+							//Set group context is debounced and may run async rather than sync, hence this function will reply on its own
+							debounced = true;
+							SetGroupContext(queryMessage, queryResponse, queryData);
 							break;
 						case "SecurityLookup":
 							SecurityLookup(queryResponse, queryData);
@@ -622,6 +643,7 @@ namespace BloombergBridge
 				queryResponse.Add("status", false);
 				queryResponse.Add("message", "No requested function found in query data:" + queryData.ToString());
 			}
+			return debounced;
 		}
 
 		private static void RunFunction(JObject queryResponse, JToken queryData)
@@ -787,51 +809,107 @@ namespace BloombergBridge
 			}
 		}
 
-		private static System.Timers.Timer debounceTimer = null;
-		private static DateTimeOffset lastQueryTime = DateTimeOffset.UtcNow;
+		/// <summary>
+		/// Utility class for storing details of debounced queries
+		/// </summary>
+		private class DebouncedQuery
+        {
+			public System.Timers.Timer timer { get; set; }
+			public DateTimeOffset lastQueryTime { get; set; }
+			public FinsembleQueryArgs queryMessage { get; set; }
+			public JObject queryResponse { get; set; }
+			public JToken queryData { get; set; }
+		}
+
+		private static Dictionary<string, DebouncedQuery> debounceMap = new Dictionary<string, DebouncedQuery>();
 		private const int SET_GROUP_CONTEXT_THROTTLE = 1200;
-		private static void SetGroupContext(JObject queryResponse, JToken queryData)
+		private static void SetGroupContext(FinsembleQueryArgs queryMessage, JObject queryResponse, JToken queryData)
 		{
 			if (validateQueryData("SetGroupContext", queryData, new string[] { "name", "value" }, null, queryResponse))
 			{
+				bool debounce = false;
+				string groupName = queryData["name"].ToString();
 				DateTimeOffset now = DateTimeOffset.UtcNow;
-				TimeSpan ts = now.Subtract(lastQueryTime);
-				if (ts.TotalMilliseconds < SET_GROUP_CONTEXT_THROTTLE)
+				double tsMillis = 0;
+				if (debounceMap.ContainsKey(groupName))
 				{
-					if (debounceTimer != null)
+					tsMillis = now.Subtract(debounceMap[groupName].lastQueryTime).TotalMilliseconds;
+					if (tsMillis < SET_GROUP_CONTEXT_THROTTLE)
 					{
-						debounceTimer.Stop();
+						debounce = true;
 					}
-					debounceTimer = new System.Timers.Timer();
-					debounceTimer.Interval = SET_GROUP_CONTEXT_THROTTLE - ts.TotalMilliseconds;
-					debounceTimer.Elapsed += async (sender2, args2) =>
+				}
+				
+				if (debounce)
+				{
+					if (debounceMap.ContainsKey(groupName))
 					{
+						if (debounceMap[groupName].timer != null)
+						{
+							//if the timer element is set, this query has not been responded to yet
+							DebouncedQuery toBeCancelled = debounceMap[groupName];
+							toBeCancelled.timer.Stop();
+							//send a response to say this query was cancelled by debouncing
+							toBeCancelled.queryResponse.Add("status", false);
+							toBeCancelled.queryResponse.Add("message", "SetGroupContext call cancelled by debouncing, a subsequent call will be responded to");
+							Respond_to_BBG_run_terminal_function(toBeCancelled.queryMessage, toBeCancelled.queryResponse, toBeCancelled.queryData);
+						}
+					}
+					var debounceTimer = new System.Timers.Timer();
+					debounceTimer.Interval = SET_GROUP_CONTEXT_THROTTLE - tsMillis;
+					debounceTimer.Elapsed += (sender2, args2) =>
+                    {
 						debounceTimer.Stop();
-						DoSetGroupContext(queryResponse, queryData);
+						//update time of last set to allow debouncing   
+						debounceMap[groupName].lastQueryTime = now;
+						DoSetGroupContext(queryMessage, queryResponse, queryData);
+					};
+					debounceMap[groupName] = new DebouncedQuery() {
+						timer = debounceTimer,
+						lastQueryTime = now,
+						queryMessage = queryMessage,
+						queryResponse = queryResponse,
+						queryData = queryData
 					};
 					debounceTimer.Start();
 				}
 				else
 				{
-					DoSetGroupContext(queryResponse, queryData);
+					//save time of last set to allow debouncing   
+					debounceMap[groupName] = new DebouncedQuery()
+					{
+						timer = null,
+						lastQueryTime = now,
+						queryMessage = queryMessage,
+						queryResponse = queryResponse,
+						queryData = queryData
+					};
+					DoSetGroupContext(queryMessage, queryResponse, queryData);
 				}
+
 			}
 		}
 
-		private static void DoSetGroupContext(JObject queryResponse, JToken queryData)
+		private static void DoSetGroupContext(FinsembleQueryArgs queryMessage, JObject queryResponse, JToken queryData)
 		{
-			//save time of last set to allow debouncing   
-			lastQueryTime = DateTimeOffset.UtcNow;
+			try
+			{
+				if (queryData["cookie"] != null && queryData["cookie"].ToString() != "")
+				{
+					BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString(), queryData["cookie"].ToString());
+				}
+				else
+				{
+					BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString());
+				}
+				queryResponse.Add("status", true);
+			} catch (Exception err) {
+				queryResponse.Add("status", false);
+				queryResponse.Add("message", "Exception occurred while running 'SetGroupContext', message: " + err.Message);
+			}
 
-			if (queryData["cookie"] != null && queryData["cookie"].ToString() != "")
-			{
-				BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString(), queryData["cookie"].ToString());
-			}
-			else
-			{
-				BlpTerminal.SetGroupContext(queryData["name"].ToString(), queryData["value"].ToString());
-			}
-			queryResponse.Add("status", true);
+			//respond to the query directly as this call is debounced and may run asynchronously
+			Respond_to_BBG_run_terminal_function(queryMessage, queryResponse, queryData);
 		}
 
 		private static void SecurityLookup(JObject queryResponse, JToken queryData)
