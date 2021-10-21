@@ -1,6 +1,6 @@
 {
   "name": "finsemble-bloomberg",
-  "version": "5.4.6",
+  "version": "6.2.0",
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
     "watch": "node ./fpe-scripts/watch.js",
@@ -19,7 +19,7 @@
     "node": ">=10"
   },
   "devDependencies": {
-    "@finsemble/finsemble-core": "^5.0.1",
+    "@finsemble/finsemble-core": "^6.2.0",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
     "chokidar": "^3.4.0",
