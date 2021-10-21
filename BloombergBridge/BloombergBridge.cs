@@ -809,11 +809,19 @@ namespace BloombergBridge
 			}
 		}
 
-		private static Dictionary<string, System.Timers.Timer> debounceTimerMap = new Dictionary<string, System.Timers.Timer>();
-		private static Dictionary<string, DateTimeOffset> lastQueryTimeMap = new Dictionary<string, DateTimeOffset>();
+		/// <summary>
+		/// Utility class for storing details of debounced queries
+		/// </summary>
+		private class DebouncedQuery
+        {
+			public System.Timers.Timer timer { get; set; }
+			public DateTimeOffset lastQueryTime { get; set; }
+			public FinsembleQueryArgs queryMessage { get; set; }
+			public JObject queryResponse { get; set; }
+			public JToken queryData { get; set; }
+		}
 
-		//private static System.Timers.Timer debounceTimer = null;
-		//private static DateTimeOffset lastQueryTime = DateTimeOffset.UtcNow;
+		private static Dictionary<string, DebouncedQuery> debounceMap = new Dictionary<string, DebouncedQuery>();
 		private const int SET_GROUP_CONTEXT_THROTTLE = 1200;
 		private static void SetGroupContext(FinsembleQueryArgs queryMessage, JObject queryResponse, JToken queryData)
 		{
@@ -823,9 +831,9 @@ namespace BloombergBridge
 				string groupName = queryData["name"].ToString();
 				DateTimeOffset now = DateTimeOffset.UtcNow;
 				double tsMillis = 0;
-				if (lastQueryTimeMap.ContainsKey(groupName))
+				if (debounceMap.ContainsKey(groupName))
 				{
-					tsMillis = now.Subtract(lastQueryTimeMap[groupName]).TotalMilliseconds;
+					tsMillis = now.Subtract(debounceMap[groupName].lastQueryTime).TotalMilliseconds;
 					if (tsMillis < SET_GROUP_CONTEXT_THROTTLE)
 					{
 						debounce = true;
@@ -834,26 +842,48 @@ namespace BloombergBridge
 				
 				if (debounce)
 				{
-					if (debounceTimerMap.ContainsKey(groupName))
+					if (debounceMap.ContainsKey(groupName))
 					{
-						debounceTimerMap[groupName].Stop();
+						if (debounceMap[groupName].timer != null)
+						{
+							//if the timer element is set, this query has not been responded to yet
+							DebouncedQuery toBeCancelled = debounceMap[groupName];
+							toBeCancelled.timer.Stop();
+							//send a response to say this query was cancelled by debouncing
+							toBeCancelled.queryResponse.Add("status", false);
+							toBeCancelled.queryResponse.Add("message", "SetGroupContext call cancelled by debouncing, a subsequent call will be responded to");
+							Respond_to_BBG_run_terminal_function(toBeCancelled.queryMessage, toBeCancelled.queryResponse, toBeCancelled.queryData);
+						}
 					}
 					var debounceTimer = new System.Timers.Timer();
 					debounceTimer.Interval = SET_GROUP_CONTEXT_THROTTLE - tsMillis;
 					debounceTimer.Elapsed += (sender2, args2) =>
                     {
 						debounceTimer.Stop();
-						//save time of last set to allow debouncing   
-						lastQueryTimeMap[groupName] = now;
+						//update time of last set to allow debouncing   
+						debounceMap[groupName].lastQueryTime = now;
 						DoSetGroupContext(queryMessage, queryResponse, queryData);
 					};
+					debounceMap[groupName] = new DebouncedQuery() {
+						timer = debounceTimer,
+						lastQueryTime = now,
+						queryMessage = queryMessage,
+						queryResponse = queryResponse,
+						queryData = queryData
+					};
 					debounceTimer.Start();
-					debounceTimerMap[groupName] = debounceTimer;
 				}
 				else
 				{
 					//save time of last set to allow debouncing   
-					lastQueryTimeMap[groupName] = now;
+					debounceMap[groupName] = new DebouncedQuery()
+					{
+						timer = null,
+						lastQueryTime = now,
+						queryMessage = queryMessage,
+						queryResponse = queryResponse,
+						queryData = queryData
+					};
 					DoSetGroupContext(queryMessage, queryResponse, queryData);
 				}
 
@@ -862,8 +892,6 @@ namespace BloombergBridge
 
 		private static void DoSetGroupContext(FinsembleQueryArgs queryMessage, JObject queryResponse, JToken queryData)
 		{
-			
-
 			try
 			{
 				if (queryData["cookie"] != null && queryData["cookie"].ToString() != "")
