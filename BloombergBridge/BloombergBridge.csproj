@@ -56,6 +56,12 @@
     <StartupObject>
     </StartupObject>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>BloombergBridgeSigningKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="BloombergBridge.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="BloombergBridgeSigningKey.snk" />
     <None Include="docfx_project\api\index.md" />
     <None Include="docfx_project\api\toc.yml" />
     <None Include="docfx_project\articles\intro.md" />

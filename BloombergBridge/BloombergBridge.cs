@@ -42,16 +42,16 @@ namespace BloombergBridge
 #endif
 			lock (lockObj)
 			{
-					AppDomain.CurrentDomain.ProcessExit += new System.EventHandler(CurrentDomain_ProcessExit);
+				AppDomain.CurrentDomain.ProcessExit += new System.EventHandler(CurrentDomain_ProcessExit);
 			}
 
 			// Initialize Finsemble
 			try
 			{
-					FSBL = new Finsemble(args, null);
-					FSBL.Connected += OnConnected;
-					FSBL.Disconnected += OnShutdown;
-					FSBL.Connect();
+				FSBL = new Finsemble(args, null);
+				FSBL.Connected += OnConnected;
+				FSBL.Disconnected += OnShutdown;
+				FSBL.Connect();
 			}
 			catch (Exception err)
 			{
@@ -75,9 +75,7 @@ namespace BloombergBridge
 
 				if (!connect)
 				{ //we've been told to not even try and connect
-
 					_isRegistered = false;
-
 					checkForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
 				}
 				else
