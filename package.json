@@ -1,6 +1,6 @@
 {
   "name": "finsemble-bloomberg",
-  "version": "5.4.3",
+  "version": "5.4.6",
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
     "watch": "node ./fpe-scripts/watch.js",
