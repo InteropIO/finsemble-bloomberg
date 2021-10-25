@@ -19,10 +19,7 @@
                     "height": 600
                 },
                 "component": {
-                    "spawnOnStartup": false,
-                    "preload": false,
-                    "singleton": false,
-                    "showDevConsoleOnVisible": false
+                    "spawnOnStartup": false
                 },
                 "foreign": {
                     "services": {
