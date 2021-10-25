@@ -40,7 +40,7 @@
                         },
                         "Window Manager": {
                             "alwaysOnTopIcon": true,
-                            "title": "testBloomberg",
+                            "title": "Bloomberg Bridge tester",
                             "persistWindowState": true
                         },
                         "Toolbar": {
