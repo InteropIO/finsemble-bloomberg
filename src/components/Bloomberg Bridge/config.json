@@ -24,11 +24,6 @@
                         },
                         "Toolbar": {
                             "iconClass": "ff-component"
-                        },
-                        "Window Manager": {
-                            "FSBLHeader": true,
-                            "persistWindowState": false,
-                            "showLinker": true
                         }
                     }
                 }
