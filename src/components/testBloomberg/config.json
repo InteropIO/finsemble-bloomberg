@@ -1,8 +1,8 @@
 {
     "appd": {
-        "Bloomberg test component": {
-            "appId": "Bloomberg test component",
-            "name": "Bloomberg test component",
+        "Bloomberg Bridge tester": {
+            "appId": "Bloomberg Bridge tester",
+            "name": "Bloomberg Bridge testert",
             "description": "The Bloomberg test component makes testing Bloomberg functionality in a single location easier.",
             "manifest": {
                 "window": {
