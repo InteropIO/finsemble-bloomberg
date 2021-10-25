@@ -14,7 +14,8 @@
                     "width": 300
                 },
                 "component": {
-                    "spawnOnStartup": false
+                    "spawnOnStartup": false,
+                    "singleton": true
                 },
                 "foreign": {
                     "components": {
