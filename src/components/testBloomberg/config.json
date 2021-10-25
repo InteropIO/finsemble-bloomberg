@@ -3,7 +3,7 @@
         "Bloomberg Bridge tester": {
             "appId": "Bloomberg Bridge tester",
             "name": "Bloomberg Bridge testert",
-            "description": "The Bloomberg test component makes testing Bloomberg functionality in a single location easier.",
+            "description": "The Bloomberg Bridge tester makes testing Finsemble's Bloomberg Terminal connection integration easier.",
             "manifest": {
                 "window": {
                     "url": "$applicationRoot/components/testBloomberg/testBloomberg.html",
