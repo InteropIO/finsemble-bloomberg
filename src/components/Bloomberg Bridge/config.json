@@ -54,7 +54,7 @@
                 "foreign": {
                     "components": {
                         "App Launcher": {
-                            "launchableByUser": true
+                            "launchableByUser": false
                         },
                         "Toolbar": {
                             "iconClass": "ff-component"
