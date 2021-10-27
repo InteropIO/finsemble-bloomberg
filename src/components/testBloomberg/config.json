@@ -2,7 +2,7 @@
     "appd": {
         "Bloomberg Bridge tester": {
             "appId": "Bloomberg Bridge tester",
-            "name": "Bloomberg Bridge testert",
+            "name": "Bloomberg Bridge tester",
             "description": "The Bloomberg Bridge tester makes testing Finsemble's Bloomberg Terminal connection integration easier.",
             "manifest": {
                 "window": {
@@ -50,7 +50,7 @@
                 }
             },
             "version": "1.0.0",
-            "tooltip": "Bloomberg test component"
+            "tooltip": "Bloomberg Bridge test component"
         }
     }
 }

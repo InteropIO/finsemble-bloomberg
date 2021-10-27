@@ -18,6 +18,11 @@
                     "singleton": true
                 },
                 "foreign": {
+                    "services": {
+                        "windowService": {
+                            "manageWindowMovement": false
+                        }
+                    },
                     "components": {
                         "App Launcher": {
                             "launchableByUser": true
@@ -49,6 +54,11 @@
                     "singleton": true
                 },
                 "foreign": {
+                    "services": {
+                        "windowService": {
+                            "manageWindowMovement": false
+                        }
+                    },
                     "components": {
                         "App Launcher": {
                             "launchableByUser": false
