@@ -2,14 +2,14 @@
 	"appAssets": [
 		{
 			"src": "http://localhost:3375/hosted/BloombergBridgeRelease.zip",
-			"version": "1.2.2",
+			"version": "6.2.0",
 			"alias": "bloomberg_bridge",
 			"target": "BloombergBridge.exe"
 		}
 	],
 	"finsemble": {
 		"custom": {
-            "bloombergBridgeFolder": "C:/Users/admin/Documents/code/finsemble-bloomberg/BloombergBridge",
+            "bloombergBridgeFolder": "C:/Users/Admin/Documents/code/finsemble-bloomberg/BloombergBridge",
 			"bloomberg": {
 				"enabled": true,
 				"remote": false,
