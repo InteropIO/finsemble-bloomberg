@@ -14,7 +14,8 @@
                     "width": 300
                 },
                 "component": {
-                    "spawnOnStartup": false
+                    "spawnOnStartup": false,
+                    "singleton": true
                 },
                 "foreign": {
                     "components": {
@@ -23,11 +24,6 @@
                         },
                         "Toolbar": {
                             "iconClass": "ff-component"
-                        },
-                        "Window Manager": {
-                            "FSBLHeader": true,
-                            "persistWindowState": false,
-                            "showLinker": true
                         }
                     }
                 }
@@ -49,20 +45,16 @@
                     "width": 300
                 },
                 "component": {
-                    "spawnOnStartup": true
+                    "spawnOnStartup": true,
+                    "singleton": true
                 },
                 "foreign": {
                     "components": {
                         "App Launcher": {
-                            "launchableByUser": true
+                            "launchableByUser": false
                         },
                         "Toolbar": {
                             "iconClass": "ff-component"
-                        },
-                        "Window Manager": {
-                            "FSBLHeader": true,
-                            "persistWindowState": false,
-                            "showLinker": true
                         }
                     }
                 }
