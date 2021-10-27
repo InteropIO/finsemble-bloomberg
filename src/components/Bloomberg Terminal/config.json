@@ -11,6 +11,11 @@
                     "windowType": "assimilation"
                 },
                 "foreign": {
+                    "services": {
+                        "windowService": {
+                            "manageWindowMovement": false
+                        }
+                    },
                     "components": {
                         "App Launcher": {
                             "launchableByUser": true
@@ -20,21 +25,10 @@
                         },
                         "Window Manager": {
                             "FSBLHeader": false,
-                            "persistWindowState": false
+                            "persistWindowState": false,
+                            "man"
                         }
                     }
-                },
-                "interop": {
-                    "rewire": [
-                        {
-                            "contextType": "layout",
-                            "fwd": "#Workspace"
-                        },
-                        {
-                            "contextType": "fdc3.instrument",
-                            "cc": "#Workspace"
-                        }
-                    ]
                 }
             },
             "version": "1.0.0",
