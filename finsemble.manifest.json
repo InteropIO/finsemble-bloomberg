@@ -13,7 +13,8 @@
 			"bloomberg": {
 				"enabled": true,
 				"remote": false,
-				"remoteAddress": ""
+                "remoteAddress": "",
+                "showStatus": true
 			}
         }
 	}

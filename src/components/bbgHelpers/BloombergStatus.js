@@ -8,7 +8,6 @@ const title = "Bloomberg Preferences";
 const wrapperClasses = "finsemble-toolbar-button";
 
 export const BloombergStatus = () => {
-    const [isConnected, setIsConnected] = useState(false);
     const [indicatorColor, setIndicatorColor] = useState("red");
     const [showBloomberg, setShowBloomberg] = useState(false);
 
@@ -99,8 +98,8 @@ export const BloombergStatus = () => {
             if (err) {
                 FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
             } else {
-                let bbgStatus = typeof status.value == "undefined" ? status : status.value;
-                setShowBloomberg(bbgStatus);
+                let bbgShowStatus = (typeof status.value == "undefined" || status.value) ? true : false;
+                setShowBloomberg(bbgShowStatus);
             }
         };
         FSBL.Clients.ConfigClient.getValue({ field: "finsemble.custom.bloomberg.showStatus" }, statusHandler);
