@@ -25,8 +25,7 @@
                         },
                         "Window Manager": {
                             "FSBLHeader": false,
-                            "persistWindowState": false,
-                            "man"
+                            "persistWindowState": false
                         }
                     }
                 }
