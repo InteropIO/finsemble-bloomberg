@@ -20,7 +20,7 @@
     "node": ">=12"
   },
   "devDependencies": {
-    "@finsemble/finsemble-core": "6.2.0",
+    "@finsemble/finsemble-core": "6.2.1",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "chokidar": "^3.5.2",
