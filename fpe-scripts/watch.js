@@ -6,7 +6,7 @@ const configJSON = require("../finsemble.config.json")
 
 
 const SRC_FOLDER = "src";
-const HOSTED_FOLDER = "hosted";
+const HOSTED_FOLDER = "public/hosted";
 const FINSEMBLE_CONFIG = "finsemble.config.json";
 const FINSEMBLE_MANIFEST = "finsemble.manifest.json";
 
@@ -91,7 +91,7 @@ function ready(seedDirectory) {
 
 async function updateManifestLocal(seedDirectory, currentFile) {
 	console.log("Updating manifest file");
-	const seedManifestPath = path.join(seedDirectory, 'configs/application/manifest-local.json');
+    const seedManifestPath = path.join(seedDirectory, 'public/configs/application/manifest-local.json');
 	try {
 		const seedManifest = await readJson(seedManifestPath);
 		const projectManifest = await readJson(currentFile);
@@ -126,7 +126,7 @@ async function updateManifestLocal(seedDirectory, currentFile) {
 
 async function updateConfig(seedDirectory, currentFile) {
 	console.log("Updating config.json file");
-	const seedConfigPath = path.join(seedDirectory, 'configs/application/config.json');
+    const seedConfigPath = path.join(seedDirectory, 'public/configs/application/config.json');
 	try {
 		const seedConfig = await readJson(seedConfigPath);
 		const projectConfig = await readJson(currentFile);

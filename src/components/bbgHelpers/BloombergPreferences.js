@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {BloombergBridgeClient} from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+import { BloombergBridgeClient } from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
 
 // the BloombergBridgeClient that will be used for all messaging to/from Bloomberg
 let bbg = new BloombergBridgeClient(FSBL.Clients.RouterClient, FSBL.Clients.Logger);
@@ -23,7 +23,7 @@ export const BloombergPreferences = () => {
                     setConnectionStatus("Connected");
                     setIndicatorColor("green");
                 } else if (err) {
-                    FSBL.Clients.Logger.error("Error received when checking connection", err);
+                    FSBL.Clients.Logger.debug("Error received when checking connection", err);
                     setIsConnected(false);
                     setConnectionStatus("Confirm Bloomberg and Bridge are both running.");
                     setIndicatorColor("red");
@@ -45,12 +45,12 @@ export const BloombergPreferences = () => {
             //  worth doing in case the bridge process is killed off and doesn't get a chance to send an update
             setInterval(checkConnection, 30000);
         } catch (e) {
-            FSBL.Clients.Logger.error(`error in bbg prefs: ${e}`);
+            FSBL.Clients.Logger.debug(`Error in bbg prefs: ${e}`);
         }
 
         let statusHandler = (err, status) => {
             if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
+                FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
             } else {
                 let bbgStatus = (typeof status.value == "undefined" || status.value) ? true : false;
                 setShowBloomberg(bbgStatus);
@@ -61,9 +61,9 @@ export const BloombergPreferences = () => {
 
         let remoteAddressHandler = (err, address) => {
             if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
+                FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
             } else {
-                let remoteAddress = typeof address.value == "undefined" ? address : address.value;
+                let remoteAddress = address?.value ?? "";
                 setBbgRemoteAddress(remoteAddress);
             }
         };
@@ -72,7 +72,7 @@ export const BloombergPreferences = () => {
 
         let remoteHandler = (err, remote) => {
             if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
+                FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
             } else {
                 let bbgRemote = typeof remote.value == "undefined" ? remote : remote.value;
                 setIsRemote(bbgRemote);
@@ -84,7 +84,7 @@ export const BloombergPreferences = () => {
         let enabledHandler = (err, enabled) => {
             checkConnection();
             if (err) {
-                FSBL.Clients.Logger.error("Error received when checking bloomberg bridge config", err);
+                FSBL.Clients.Logger.debug("Error received when checking bloomberg bridge config", err);
             } else {
                 let bbgEnabled = typeof enabled.value == "undefined" ? enabled : enabled.value;
                 setIsEnabled(bbgEnabled);
@@ -106,7 +106,7 @@ export const BloombergPreferences = () => {
         });
         bbg.setEnabled(_enabled, (err, resp) => {
             if (err) {
-                FSBL.Clients.Logger.error("Error - There was an error setting the Bloomberg connection enabled flag:", err);
+                FSBL.Clients.Logger.debug("Error - There was an error setting the Bloomberg connection enabled flag:", err);
             }
             if (resp) {
                 //connection has been enabled
@@ -126,17 +126,19 @@ export const BloombergPreferences = () => {
     }
 
     function updateAddress() {
-        setBbgRemoteAddress(document.getElementById('address').value);
-            FSBL.Clients.ConfigClient.setPreference({
-                field: "finsemble.custom.bloomberg.remoteAddress",
-                value: bbgRemoteAddress
-            }, (err, response) => {
-                //preference has been set
-            });
+        const remoteAddress = document.getElementById("address").value;
+        FSBL.Clients.ConfigClient.setPreference({
+            field: "finsemble.custom.bloomberg.remoteAddress",
+            value: remoteAddress
+        }, (err, response) => {
+            //preference has been set
+        });
+        setBbgRemoteAddress(remoteAddress);
     }
 
     const addressInput = React.createElement("input", {
         id: "address",
+        name: "address",
         type: "text",
         style: {
             backgroundColor: "var(--core-primary)",

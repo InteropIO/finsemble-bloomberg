@@ -1,6 +1,6 @@
 {
   "name": "finsemble-bloomberg",
-  "version": "5.4.6",
+  "version": "6.2.0",
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
     "watch": "node ./fpe-scripts/watch.js",
@@ -11,32 +11,33 @@
   "keywords": [
     "Finsemble",
     "Bloomberg",
-    "Terminal connect"
+    "Terminal connect",
+    "FDC3"
   ],
-  "author": "ChartIQ <support@finsemble.com> (https://www.chartiq.com/finsemble/)",
+  "author": "Cosaic <support@finsemble.com> (https://www.chartiq.com/finsemble/)",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "devDependencies": {
-    "@finsemble/finsemble-core": "^5.0.1",
-    "@typescript-eslint/eslint-plugin": "^4.5.0",
-    "@typescript-eslint/parser": "^4.5.0",
-    "chokidar": "^3.4.0",
-    "eslint": "^7.11.0",
-    "eslint-config-airbnb-typescript": "^12.0.0",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jsx-a11y": "^6.3.1",
-    "eslint-plugin-react": "^7.21.5",
+    "@finsemble/finsemble-core": "6.2.1",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "chokidar": "^3.5.2",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "fs-extra": "^9.0.0",
-    "typedoc": "^0.17.7",
-    "typedoc-plugin-markdown": "^2.3.1",
-    "typescript": "^4.0.3"
+    "fs-extra": "^9.1.0",
+    "typedoc": "^0.17.8",
+    "typedoc-plugin-markdown": "^2.4.2",
+    "typescript": "4.3.5"
   },
   "dependencies": {
-    "@types/node": "^14.0.13",
-    "react-autosuggest": "^10.0.2",
-    "react-tabs": "^3.1.1"
+    "@types/node": "^14.17.27",
+    "react-autosuggest": "^10.1.0",
+    "react-tabs": "^3.2.2"
   }
 }
