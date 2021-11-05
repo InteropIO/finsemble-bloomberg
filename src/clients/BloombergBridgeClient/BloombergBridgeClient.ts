@@ -1,8 +1,6 @@
-
-
-import "@finsemble/finsemble-core"
-import { ILogger } from "clients/ILogger";
-import { IRouterClient, RouterMessage } from "clients/IRouterClient";
+import { ICentralLogger } from "@finsemble/finsemble-core/types/clients/logger";
+import { RouterMessage, IRouterClient, QueryResponse } from "@finsemble/finsemble-core/types/clients/routerClientInstance";
+import { StandardCallback, CallbackError, StandardError } from "@finsemble/finsemble-core/types/types";
 
 // import type { ILogger } from "clients/ILogger";
 
@@ -85,7 +83,7 @@ export class BloombergBridgeClient {
     private connectionEventListener: BBGConnectionEventListener | null = null;
     private groupEventListener: BBGGroupEventListener | null = null;
     private routerClient: IRouterClient | null = null;
-    private logger: ILogger | null = null;
+    private logger: ICentralLogger | null = null;
 
     /**
      * BloombergBridgeClient constructor.
@@ -107,7 +105,7 @@ export class BloombergBridgeClient {
 	 * let bbg = new BloombergBridgeClient(Finsemble.Clients.RouterClient, Finsemble.Clients.Logger);
 	 * ```
      */
-    constructor(routerClient?: IRouterClient, logger?: ILogger) {
+    constructor(routerClient?: IRouterClient, logger?: ICentralLogger) {
         if (routerClient) {
             this.routerClient = routerClient;
         } else if (FSBL){
@@ -340,7 +338,7 @@ export class BloombergBridgeClient {
 	 * @private
      */
     apiResponseHandler(cb: StandardCallback) {
-        return (err: StandardError, response: { data: { status: boolean, message?: string } }) => {
+        return (err: StandardError, response: QueryResponse<{ status: boolean, message?: string }>) => {
             if (err) {
                 const errMsg = 'Error returned by BBG_run_terminal_function: ';
                 console.error(errMsg, err);

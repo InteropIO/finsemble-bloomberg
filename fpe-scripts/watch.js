@@ -9,6 +9,7 @@ const SRC_FOLDER = "src";
 const HOSTED_FOLDER = "public/hosted";
 const FINSEMBLE_CONFIG = "finsemble.config.json";
 const FINSEMBLE_MANIFEST = "finsemble.manifest.json";
+const FINSEMBLE_PRELOADS_BUILD_CONFIG = "finsemble.webpack.preloads.entries.json";
 
 const seedDirectory = path.join(configJSON.seedProjectDirectory);
 
@@ -23,7 +24,7 @@ access(seedDirectory, constants.F_OK | constants.W_OK, (err) => {
 
 function beginWatch(seedDirectory) {
 	// Initialize watcher.
-	const watcher = chokidar.watch([SRC_FOLDER, HOSTED_FOLDER, FINSEMBLE_CONFIG, FINSEMBLE_MANIFEST], {
+	const watcher = chokidar.watch([SRC_FOLDER, HOSTED_FOLDER, FINSEMBLE_CONFIG, FINSEMBLE_MANIFEST, FINSEMBLE_PRELOADS_BUILD_CONFIG], {
 		ignored: /(^|[\/\\])\../, // ignore dotfiles
 		persistent: true
 	});
@@ -56,6 +57,15 @@ function updateSeed(action, currentPath, message, seedDirectory) {
 	if (currentPath === FINSEMBLE_MANIFEST) {
 		try {
 			updateManifestLocal(seedDirectory, currentPath);
+		} catch (error) {
+			console.error(`could not update the config due to: ${error}`);
+		}
+		return
+	}
+
+	if (currentPath === FINSEMBLE_PRELOADS_BUILD_CONFIG) {
+		try {
+			updatePreloadsBuildConfig(seedDirectory, currentPath);
 		} catch (error) {
 			console.error(`could not update the config due to: ${error}`);
 		}
@@ -142,6 +152,29 @@ async function updateConfig(seedDirectory, currentFile) {
 		const output = await writeJson(seedConfigPath, seedConfig, { spaces: 2 });
 		if (output) console.log('success writing config');
 
+
+	} catch (error) {
+		console.error(error);
+	}
+
+}
+
+async function updatePreloadsBuildConfig(seedDirectory, currentFile) {
+	console.log("Updating webpack.preloads.entries.json file");
+    const seedConfigPath = path.join(seedDirectory, 'webpack/webpack.preloads.entries.json');
+	try {
+		const seedConfig = await readJson(seedConfigPath);
+		const projectConfig = await readJson(currentFile);
+
+		//add preloads to finsemble seed's preload build config
+		Object.keys(projectConfig).forEach((key) => {
+			seedConfig[key] = projectConfig[key];
+
+		});
+
+		//write out updated config
+		const output = await writeJson(seedConfigPath, seedConfig, { spaces: 2 });
+		if (output) console.log('success writing webpack.preloads.entries.json');
 
 	} catch (error) {
 		console.error(error);
