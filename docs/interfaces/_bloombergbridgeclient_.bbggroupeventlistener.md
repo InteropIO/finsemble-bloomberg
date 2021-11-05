@@ -14,7 +14,7 @@ Interface representing an event handler for Bloomberg group events.
 
 ▸ (`err`: string | Error, `response`: RouterMessage‹object›): *void*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:35](https://github.com/ChartIQ/finsemble-bloomberg/blob/310ed1f/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L35)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:35](https://github.com/ChartIQ/finsemble-bloomberg/blob/fd42a96/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L35)*
 
 Interface representing an event handler for Bloomberg group events.
 

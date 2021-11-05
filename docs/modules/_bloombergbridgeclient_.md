@@ -26,7 +26,7 @@
 
 • **CONNECTION_CHECK_TIMEOUT**: *1500* = 1500
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:10](https://github.com/ChartIQ/finsemble-bloomberg/blob/310ed1f/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L10)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:10](https://github.com/ChartIQ/finsemble-bloomberg/blob/fd42a96/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L10)*
 
 Timeout in milliseconds for terminal connection checks that will cause a checkConnection
 call to fail.
@@ -37,6 +37,6 @@ ___
 
 • **SET_CONNECT_STATE_TIMEOUT**: *2500* = 2500
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:12](https://github.com/ChartIQ/finsemble-bloomberg/blob/310ed1f/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L12)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:12](https://github.com/ChartIQ/finsemble-bloomberg/blob/fd42a96/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L12)*
 
 Timeout in milliseconds for setting the connect state.

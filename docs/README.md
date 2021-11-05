@@ -138,7 +138,7 @@ To use the watch script:
 
    - **our advice:** clone this repo to the same directory as the seed-project e.g _myfolder/finsemble-seed_ & _myfolder/finsemble-bloomberg_
 
-3. If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project. If you intend to build an debug the \(.Net\) BloombergBridge, also set the value of the `$bloombergBridgeFolder` variable to point to the [BloombergBridge folder](../BloombergBridge) in this project \(see the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables\).
+3. If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project. If you intend to build an debug the \(.Net\) BloombergBridge, also set the value of the `$bloombergBridgeFolder` manifest macro to point to the [BloombergBridge folder](../BloombergBridge) in this project \(see the [Finsemble config documentation](https://documentation.finsemble.com/tutorial-Configuration.html#manifest-macros) for more details on setting manifest macros\).
 
 4. Run `yarn` then run `yarn watch` (or `npm install` then  `npm run watch`) in the _finsemble-bloomberg_ project's directory \*_this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds_
 
@@ -175,7 +175,7 @@ To manually install the integration into your Finsemble project:
 
   or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: _[src/components/Bloomberg Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_.
 
-  Note that the 'Bloomberg Bridge Debug' configuration makes use of a `$bloombergBridgeFolder` variable that should be set in your manifest. See the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables.
+  Note that the 'Bloomberg Bridge Debug' configuration makes use of a `$bloombergBridgeFolder` manifest macro that should be set in your manifest. See the [Finsemble config documentation](https://documentation.finsemble.com/tutorial-Configuration.html#manifest-macross) for more details on setting manifest macros.
 
 3. The example configuration supplied is for manual launch of the Bloomberg Bridge. You will likely wish to alter it to automatically launch the Bloomberg Bridge on start-up and to hide it from the launcher menu. To do so modify the example to set:
 
