@@ -92,7 +92,7 @@ finsemble-bloomberg
 |   |   BloombergBridge.csproj
 |   |   SecurityLookup.cs
 |   |
-|   └───bin                         - build output directories
+|   └───bin                      - build output directories
 |       └───Release
 |       └───Debug
 |
@@ -102,12 +102,12 @@ finsemble-bloomberg
 |───docs_src                     - Documentation source directory
 |
 |───fpe-scripts
-|       watch.js                     - Watch script for copying project files into a Finsemble project
+|       watch.js                 - Watch script for copying project files into a Finsemble project
 |
 |───hosted
 |       BloombergBridgeRelease.zip   - Example BloombergBridge build packaged for use as an appAsset
 |
-└───src                           - Typescript client and example Javascript component source directory
+└───src                          - Typescript client and example Javascript component source directory
     |
     └───clients
     |   └───BloombergBridgeClient
@@ -115,15 +115,15 @@ finsemble-bloomberg
     |           BloombergBridgePreload.ts - Preload script that adds the client to `FSBL.Clients`
     |
     └───components
-    |   └───bbgHelpers               - The Toolbar and User Preferences code
-    |   └───Bloomberg Bridge         - Configs for launching the Bloomberg Bridge
-    |   └───Bloomberg Terminal       - Example config for launching the Bloomberg terminal
-    |   └───SecurityFinder           - Security lookup example, demonstrating a realistic use-case
-    |   └───testBloomberg            - Test component demonstrating use of all API functions
+    |   └───bbgHelpers           - The Toolbar and User Preferences code
+    |   └───Bloomberg Bridge     - Configs for launching the Bloomberg Bridge
+    |   └───Bloomberg Terminal   - Example config for launching the Bloomberg terminal
+    |   └───SecurityFinder       - Security lookup example, demonstrating a realistic use-case
+    |   └───testBloomberg        - Test component demonstrating use of all API functions
     |
     └───services
-        └───bloombergSearch          - An example service that uses the integration to add a security
-                                       search to the finsemble toolbar
+        └───bloombergSearch      - An example service that uses the integration to add a security
+                                   search to the finsemble toolbar
 ```
 
 ### Installation via the watch script
@@ -144,13 +144,13 @@ To use the watch script:
 
 5. To build and run the SecurityFinder example, you will also need to install dependencies in your seed project by running:
 
-   ```
-   yarn add react-tabs react-select react-autosuggest
-   ```
-   or
-   ```
-   npm install react-tabs react-select react-autosuggest
-   ```
+    ```
+    yarn add react-tabs react-select react-autosuggest
+    ```
+    or
+    ```
+    npm install react-tabs react-select react-autosuggest
+    ```
 
 6. Your seed project directory has now been updated with the source files from the integration, run `yarn dev` or `npm run dev` in your Finsemble seed project's directory to build and run locally.
 
@@ -162,74 +162,74 @@ To manually install the integration into your Finsemble project:
 
 2. Configure Finsemble to launch the Bloomberg Bridge. This can be achieved by either importing a config file by, for example, adding to the `importConfig` in your seed project's _/configs/application/config.json_ file:
 
-  ```JSON
-  ...
-      ...
-      "importConfig": [
-          ...
-          "$applicationRoot/components/Bloomberg Bridge/config.json"
-          ...
-      ]
-  }
-  ```
+    ```JSON
+    ...
+        ...
+        "importConfig": [
+            ...
+            "$applicationRoot/components/Bloomberg Bridge/config.json"
+            ...
+        ]
+    }
+    ```
 
-  or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: _[src/components/Bloomberg Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_.
+    or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: _[src/components/Bloomberg Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_.
 
-  Note that the 'Bloomberg Bridge Debug' configuration makes use of a `$bloombergBridgeFolder` manifest macro that should be set in your manifest. See the [Finsemble config documentation](https://documentation.finsemble.com/tutorial-Configuration.html#manifest-macross) for more details on setting manifest macros.
+    **Note:** that the 'Bloomberg Bridge Debug' configuration makes use of a `$bloombergBridgeFolder` manifest macro that should be set in your manifest. See the [Finsemble config documentation](https://documentation.finsemble.com/tutorial-Configuration.html#manifest-macros) for more details on setting manifest macro.
 
 3. The example configuration supplied is for manual launch of the Bloomberg Bridge. You will likely wish to alter it to automatically launch the Bloomberg Bridge on start-up and to hide it from the launcher menu. To do so modify the example to set:
 
-   - `components['Bloomberg Bridge'].component.spawnOnStartup = true`
-   - `components['Bloomberg Bridge'].foreign.components['App Launcher'].launchableByUser = false`
+    - `components['Bloomberg Bridge'].component.spawnOnStartup = true`
+    - `components['Bloomberg Bridge'].foreign.components['App Launcher'].launchableByUser = false`
 
 4. Copy the _[src/clients/BloombergBridgeClient/BloombergBridgeClient.ts](../src/clients/BloombergBridgeClient/BloombergBridgeClient.ts)_ file into your project at an appropriate location (e.g. _/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts_). This can then be imported into components or services that you build. 
 
 5. You may also wish to copy the preload file, _[src/clients/BloombergBridgeClient/BloombergBridgePreload.ts](../src/clients/BloombergBridgeClient/BloombergBridgePreload.ts)_, into your project if you intend to preload, rather than import the client into your applications. This file needs to be built by Finsemble, to add it to the build edit your _/webpack/webpack.preloads.entries.json_ file and add an entry for the preload, e.g.
-```JSON
-{
-  ...
-  "bloombergBridge": {
-    "output": "clients/BloombergBridgeClient/BloombergBridgePreload",
-    "entry": "./src/clients/BloombergBridgeClient/BloombergBridgePreload.ts"
-  }
-}
-```
+    ```JSON
+    {
+        ...
+        "bloombergBridge": {
+            "output": "clients/BloombergBridgeClient/BloombergBridgePreload",
+            "entry": "./src/clients/BloombergBridgeClient/BloombergBridgePreload.ts"
+        }
+    }
+    ```
 
 6. If you wish to incorporate any of the supplied examples into your project, copy their folders from [src/components/](../src/components/) or [src/services/](../src/services/) into your project. Each contains:
 
-  - a _config.json_ file that you should import or copy into your project.
-  - a _finsemble.webpack.json_ file that works with the Finsemble seed project's build system. If you are using a different build, ensure that the component is built by it.
+    - a _config.json_ file that you should import or copy into your project.
+    - a _finsemble.webpack.json_ file that works with the Finsemble seed project's build system. If you are using a different build, ensure that the component is built by it.
 
-  **Note:** The examples include either an import statement for the BloombergBridgeClient, which need to be updated to use the path to the source file you copied into your project in step 4:
+    **Note:** The examples include either an import statement for the BloombergBridgeClient, which need to be updated to use the path to the source file you copied into your project in step 4:
 
-  ```javascript
-  import { BloombergBridgeClient } from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
-  ```
+    ```javascript
+    import { BloombergBridgeClient } from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+    ```
 
-  or use the preload script via their configuration:
+    or use the preload script via their configuration:
 
-  ```JSON
-  "Bloomberg Security Finder": {
-    "window": {
+    ```JSON
+    "Bloomberg Security Finder": {
+        "window": {
+            ...
+        },
+        "component": {
+            "preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgePreload.js",
+            ...
+        }
         ...
-    },
-    "component": {
-        "preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgePreload.js",
-        ...
-    }
-    ...
-  ```
+    ```
 
 7. To build and run the SecurityFinder example, you will also need to install dependencies in your project by running:
-  ```
-  yarn add react-tabs react-select react-autosuggest
-  ```
-  
-  OR
-  
-  ```
-  npm install react-tabs react-select react-autosuggest
-  ```
+    ```
+    yarn add react-tabs react-select react-autosuggest
+    ```
+    
+    OR
+    
+    ```
+    npm install react-tabs react-select react-autosuggest
+    ```
    
 ## Working with a Remote terminal
 
@@ -289,8 +289,8 @@ Open the Preferences Panel via the Toolbar > File Menu > Preferences, or by clic
 - The _"Show Status in Toolbar"_ toggle, defaults to true if not set in the manifest, controls whether or not the Bloomberg Status shows in the Toolbar or not.
 - The _"Enabled"_ toggle controls whether or not the Bloomberg Bridge is connected to a running Bloomberg Terminal Connect instance.
 - The _"Connection Type"_ radio buttons allow switching between:
-  - _Local:_ the Bloomberg Terminal Connect is running on the same machine as Finsemble.
-  - _Remote:_ the Bloomberg Terminal Connect instance is running on another machine, in which case that machine's IP address is entered in the _Address_ field.
+    - _Local:_ the Bloomberg Terminal Connect is running on the same machine as Finsemble.
+    - _Remote:_ the Bloomberg Terminal Connect instance is running on another machine, in which case that machine's IP address is entered in the _Address_ field.
 
 These will reflect changes pushed via the manifest for Finsemble, or if not in the manifest, will just use the defaults.
 
@@ -299,26 +299,26 @@ These will reflect changes pushed via the manifest for Finsemble, or if not in t
 #### Installing the preference panel
 
 - in your project, in _src/components/userPreferences/UserPreferences.tsx_ modify the following:
-  - In the [imports](./media/bbg_prefs_include.png), add:
-  ```TypeScript
-      import { BloombergPreferences } from "../bbgHelpers/BloombergPreferences";
-  ```
-  - in the _sections_ const, add [this line](./media/bbg_prefs_sections_line.png) (and a comma on the previous line):
-  ```TypeScript
-      "Bloomberg Terminal Connect": BloombergPreferences
-  ```
+    - In the [imports](./media/bbg_prefs_include.png), add:
+    ```TypeScript
+        import { BloombergPreferences } from "../bbgHelpers/BloombergPreferences";
+    ```
+    - in the _sections_ const, add [this line](./media/bbg_prefs_sections_line.png) (and a comma on the previous line):
+    ```TypeScript
+        "Bloomberg Terminal Connect": BloombergPreferences
+    ```
 
 #### Installing the connection status icon
 
 - in your project, in _src/components/toolbar/src/Toolbar.tsx_ modify the following:
-  - In the imports, add:
-  ```TypeScript
-      import { BloombergStatus } from "../../bbgHelpers/BloombergStatus";
-  ```
-  - In the _Toolbar_ [return](./media/bbg_status_toolbar.png), insert:
-  ```TypeScript
-      <BloombergStatus />
-  ```
+    - In the imports, add:
+    ```TypeScript
+        import { BloombergStatus } from "../../bbgHelpers/BloombergStatus";
+    ```
+    - In the _Toolbar_ [return](./media/bbg_status_toolbar.png), insert:
+    ```TypeScript
+        <BloombergStatus />
+    ```
 
 ## Building and Deploying the Bloomberg Bridge
 
@@ -331,20 +331,20 @@ An example appAsset for the Bridge is provided in _/hosted_ directory.
 - Visual Studio 2017 (or later) and .Net Framework 4.5.2+
 - Finsemble.dll: Installed automatically via NuGet when using Visual Studio to build the integration.
 - Bloomberglp.TerminalApiEx.dll
-  - To download from Bloomberg Terminal, run `TMCT` **\<GO\>**
-  - Click Software Downloads
-  - Follow instructions to install, default location: _C:\blp\TerminalAPISDK_
-  - Add either the 32bit or 64bit DLL in the _lib_ or _lib.x64_ to your project as a reference.
+    - To download from Bloomberg Terminal, run `TMCT` **\<GO\>**
+    - Click Software Downloads
+    - Follow instructions to install, default location: _C:\blp\TerminalAPISDK_
+    - Add either the 32bit or 64bit DLL in the _lib_ or _lib.x64_ to your project as a reference.
 - Bloomberglp.Blpapi.dll
-  - Download the BLP API C# (.NET) Supported Release for Windows from the [Bloomberg API library](https://www.bloomberg.com/professional/support/api-library/) page.
-  - Add the _/bin/Bloomberglp.Blpapi.dll_ DLL as a reference to your integration's project.
+    - Download the BLP API C# (.NET) Supported Release for Windows from the [Bloomberg API library](https://www.bloomberg.com/professional/support/api-library/) page.
+    - Add the _/bin/Bloomberglp.Blpapi.dll_ DLL as a reference to your integration's project.
 
 ### Build the integration
 
 - Open the BloombergIntegration.sln in Visual Studio.
 - Add the previously downloaded DLLs as references to the Bloomberg Bridge project, specifically:
-  - Terminal Connect API (Bloomberglp.TerminalApiEx.dll)
-  - BLP API (Bloomberglp.Blpapi.dll)
+    - Terminal Connect API (Bloomberglp.TerminalApiEx.dll)
+    - BLP API (Bloomberglp.Blpapi.dll)
 - Rebuild the project (which will install NuGet dependencies automatically)
 
 ### Running the BloombergBridge from a local path
@@ -358,23 +358,23 @@ For debugging purposes a configuration referencing a local Bloomberg Bridge buil
 - Host the build at an appropriate URL (or if using the watch script and testing locally, add it to the _hosted_ directory of the project)
 - Configure Finsemble's manifest file (e.g. _/configs/application/manifest-local.json_) with an appropriate appAssets configuration of the form:
 
-  ```JSON
-  {
-      ...
-      "appAssets": [
-          ...
-          {
-              "src": "http://localhost:3375/hosted/BloombergBridgeRelease.zip",
-              "version": "1.2.0",
-              "alias": "bloomberg_bridge",
-              "target": "BloombergBridge.exe"
-          }
-      ],
-      ...
-  }
-  ```
+    ```JSON
+    {
+        ...
+        "appAssets": [
+            ...
+            {
+                "src": "http://localhost:3375/hosted/BloombergBridgeRelease.zip",
+                "version": "1.2.0",
+                "alias": "bloomberg_bridge",
+                "target": "BloombergBridge.exe"
+            }
+        ],
+        ...
+    }
+    ```
 
-  N.B. Finsemble will only download and deploy a new version of the asset if it does not have a copy of the asset that was downloaded via an app asset with the given version number. Hence, if you need to replace the version installed on the user's machine ensure that you change the value of the `version` field.
+    N.B. Finsemble will only download and deploy a new version of the asset if it does not have a copy of the asset that was downloaded via an app asset with the given version number. Hence, if you need to replace the version installed on the user's machine ensure that you change the value of the `version` field.
 
 ## Using the Bloomberg Bridge Client
 
@@ -400,19 +400,19 @@ Documentation for:
 
 If you use the BloombergBridgeClient preload in your component, it will be instantiated for you at:
 
-```Javascript
+```javascript
 FSBL.Clients.BloombergBridgeClient
 ```
 
 For the purposes of the following examples you can create a reference to it as follows:
 
-```Javascript
+```javascript
 let bbg = FSBL.Clients.BloombergBridgeClient;
 ```
 
 As setup of the client occurs when the Finsemble clients are themselves ready (on the FSBLReady event), the preload will dispatch its own event when the BloombergBridgeClient is ready: `BloombergBridgeClientReady`. To avoid race conditions, you should wait on this event, rather than `FSBLReady`, in your components, e.g.:
 
-```Javascript
+```javascript
 window.addEventListener("BloombergBridgeClientReady", BBGReady);
 
 function BBGReady() {
@@ -428,7 +428,7 @@ function BBGReady() {
 
 If you are not using the BloombergBridgeClient as a preload in a component (when it will instantiate itself using the RouterClient and Logger instance already preloaded into the window) you must instantiate by passing a Finsemble RouterClient and Logger, e.g. in a componet:
 
-```Javascript
+```javascript
 let bbg = new BloombergBridgeClient(FSBL.Clients.RouterClient, FSBL.Clients.Logger);
 ```
 
@@ -436,7 +436,7 @@ let bbg = new BloombergBridgeClient(FSBL.Clients.RouterClient, FSBL.Clients.Logg
 
 You can either check the connection manually:
 
-```Javascript
+```javascript
 let checkConnectionHandler = (err, loggedIn) => {
     if (!err && loggedIn) {
          showConnectedIcon();
@@ -449,7 +449,7 @@ bbg.checkConnection(checkConnectionHandler);
 
 or register a handler for connection events:
 
-```Javascript
+```javascript
 let connectionEventHandler = (err, resp) => {
     if (!err && resp && resp.loggedIn) {
         showConnectedIcon();
@@ -464,7 +464,7 @@ bbg.setConnectionEventListener(connectionEventHandler);
 
 Retrieve a list of all current Launchpad groups and their current context:
 
-```Javascript
+```javascript
 bbg.runGetAllGroups((err, response) => {
     if (!err) {
         if (response && response.groups && Array.isArray(response.groups)) {
@@ -486,7 +486,7 @@ bbg.runGetAllGroups((err, response) => {
 
 Get the current state of a Launchpad group:
 
-```Javascript
+```javascript
 bbg.runGetGroupContext(groupName, (err, response) => {
     if (!err) {
         if (response && response.group) {
@@ -505,7 +505,7 @@ bbg.runGetGroupContext(groupName, (err, response) => {
 
 Set the state (value) of a Launchpad group:
 
-```Javascript
+```javascript
 bbg.runSetGroupContext(groupName, newValue, null, (err, response) => {
     if (!err) {
         /* You may wish to retrieve the current state of Launchpad group here as Bloomberg
@@ -522,7 +522,7 @@ bbg.runSetGroupContext(groupName, newValue, null, (err, response) => {
 
 Register a listener for group events (e.g. creation or context change):
 
-```Javascript
+```javascript
 bbg.setGroupEventListener((err, response) => {
     if (!err) {
         if (response.data.group && response.data.group.type == "monitor") {
@@ -540,7 +540,7 @@ bbg.setGroupEventListener((err, response) => {
 
 Retrieve all worksheets:
 
-```Javascript
+```javascript
 bbg.runGetAllWorksheets((err, response) => {
     if (!err) {
         if (response && response.worksheets && Array.isArray(response.worksheets)) {
@@ -560,7 +560,7 @@ bbg.runGetAllWorksheets((err, response) => {
 
 Retrieve the content of a particular worksheet by Id:
 
-```Javascript
+```javascript
 bbg.runGetWorksheet(worksheetId, (err, response) => {
     if (!err) {
         if (response && response.worksheet && Array.isArray(response.worksheet.securities)) {
@@ -579,7 +579,7 @@ bbg.runGetWorksheet(worksheetId, (err, response) => {
 
 Create a worksheet:
 
-```Javascript
+```javascript
 let securities = ["TSLA US Equity", "AMZN US Equity"];
 bbg.runCreateWorksheet(worksheetName, securities, (err, response) => {
     if (!err) {
@@ -600,7 +600,7 @@ bbg.runCreateWorksheet(worksheetName, securities, (err, response) => {
 
 Replace the content of a worksheet:
 
-```Javascript
+```javascript
 let securities = ["TSLA US Equity", "AMZN US Equity"];
 bbg.runReplaceWorksheet(worksheetId, securities, (err, response) => {
     if (!err) {
@@ -623,7 +623,7 @@ bbg.runReplaceWorksheet(worksheetId, securities, (err, response) => {
 
 You can search for Bloomberg securities via the Bloomberg Bridge and BLP API, which will return results in around ~120-150ms and maybe used, for example, to power an autocomplete or typeahead search:
 
-```Javascript
+```javascript
 bbg.runSecurityLookup(security, (err, response) => {
     if (!err) {
         if (response && response.results) {
@@ -654,7 +654,7 @@ At a minimum a command must include a Mnemonic and Panel number.
 
 To run a command:
 
-```Javascript
+```javascript
 let mnemonic = "DES";
 let securities = ["MSFT US Equity"];
 let panel = 3;

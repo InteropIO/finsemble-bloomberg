@@ -23,7 +23,7 @@ Interface representing a Bloomberg worksheet.
 
 • **id**: *string*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:53](https://github.com/ChartIQ/finsemble-bloomberg/blob/fd42a96/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L53)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:53](https://github.com/ChartIQ/finsemble-bloomberg/blob/2779b1d/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L53)*
 
 The name of the worksheet (non-unique).
 
@@ -33,7 +33,7 @@ ___
 
 • **isActive**: *boolean*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:57](https://github.com/ChartIQ/finsemble-bloomberg/blob/fd42a96/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L57)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:57](https://github.com/ChartIQ/finsemble-bloomberg/blob/2779b1d/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L57)*
 
 A flag indicating the Worksheet's IsActive status.
 
@@ -43,7 +43,7 @@ ___
 
 • **name**: *string*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:55](https://github.com/ChartIQ/finsemble-bloomberg/blob/fd42a96/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L55)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:55](https://github.com/ChartIQ/finsemble-bloomberg/blob/2779b1d/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L55)*
 
 The name of the worksheet assigned by the Bloomberg terminal and globally unique.
 
@@ -53,6 +53,6 @@ ___
 
 • **securities**: *string[]*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:59](https://github.com/ChartIQ/finsemble-bloomberg/blob/fd42a96/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L59)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:59](https://github.com/ChartIQ/finsemble-bloomberg/blob/2779b1d/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L59)*
 
 The list of securities appearing in the worksheet.
