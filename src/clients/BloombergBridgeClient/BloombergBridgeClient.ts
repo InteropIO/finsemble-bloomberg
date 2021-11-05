@@ -1,7 +1,6 @@
 import { ICentralLogger } from "@finsemble/finsemble-core/types/clients/logger";
 import { RouterMessage, IRouterClient, QueryResponse } from "@finsemble/finsemble-core/types/clients/routerClientInstance";
 import { StandardCallback, CallbackError, StandardError } from "@finsemble/finsemble-core/types/types";
-import "@finsemble/finsemble-core/types/main";
 
 // import type { ILogger } from "clients/ILogger";
 
