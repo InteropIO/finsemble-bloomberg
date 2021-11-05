@@ -15,7 +15,7 @@ when the BloombergBridge connects or disconnects from the terminal.
 
 ▸ (`err`: string | Error, `response`: RouterMessage‹object›): *void*
 
-*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:20](https://github.com/ChartIQ/finsemble-bloomberg/blob/1dcb132/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L20)*
+*Defined in [src/clients/BloombergBridgeClient/BloombergBridgeClient.ts:19](https://github.com/ChartIQ/finsemble-bloomberg/blob/310ed1f/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts#L19)*
 
 Interface representing an event handler for connection events, which are fired
 when the BloombergBridge connects or disconnects from the terminal.
@@ -31,7 +31,7 @@ Name | Type |
 
 ▸ (`err`: E, `response?`: R): *void*
 
-Defined in node_modules/@finsemble/finsemble-core/types/index.d.ts:7401
+Defined in node_modules/@finsemble/finsemble-core/types/types.d.ts:12
 
 Interface representing an event handler for connection events, which are fired
 when the BloombergBridge connects or disconnects from the terminal.

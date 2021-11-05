@@ -2,7 +2,7 @@
 
 ## Finsemble's Bloomberg Terminal Connect Integration
 
-Welcome to Finsemble's integration with [Bloomberg Terminal Connect](https://www.bloomberg.com/terminal-connect/), which enables Finsemble components and services to interoperate with Bloomberg panels or Launchpad components, allowing you to build powerful workflows for your users that avoid data re-entry and copy/paste errors.
+Welcome to Finsemble's integration with [Bloomberg Terminal Connect](https://www.bloomberg.com/terminal-connect/) v2, which enables Finsemble components and services to interoperate with Bloomberg panels or Launchpad components, allowing you to build powerful workflows for your users that avoid data re-entry and copy/paste errors.
 
 Specifically, the integration enables:
 
@@ -14,7 +14,7 @@ Specifically, the integration enables:
 
 By using this integration with Finsemble, your custom applications can drive context in the Bloomberg Terminal or react to context changes received from it.
 
-To use the integration you will need access to both a Bloomberg Terminal and license for Terminal Connect. For more information on Terminal Connect, run `TMCT`**\<GO\>** in your Bloomberg terminal. For help designing your integration, contact the Finsemble [Solutions Engineering team](mailto:support@finsemble.com).
+To use the integration you will need access to both a Bloomberg Terminal and license for Terminal Connect v2. For more information on Terminal Connect, run `TMCT`**\<GO\>** in your Bloomberg terminal. For help designing your integration, contact the Finsemble [Solutions Engineering team](mailto:support@finsemble.com).
 
 ## Table of Contents
 
@@ -41,7 +41,7 @@ To use the integration you will need access to both a Bloomberg Terminal and lic
 
 ## How it works
 
-The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect and the Bloomberg Desktop API (DAPI). The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](../src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into the FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
+The integration is comprised of a native (.Net) bridge application that acts as a Desktop service for communicating with the terminal via Terminal Connect v2 and the Bloomberg Desktop API (DAPI). The Bridge application exposes an API via the Finsemble router for which a [Typescript client class](../src/clients/BloombergBridgeClient) is provided. The client can be imported into Finsemble Javascript components or custom desktop services that you build. The client may also be used as a preload, where it will be added into the FSBL Object as `FSBL.Clients.BloombergBridgeClient`.
 
 Documentation for the Typescript client implementation can be found [here](modules/_bloombergbridgeclient_.md).
 
@@ -118,12 +118,13 @@ finsemble-bloomberg
     |   └───testBloomberg            - Test component demonstrating use of all API functions
     |
     └───services
-        └───BloombergFDC3Service     - Coming soon!
+        └───bloombergSearch          - An example service that uses the integration to add a security
+                                       search to the finsemble toolbar
 ```
 
 ### Installation via the watch script
 
-When run, the watch script deploys all files to the configured Finsemble seed project directory and then watches for any changes in the _/src_ directory. When folders or files are added or removed this will be automatically reflected in the Finsemble Seed Project. _finsemble.config.json_ and finsemble.manifest.json are also observed for changes and will update the seed project's main _/configs/application/config.json_ and _/configs/application/manifest-local.json_ files if they change.
+When run, the watch script deploys all files to the configured Finsemble seed project directory and then watches for any changes in the _/src_ directory. When folders or files are added or removed this will be automatically reflected in the Finsemble Seed Project. _finsemble.config.json_, _finsemble.manifest.json_ and _finsemble.webpack.preloads.entries.json_ are also observed for changes and will update the seed project's main _/configs/application/config.json_, _/configs/application/manifest-local.json_ and _webpack\webpack.preloads.entries.json_ files if they change.
 
 To use the watch script:
 
@@ -136,15 +137,19 @@ To use the watch script:
 3. If you clone in a different location, open [finsemble.config.json](../finsemble.config.json) and update `seedProjectDirectory` with the path to your local Finsemble Seed Project. If you intend to build an debug the \(.Net\) BloombergBridge, also set the value of the `$bloombergBridgeFolder` variable to point to the [BloombergBridge folder](../BloombergBridge) in this project \(see the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables\).
 
 
-4. Run `npm install` then run `npm run watch` in the _finsemble-bloomberg_ project's directory \*_this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds_
+4. Run `yarn` then run `yarn watch` (or `npm install` then  `npm run watch`) in the _finsemble-bloomberg_ project's directory \*_this will continue to watch for file changes and will copy across updated files as needed, this can be stopped once all the files have been copied to the seed project approx. 30 seconds_
 
 5. To build and run the SecurityFinder example, you will also need to install dependencies in your seed project by running:
 
    ```
+   yarn add react-tabs react-select react-autosuggest
+   ```
+   or
+   ```
    npm install react-tabs react-select react-autosuggest
    ```
 
-6. Your seed project directory has now been updated with the source files from the integration, run `npm run dev` in your Finsemble seed project's directory to build and run locally.
+6. Your seed project directory has now been updated with the source files from the integration, run `yarn dev` or `npm run dev` in your Finsemble seed project's directory to build and run locally.
 
 ### Manual installation
 
@@ -154,55 +159,74 @@ To manually install the integration into your Finsemble project:
 
 2. Configure Finsemble to launch the Bloomberg Bridge. This can be achieved by either importing a config file by, for example, adding to the `importConfig` in your seed project's _/configs/application/config.json_ file:
 
-   ```JSON
-   ...
-       ...
-       "importConfig": [
-           ...
-           "$applicationRoot/components/Bloomberg Bridge/config.json"
-           ...
-       ]
-   }
-   ```
+  ```JSON
+  ...
+      ...
+      "importConfig": [
+          ...
+          "$applicationRoot/components/Bloomberg Bridge/config.json"
+          ...
+      ]
+  }
+  ```
 
-   or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: _[src/components/Bloomberg Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_.
+  or by adding it directly to the _/configs/application/components.json_ file. Example configurations are available at: _[src/components/Bloomberg Bridge/config.json](../src/components/Bloomberg%20Bridge/config.json)_.
 
-   Note that the 'Bloomberg Bridge Debug' configuration makes use of a `$bloombergBridgeFolder` variable that should be set in your manifest. See the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables.
+  Note that the 'Bloomberg Bridge Debug' configuration makes use of a `$bloombergBridgeFolder` variable that should be set in your manifest. See the [Finsemble config documentation](https://documentation.chartiq.com/finsemble/tutorial-Configuration.html#configuration-variables) for more details on setting variables.
 
 3. The example configuration supplied is for manual launch of the Bloomberg Bridge. You will likely wish to alter it to automatically launch the Bloomberg Bridge on start-up and to hide it from the launcher menu. To do so modify the example to set:
 
    - `components['Bloomberg Bridge'].component.spawnOnStartup = true`
    - `components['Bloomberg Bridge'].foreign.components['App Launcher'].launchableByUser = false`
 
-4. Copy the _[src/clients/BloombergBridgeClient/BloombergBridgeClient.ts](../src/clients/BloombergBridgeClient/BloombergBridgeClient.ts)_ file into your project at an appropriate location (e.g. _/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts_). This can then be imported into components or services that you build. You may also wish to copy the preload file, _[src/clients/BloombergBridgeClient/BloombergBridgePreload.ts](../src/clients/BloombergBridgeClient/BloombergBridgePreload.ts)_, into your project if you intend to preload, rather than import the client into your applications.
+4. Copy the _[src/clients/BloombergBridgeClient/BloombergBridgeClient.ts](../src/clients/BloombergBridgeClient/BloombergBridgeClient.ts)_ file into your project at an appropriate location (e.g. _/src/clients/BloombergBridgeClient/BloombergBridgeClient.ts_). This can then be imported into components or services that you build. 
 
-5. If you wish to incorporate any of the supplied examples into your project, copy their folders from [src/components/](../src/components/) or [src/services/](../src/services/) into your project. Each contains:
+5. You may also wish to copy the preload file, _[src/clients/BloombergBridgeClient/BloombergBridgePreload.ts](../src/clients/BloombergBridgeClient/BloombergBridgePreload.ts)_, into your project if you intend to preload, rather than import the client into your applications. This file needs to be built by Finsemble, to add it to the build edit your _/webpack/webpack.preloads.entries.json_ file and add an entry for the preload, e.g.
+```JSON
+{
+  ...
+  "bloombergBridge": {
+    "output": "clients/BloombergBridgeClient/BloombergBridgePreload",
+    "entry": "./src/clients/BloombergBridgeClient/BloombergBridgePreload.ts"
+  }
+}
+```
 
-   - a _config.json_ file that you should import or copy into your project.
-   - a _finsemble.webpack.json_ file that works with the Finsemble seed project's build system. If you are using a different build, ensure that the component is built by it.
+6. If you wish to incorporate any of the supplied examples into your project, copy their folders from [src/components/](../src/components/) or [src/services/](../src/services/) into your project. Each contains:
 
-   **Note:** The examples include either an import statement for the BloombergBridgeClient, which need to be updated to use the path to the source file you copied into your project in step 4:
+  - a _config.json_ file that you should import or copy into your project.
+  - a _finsemble.webpack.json_ file that works with the Finsemble seed project's build system. If you are using a different build, ensure that the component is built by it.
 
-   ```javascript
-   import { BloombergBridgeClient } from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
-   ```
+  **Note:** The examples include either an import statement for the BloombergBridgeClient, which need to be updated to use the path to the source file you copied into your project in step 4:
 
-   or use the preload script via their configuration:
+  ```javascript
+  import { BloombergBridgeClient } from "../../clients/BloombergBridgeClient/BloombergBridgeClient";
+  ```
 
-   ```JSON
-   "Bloomberg Security Finder": {
-       "window": {
-           ...
-       },
-       "component": {
-           "preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgePreload.js",
-           ...
-   ```
+  or use the preload script via their configuration:
 
-6. To build and run the SecurityFinder example, you will also need to install dependencies in your project by running:
-   ```
-   npm install react-tabs react-select react-autosuggest
-   ```
+  ```JSON
+  "Bloomberg Security Finder": {
+    "window": {
+        ...
+    },
+    "component": {
+        "preload": "$applicationRoot/clients/BloombergBridgeClient/BloombergBridgePreload.js",
+        ...
+    }
+    ...
+  ```
+
+7. To build and run the SecurityFinder example, you will also need to install dependencies in your project by running:
+  ```
+  yarn add react-tabs react-select react-autosuggest
+  ```
+  
+  OR
+  
+  ```
+  npm install react-tabs react-select react-autosuggest
+  ```
    
 ## Working with a Remote terminal
 
