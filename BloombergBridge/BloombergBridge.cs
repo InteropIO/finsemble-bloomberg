@@ -67,7 +67,7 @@ namespace BloombergBridge
 		/// Function that attempts to connect to the bloomberg terminal and then monitor the connection
 		/// until told to shutdown. Cycles once per second.
 		/// </summary>
-		private static void connectionMonitorThread()
+		private static void ConnectionMonitorThread()
 		{
 			bool _remote = remote;
 			string _remoteAddress = remoteAddress;
@@ -80,14 +80,14 @@ namespace BloombergBridge
 
 					_isRegistered = false;
 
-					checkForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
+					CheckForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
 				}
 				else
 				{ //go ahead and try to connect
 					try
 					{
 						_isRegistered = BlpApi.IsRegistered;
-						checkForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
+						CheckForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
 					}
 					catch (Exception err)
 					{
@@ -123,7 +123,7 @@ namespace BloombergBridge
 						FSBL.Logger.Debug(new JToken[] { "Registered and logged in to terminal." });
 					}
 
-					checkForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
+					CheckForConnectionStatusChange(_isRegistered, _remote, _remoteAddress);
 				}
 				_remote = remote;
 				_remoteAddress = remoteAddress;
@@ -134,12 +134,12 @@ namespace BloombergBridge
 		}
 
         /// <summary>
-        /// Utility function called by connectionMonitorThread to detect a change in the connection status.
+        /// Utility function called by ConnectionMonitorThread to detect a change in the connection status.
         /// </summary>
         /// <param name="_isRegistered"></param>
         /// <param name="_remote"></param>
         /// <param name="_remoteAddress"></param>
-        private static void checkForConnectionStatusChange(bool _isRegistered, bool _remote, string _remoteAddress)
+        private static void CheckForConnectionStatusChange(bool _isRegistered, bool _remote, string _remoteAddress)
 		{
 			bool statusChange = false;
 			if (_isRegistered != isRegistered || _remote != remote || _remoteAddress != remoteAddress)
@@ -153,10 +153,12 @@ namespace BloombergBridge
 			}
 			if (statusChange)
 			{
-				JObject connectionStatus = new JObject();
-				connectionStatus.Add("enabled", connect);
-				connectionStatus.Add("registered", isRegistered);
-				if (isRegistered)
+                JObject connectionStatus = new JObject
+                {
+                    { "enabled", connect },
+                    { "registered", isRegistered }
+                };
+                if (isRegistered)
                 {
 					if (!remote)
 					{
@@ -226,7 +228,7 @@ namespace BloombergBridge
 			FSBL.Logger.Log("Bloomberg bridge connected to Finsemble.");
 
 			//setup Router endpoints
-			addResponders();
+			AddResponders();
 
 			//Handler function for received configuration values
 			EventHandler<FinsembleEventArgs> ConfigHandler = (routerClient, response) =>
@@ -239,27 +241,35 @@ namespace BloombergBridge
 				{
 					FSBL.Logger.Debug(new JToken[] { "Received bloomberg bridge configuration: ", response.response?["data"] });
 				}
-				JToken data = response.response?["data"];
-				//handle different return data from ConfigClient.GetValue and COnfigClient.AddListner
-				if (data?["value"] != null)
+				if (response.response != null && response.response["data"] != null && response.response["data"].HasValues)
                 {
-					data = data?["value"];
-				}
-				if (data != null && data?["remote"] != null)
-				{ //possible remote connection
-					if (bool.Parse(data?["remote"].ToString()) &&
-						data?["remoteAddress"] != null)
+					JToken data = response.response?["data"];
+					//handle different return data from ConfigClient.GetValue and ConfigClient.AddListner
+					if (data?["value"] != null)
 					{
-						remote = true;
-						remoteAddress = data?["remoteAddress"].ToString();
-					} else
-                    {
-						remote = false;
+						data = data?["value"];
+					}
+					if (data != null && data?["remote"] != null)
+					{ //possible remote connection
+						if (bool.Parse(data?["remote"].ToString()) &&
+							data?["remoteAddress"] != null)
+						{
+							remote = true;
+							remoteAddress = data?["remoteAddress"].ToString();
+						}
+						else
+						{
+							remote = false;
+						}
+					}
+					if (data != null && data?["enabled"] != null)
+					{
+						connect = bool.Parse(data?["enabled"].ToString());
 					}
 				}
-				if (data != null && data?["enabled"] != null)
-				{
-					connect = bool.Parse(data?["enabled"].ToString());
+				else
+                {
+					FSBL.Logger.Log(new JToken[] { "No Bloomberg remote config found at finsemble.custom.bloomberg" });
 				}
 			};
 
@@ -269,7 +279,7 @@ namespace BloombergBridge
 			//subscribe to changes in the config
 			FSBL.ConfigClient.AddListener(new JObject { ["field"] = "finsemble.custom.bloomberg" }, ConfigHandler, (routerClient, response) => {
 				//start up connection monitor thread
-				Thread thread = new Thread(new ThreadStart(connectionMonitorThread));
+				Thread thread = new Thread(new ThreadStart(ConnectionMonitorThread));
 				thread.Start();
 			});
 		}
@@ -283,7 +293,7 @@ namespace BloombergBridge
 		private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
 		{
 			shutdown = true;
-			removeResponders();
+			RemoveResponders();
 		}
 
 		/// <summary>
@@ -302,7 +312,7 @@ namespace BloombergBridge
 					{
 						try
 						{
-							removeResponders();
+							RemoveResponders();
 
 							// Dispose of Finsemble.
 							FSBL.Dispose();
@@ -337,14 +347,14 @@ namespace BloombergBridge
 				JObject output = new JObject();
 				if (context.Group != null)
 				{
-					output.Add("group", renderGroup(context.Group));
+					output.Add("group", RenderGroup(context.Group));
 				}
 				if (context.Groups != null)
 				{
 					JArray groups = new JArray();
 					foreach (var group in context.Groups)
 					{
-						groups.Add(renderGroup(group));
+						groups.Add(RenderGroup(group));
 					}
 
 					output.Add("groups", groups);
@@ -364,7 +374,7 @@ namespace BloombergBridge
 		/// <summary>
 		/// Sets up query responders to expose the functions of the bridge as an API.
 		/// </summary>
-		private static void addResponders()
+		private static void AddResponders()
 		{
 			FSBL.Logger.Log("Setting up query responders");
 			try
@@ -394,16 +404,16 @@ namespace BloombergBridge
 		/// <summary>
 		/// Remove query responders, used on shutdown.
 		/// </summary>
-		private static void removeResponders()
+		private static void RemoveResponders()
 		{
-			try
-			{
+            try
+            {
 				FSBL.Logger.Log("Removing query responders");
 				FSBL.RouterClient.RemoveResponder("BBG_connect", true);
 				FSBL.RouterClient.RemoveResponder("BBG_connection_status", true);
 				FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function", true);
 			}
-			catch (Exception err) { }
+			catch (Exception) { }
 
 			//dispose of security finder
 			if (secFinder != null)
@@ -465,10 +475,12 @@ namespace BloombergBridge
 				//failed to register the query responder properly
 				FSBL.Logger.Error("Error received by BBG_connection_status query responder: ", queryMessage.error );
 			} else {
-				JObject connectionStatus = new JObject();
-				connectionStatus.Add("enabled", connect);
-				connectionStatus.Add("registered", isRegistered);
-				if (isRegistered)
+                JObject connectionStatus = new JObject
+                {
+                    { "enabled", connect },
+                    { "registered", isRegistered }
+                };
+                if (isRegistered)
 				{
 					if (!remote)
 					{
@@ -496,10 +508,12 @@ namespace BloombergBridge
 		{
 			//status change
 			isRegistered = false;
-			JObject connectionStatus = new JObject();
-			connectionStatus.Add("enabled", connect);
-			connectionStatus.Add("registered", isRegistered);
-			FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
+            JObject connectionStatus = new JObject
+            {
+                { "enabled", connect },
+                { "registered", isRegistered }
+            };
+            FSBL.RouterClient.Transmit("BBG_connection_status", connectionStatus);
 			Console.WriteLine("Transmitted connection status after disconnect: " + connectionStatus.ToString());
 			FSBL.Logger.Log("Transmitted connection status after disconnect: ", connectionStatus);
 		}
@@ -650,7 +664,7 @@ namespace BloombergBridge
 
 		private static void RunFunction(JObject queryResponse, JToken queryData)
 		{
-			if (validateQueryData("RunFunction", queryData, new string[] { "mnemonic", "panel" }, null, queryResponse))
+			if (ValidateQueryData("RunFunction", queryData, new string[] { "mnemonic", "panel" }, null, queryResponse))
 			{
 				string BBG_mnemonic = queryData.Value<string>("mnemonic");
 				string panel = queryData.Value<string>("panel");
@@ -684,7 +698,7 @@ namespace BloombergBridge
 
 		private static void CreateWorksheet(JObject queryResponse, JToken queryData)
 		{
-			if (validateQueryData("CreateWorksheet", queryData, new string[] { "securities", "name" }, null, queryResponse))
+			if (ValidateQueryData("CreateWorksheet", queryData, new string[] { "securities", "name" }, null, queryResponse))
 			{
 				var _securities = new List<string>();
 				foreach (string a in queryData["securities"])
@@ -693,22 +707,22 @@ namespace BloombergBridge
 				}
 				BlpWorksheet worksheet = BlpTerminal.CreateWorksheet(queryData["name"].ToString(), _securities);
 				queryResponse.Add("status", true);
-				queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+				queryResponse.Add("worksheet", RenderWorksheet(worksheet, true));
 			}
 		}
 
 		private static void GetWorksheet(JObject queryResponse, JToken queryData)
 		{
-			if (validateQueryData("GetWorksheet", queryData, null, new string[] { "name", "id" }, queryResponse))
+			if (ValidateQueryData("GetWorksheet", queryData, null, new string[] { "name", "id" }, queryResponse))
 			{
-				string worksheetId = resolveWorksheetId(queryData, queryResponse);
+				string worksheetId = ResolveWorksheetId(queryData, queryResponse);
 				if (worksheetId != null)
 				{
 					BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
 					if (worksheet != null)
 					{
 						queryResponse.Add("status", true);
-						queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+						queryResponse.Add("worksheet", RenderWorksheet(worksheet, true));
 					}
 					else
 					{
@@ -721,7 +735,7 @@ namespace BloombergBridge
 
 		private static void ReplaceWorksheet(JObject queryResponse, JToken queryData)
 		{
-			if (validateQueryData("ReplaceWorksheet", queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
+			if (ValidateQueryData("ReplaceWorksheet", queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
 			{
 				List<string> securities = new List<string>();
 				foreach (string a in queryData["securities"])
@@ -729,7 +743,7 @@ namespace BloombergBridge
 					securities.Add(a);
 				}
 
-				string worksheetId = resolveWorksheetId(queryData, queryResponse);
+				string worksheetId = ResolveWorksheetId(queryData, queryResponse);
 				if (worksheetId != null)
 				{
 					BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
@@ -737,7 +751,7 @@ namespace BloombergBridge
 					{
 						worksheet.ReplaceSecurities(securities);
 						queryResponse.Add("status", true);
-						queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+						queryResponse.Add("worksheet", RenderWorksheet(worksheet, true));
 					}
 					else
 					{
@@ -750,7 +764,7 @@ namespace BloombergBridge
 
 		private static void AppendToWorksheet(JObject queryResponse, JToken queryData)
 		{
-			if (validateQueryData("AppendToWorksheet", queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
+			if (ValidateQueryData("AppendToWorksheet", queryData, new string[] { "securities" }, new string[] { "name", "id" }, queryResponse))
 			{
 				List<string> securities = new List<string>();
 				foreach (string a in queryData["securities"])
@@ -758,7 +772,7 @@ namespace BloombergBridge
 					securities.Add(a);
 				}
 
-				string worksheetId = resolveWorksheetId(queryData, queryResponse);
+				string worksheetId = ResolveWorksheetId(queryData, queryResponse);
 				if (worksheetId != null)
 				{
 					BlpWorksheet worksheet = BlpTerminal.GetWorksheet(worksheetId);
@@ -766,7 +780,7 @@ namespace BloombergBridge
 					{
 						worksheet.AppendSecurities(securities);
 						queryResponse.Add("status", true);
-						queryResponse.Add("worksheet", renderWorksheet(worksheet, true));
+						queryResponse.Add("worksheet", RenderWorksheet(worksheet, true));
 					}
 					else
 					{
@@ -783,7 +797,7 @@ namespace BloombergBridge
 			JArray worksheets = new JArray();
 			foreach (BlpWorksheet sheet in allWorksheets)
 			{
-				worksheets.Add(renderWorksheet(sheet, false));
+				worksheets.Add(RenderWorksheet(sheet, false));
 			}
 			queryResponse.Add("status", true);
 			queryResponse.Add("worksheets", worksheets);
@@ -795,7 +809,7 @@ namespace BloombergBridge
 			JArray groups = new JArray();
 			foreach (BlpGroup group in allGroups)
 			{
-				groups.Add(renderGroup(group));
+				groups.Add(RenderGroup(group));
 			}
 			queryResponse.Add("status", true);
 			queryResponse.Add("groups", groups);
@@ -803,11 +817,11 @@ namespace BloombergBridge
 
 		private static void GetGroupContext(JObject queryResponse, JToken queryData)
 		{
-			if (validateQueryData("GetGroupContext", queryData, new string[] { "name" }, null, queryResponse))
+			if (ValidateQueryData("GetGroupContext", queryData, new string[] { "name" }, null, queryResponse))
 			{
 				BlpGroup group = BlpTerminal.GetGroupContext(queryData["name"].ToString());
 				queryResponse.Add("status", true);
-				queryResponse.Add("group", renderGroup(group));
+				queryResponse.Add("group", RenderGroup(group));
 			}
 		}
 
@@ -816,18 +830,18 @@ namespace BloombergBridge
 		/// </summary>
 		private class DebouncedQuery
         {
-			public System.Timers.Timer timer { get; set; }
-			public DateTimeOffset lastQueryTime { get; set; }
-			public FinsembleQueryArgs queryMessage { get; set; }
-			public JObject queryResponse { get; set; }
-			public JToken queryData { get; set; }
+			public System.Timers.Timer Timer { get; set; }
+			public DateTimeOffset LastQueryTime { get; set; }
+			public FinsembleQueryArgs QueryMessage { get; set; }
+			public JObject QueryResponse { get; set; }
+			public JToken QueryData { get; set; }
 		}
 
 		private static Dictionary<string, DebouncedQuery> debounceMap = new Dictionary<string, DebouncedQuery>();
 		private const int SET_GROUP_CONTEXT_THROTTLE = 1200;
 		private static void SetGroupContext(FinsembleQueryArgs queryMessage, JObject queryResponse, JToken queryData)
 		{
-			if (validateQueryData("SetGroupContext", queryData, new string[] { "name", "value" }, null, queryResponse))
+			if (ValidateQueryData("SetGroupContext", queryData, new string[] { "name", "value" }, null, queryResponse))
 			{
 				bool debounce = false;
 				string groupName = queryData["name"].ToString();
@@ -835,7 +849,7 @@ namespace BloombergBridge
 				double tsMillis = 0;
 				if (debounceMap.ContainsKey(groupName))
 				{
-					tsMillis = now.Subtract(debounceMap[groupName].lastQueryTime).TotalMilliseconds;
+					tsMillis = now.Subtract(debounceMap[groupName].LastQueryTime).TotalMilliseconds;
 					if (tsMillis < SET_GROUP_CONTEXT_THROTTLE)
 					{
 						debounce = true;
@@ -846,32 +860,34 @@ namespace BloombergBridge
 				{
 					if (debounceMap.ContainsKey(groupName))
 					{
-						if (debounceMap[groupName].timer != null)
+						if (debounceMap[groupName].Timer != null)
 						{
 							//if the timer element is set, this query has not been responded to yet
 							DebouncedQuery toBeCancelled = debounceMap[groupName];
-							toBeCancelled.timer.Stop();
+							toBeCancelled.Timer.Stop();
 							//send a response to say this query was cancelled by debouncing
-							toBeCancelled.queryResponse.Add("status", false);
-							toBeCancelled.queryResponse.Add("message", "SetGroupContext call cancelled by debouncing, a subsequent call will be responded to");
-							Respond_to_BBG_run_terminal_function(toBeCancelled.queryMessage, toBeCancelled.queryResponse, toBeCancelled.queryData);
+							toBeCancelled.QueryResponse.Add("status", false);
+							toBeCancelled.QueryResponse.Add("message", "SetGroupContext call cancelled by debouncing, a subsequent call will be responded to");
+							Respond_to_BBG_run_terminal_function(toBeCancelled.QueryMessage, toBeCancelled.QueryResponse, toBeCancelled.QueryData);
 						}
 					}
-					var debounceTimer = new System.Timers.Timer();
-					debounceTimer.Interval = SET_GROUP_CONTEXT_THROTTLE - tsMillis;
-					debounceTimer.Elapsed += (sender2, args2) =>
+                    var debounceTimer = new System.Timers.Timer
+                    {
+                        Interval = SET_GROUP_CONTEXT_THROTTLE - tsMillis
+                    };
+                    debounceTimer.Elapsed += (sender2, args2) =>
                     {
 						debounceTimer.Stop();
 						//update time of last set to allow debouncing   
-						debounceMap[groupName].lastQueryTime = now;
+						debounceMap[groupName].LastQueryTime = now;
 						DoSetGroupContext(queryMessage, queryResponse, queryData);
 					};
 					debounceMap[groupName] = new DebouncedQuery() {
-						timer = debounceTimer,
-						lastQueryTime = now,
-						queryMessage = queryMessage,
-						queryResponse = queryResponse,
-						queryData = queryData
+						Timer = debounceTimer,
+						LastQueryTime = now,
+						QueryMessage = queryMessage,
+						QueryResponse = queryResponse,
+						QueryData = queryData
 					};
 					debounceTimer.Start();
 				}
@@ -880,11 +896,11 @@ namespace BloombergBridge
 					//save time of last set to allow debouncing   
 					debounceMap[groupName] = new DebouncedQuery()
 					{
-						timer = null,
-						lastQueryTime = now,
-						queryMessage = queryMessage,
-						queryResponse = queryResponse,
-						queryData = queryData
+						Timer = null,
+						LastQueryTime = now,
+						QueryMessage = queryMessage,
+						QueryResponse = queryResponse,
+						QueryData = queryData
 					};
 					DoSetGroupContext(queryMessage, queryResponse, queryData);
 				}
@@ -923,7 +939,7 @@ namespace BloombergBridge
 			} 
 			else
             {
-				if (validateQueryData("SecurityLookup", queryData, new string[] { "security" }, null, queryResponse))
+				if (ValidateQueryData("SecurityLookup", queryData, new string[] { "security" }, null, queryResponse))
 				{
 
 					JArray resultsArr = new JArray();
@@ -965,7 +981,7 @@ namespace BloombergBridge
 
 		//-----------------------------------------------------------------------
 		//Private Utility functions
-		private static bool validateQueryData(string function, JToken queryData, string[] allRequiredArgs, string[] anyRequiredArgs, JObject queryResponse)
+		private static bool ValidateQueryData(string function, JToken queryData, string[] allRequiredArgs, string[] anyRequiredArgs, JObject queryResponse)
 		{
 			if (allRequiredArgs != null)
 			{
@@ -995,7 +1011,7 @@ namespace BloombergBridge
 			return true;
 		}
 
-		private static string resolveWorksheetId(JToken queryData, JObject queryResponse)
+		private static string ResolveWorksheetId(JToken queryData, JObject queryResponse)
 		{
 			string worksheetId = null;
 			if (queryData["id"] == null)
@@ -1023,7 +1039,7 @@ namespace BloombergBridge
 			return worksheetId;
 		}
 
-		private static JObject renderWorksheet(BlpWorksheet worksheet, bool includeSecurities = false)
+		private static JObject RenderWorksheet(BlpWorksheet worksheet, bool includeSecurities = false)
 		{
 			JObject worksheetObj = new JObject {
 				{ "name", worksheet.Name },
@@ -1035,7 +1051,6 @@ namespace BloombergBridge
 			{
 				var securities = worksheet.GetSecurities();
 				JArray securitiesArr = new JArray();
-				JObject obj = new JObject();
 				foreach (string a in securities)
 				{
 					securitiesArr.Add(a);
@@ -1045,7 +1060,7 @@ namespace BloombergBridge
 			return worksheetObj;
 		}
 
-		private static JObject renderGroup(BlpGroup group)
+		private static JObject RenderGroup(BlpGroup group)
 		{
 			JObject groupObj = new JObject
 			{

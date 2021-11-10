@@ -20,8 +20,6 @@
     "node": ">=12"
   },
   "devDependencies": {
-    "@finsemble/finsemble-core": "6.3.0-beta.20211021",
-    "@finsemble/finsemble-ui": "6.3.0-beta.20211021",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "chokidar": "^3.5.2",
@@ -38,8 +36,12 @@
     "redux-loop": "6.1.0"
   },
   "dependencies": {
+    "@finsemble/finsemble-core": "6.3.0",
+    "@finsemble/finsemble-ui": "6.3.0",
     "@types/node": "^14.17.27",
+    "react": "17.0.2",
     "react-autosuggest": "^10.1.0",
+    "react-select": "^5.2.1",
     "react-tabs": "^3.2.2"
   }
 }

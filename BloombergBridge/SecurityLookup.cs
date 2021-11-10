@@ -22,6 +22,7 @@ namespace BloombergBridge
 	/// created to handle multiple concurrent queries.
 	/// 
 	/// <example>
+	/// <code>
 	/// //Setup the SecurityLookup instance and initialize it
 	///	SecurityLookup secFinder = secFinder = new SecurityLookup();
 	///	secFinder.Init();
@@ -30,16 +31,16 @@ namespace BloombergBridge
 	///	lock (secFinder)
 	///	{
 	///		secFinder.Query(queryData["security"].ToString(), 10);
-	///		IList<string> results = secFinder.GetResults();
+	///		IList&lt;string&gt; results = secFinder.GetResults();
 	///		//convert the results into the security name and Type
-	///		//  results typically look like this: AAPL US<equity>
+	///		//  results typically look like this: AAPL US&lt;equity&gt;
 	///		//  when we need to output: { name: "AAPL US", type: "Equity" }
-	///		for (int i = 0; i<results.Count; i++)
+	///		for (int i = 0; i &lt; results.Count; i++)
 	///		{
 	///			string result = results[i];
 	///			JObject resultObj = new JObject();
-	///			int typeStartIndex = result.LastIndexOf('<');
-	///			if (typeStartIndex > -1)
+	///			int typeStartIndex = result.LastIndexOf('&lt;');
+	///			if (typeStartIndex &gt; -1)
 	///			{
 	///				resultObj.Add("name", result.Substring(0, typeStartIndex).Trim());
 	///				resultObj.Add("type", char.ToUpper(result[typeStartIndex + 1]) + result.Substring(typeStartIndex + 2, result.Length - (typeStartIndex + 2) - 1));
@@ -47,6 +48,7 @@ namespace BloombergBridge
 	///			resultsArr.Add(resultObj);
 	///		}
 	///	}
+	///	</code>
 	/// </example>
 	/// </summary>
 	internal class SecurityLookup
@@ -177,11 +179,13 @@ namespace BloombergBridge
 		{
 			try
 			{
-				SessionOptions sessionOptions = new SessionOptions();
-				sessionOptions.ServerHost = d_host;
-				sessionOptions.ServerPort = d_port;
-				sessionOptions.AuthenticationOptions = d_authOptions;
-				Console.WriteLine("Connecting to {0}:{1}", d_host, d_port);
+                SessionOptions sessionOptions = new SessionOptions
+                {
+                    ServerHost = d_host,
+                    ServerPort = d_port,
+                    AuthenticationOptions = d_authOptions
+                };
+                Console.WriteLine("Connecting to {0}:{1}", d_host, d_port);
 				session = new Session(sessionOptions);
 				if (!session.Start())
 				{
