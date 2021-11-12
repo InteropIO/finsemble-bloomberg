@@ -130,7 +130,13 @@ namespace BloombergBridge
 
 				Thread.Sleep(2000);
 			}
-			FSBL.Logger.Log(new JToken[] { "Exited connection monitoring loop." });
+			try
+			{
+				FSBL.Logger.Log(new JToken[] { "Exited connection monitoring loop." });
+			} catch (Exception e)
+			{
+				//ignore, FSBL may get cleaned up during shutdown
+			}
 		}
 
         /// <summary>

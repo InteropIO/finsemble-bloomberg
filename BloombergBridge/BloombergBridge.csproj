@@ -57,7 +57,7 @@
     </StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>BloombergBridgeSigningKey.snk</AssemblyOriginatorKeyFile>
@@ -92,7 +92,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\blp\blpapi_dotnet_3.16.6.1\bin\net452\Bloomberglp.Blpapi.dll</HintPath>
     </Reference>
-    <Reference Include="Bloomberglp.TerminalApiEx">
+    <Reference Include="Bloomberglp.TerminalApiEx, Version=2.4.2.0, Culture=neutral, PublicKeyToken=51f5d93763bdb58e, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\blp\TerminalAPISDK-old\Bloomberglp.TerminalApiEx.dll</HintPath>
     </Reference>
     <Reference Include="DotNetZip, Version=1.15.0.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
@@ -104,8 +105,8 @@
     <Reference Include="EventHook, Version=1.4.105.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\EventHook.1.4.105\lib\net45\EventHook.dll</HintPath>
     </Reference>
-    <Reference Include="Finsemble, Version=6.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Finsemble.6.2.0\lib\net452\Finsemble.dll</HintPath>
+    <Reference Include="Finsemble, Version=6.2.0.0, Culture=neutral, PublicKeyToken=9df516fcbc4ebe73, processorArchitecture=MSIL">
+      <HintPath>..\packages\Finsemble.6.3.0\lib\net452\Finsemble.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.IdentityModel.Tokens, Version=6.12.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IdentityModel.Tokens.6.12.1\lib\net45\Microsoft.IdentityModel.Tokens.dll</HintPath>
