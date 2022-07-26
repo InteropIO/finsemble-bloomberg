@@ -1,6 +1,0 @@
-{
-	"bloombergBridge": {
-		"output": "clients/BloombergBridgeClient/BloombergBridgePreload",
-		"entry": "./src/clients/BloombergBridgeClient/BloombergBridgePreload.ts"
-	}
-}

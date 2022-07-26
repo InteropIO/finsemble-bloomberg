@@ -3,7 +3,7 @@
   "version": "6.2.0",
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
-    "watch": "node ./fpe-scripts/watch.js",
+    "dev": "tsc --watch",
     "docs": "npx typedoc",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lintTS": "tsc --noemit && eslint . --ext .ts,.tsx"
@@ -30,10 +30,10 @@
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "fs-extra": "^9.1.0",
+    "redux-loop": "6.1.0",
     "typedoc": "^0.17.8",
     "typedoc-plugin-markdown": "^2.4.2",
-    "typescript": "4.3.5",
-    "redux-loop": "6.1.0"
+    "typescript": "4.3.5"
   },
   "dependencies": {
     "@finsemble/finsemble-core": "6.3.0",

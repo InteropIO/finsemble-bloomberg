@@ -12,18 +12,11 @@
 		"target": "ES2020",
 		"typeRoots": [
 			"node_modules/@types",
-			"node_modules/@finsemble/finsemble-core/types"
+			"node_modules/@finsemble/finsemble-core/types",
 		]
 	},
-	"typedocOptions": {
-		"out": "./docs",
-		"readme": "./docs_src/README.md",
-		"inputFiles": "./src/clients",
-		"mode": "modules",
-		"media": "./docs_src/media",
-	},
 	"include": [
-		"src/**/*"
+		"src/**/*.ts"
 	],
 	"exclude": []
 }
