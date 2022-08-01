@@ -3,10 +3,12 @@
   "version": "6.2.0",
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
-    "dev": "tsc --watch",
     "docs": "npx typedoc",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lintTS": "tsc --noemit && eslint . --ext .ts,.tsx"
+    "lintTS": "tsc --noemit && eslint . --ext .ts,.tsx",
+    "start": "cross-env NODE_ENV=development webpack --config webpack.config.js",
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "lint": "eslint 'src/**/*.js' || true",
+    "prettify": "prettier --write 'src/**/*.js'"
   },
   "keywords": [
     "Finsemble",
@@ -20,28 +22,56 @@
     "node": ">=12"
   },
   "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/plugin-proposal-class-properties": "^7.14.5",
+    "@babel/preset-env": "^7.15.8",
+    "@types/node": "^14.18.22",
+    "@types/react": "^18.0.15",
+    "@types/react-autosuggest": "^10.1.5",
+    "@types/react-dom": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
+    "babel-loader": "^8.2.2",
     "chokidar": "^3.5.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.4.0",
+    "css-minimizer-webpack-plugin": "^3.1.1",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-webpack": "^0.13.1",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "fs-extra": "^9.1.0",
+    "html-webpack-plugin": "^5.3.2",
+    "mini-css-extract-plugin": "^2.4.2",
+    "postcss-loader": "^6.2.0",
+    "postcss-preset-env": "^6.7.0",
+    "prettier": "^2.4.1",
     "redux-loop": "6.1.0",
+    "sass": "^1.43.5",
+    "sass-loader": "^12.2.0",
+    "style-loader": "^3.3.0",
+    "ts-loader": "^9.3.1",
     "typedoc": "^0.17.8",
     "typedoc-plugin-markdown": "^2.4.2",
-    "typescript": "4.3.5"
+    "typescript": "^4.3.5",
+    "webpack": "^5.58.2",
+    "webpack-cli": "^4.9.0",
+    "webpack-dev-server": "^4.3.1",
+    "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@finsemble/finsemble-core": "6.3.0",
-    "@finsemble/finsemble-ui": "6.3.0",
-    "@types/node": "^14.17.27",
+    "@finsemble/finsemble-core": "8.0.0",
+    "@finsemble/finsemble-ui": "8.0.0",
     "react": "17.0.2",
     "react-autosuggest": "^10.1.0",
     "react-select": "^5.2.1",
-    "react-tabs": "^3.2.2"
+    "react-tabs": "^5.1.0"
   }
 }

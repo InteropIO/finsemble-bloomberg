@@ -21,6 +21,8 @@ module.exports = {
     'no-tabs': 'off',
     "indent": "off",
     "linebreak-style": 0,
-    "@typescript-eslint/explicit-module-boundary-types": "off"
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-explicit-any": "off",
   }
 };

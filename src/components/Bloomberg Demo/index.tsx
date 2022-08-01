@@ -6,5 +6,5 @@ import SecurityFinder from "./SecurityFinder";
 window.addEventListener("BloombergBridgeClientReady", BBGReady);
 
 function BBGReady() {
-	ReactDOM.render(<SecurityFinder />, document.getElementById("root"));
+  ReactDOM.render(<SecurityFinder />, document.getElementById("root"));
 }

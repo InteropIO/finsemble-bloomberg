@@ -1,5 +1,5 @@
 const BloombergBridgeClient = FSBL.Clients.BloombergBridgeClient;
-const Logger = FSBL.Clients.LoggerClient;
+const Logger = FSBL.Clients.Logger;
 
 Logger.start();
 Logger.log("BloombergSearch Service starting up");
@@ -86,7 +86,7 @@ class BloombergSearchService {
      */
     function bloombergSearch(
       params: { text: string; windowName: string },
-      callback: Function
+      callback: (err: any, results: any) => void
     ) {
       Logger.log("SEARCH PARAMS: ", params);
 
@@ -100,8 +100,9 @@ class BloombergSearchService {
             Logger.error(`Bloomberg security lookup returned an error: `, err);
             callback(err, null);
           } else {
-            let results: BloombergSecuritySearchResults[] = [];
-            response.results.forEach((result) => {
+            const results: BloombergSecuritySearchResults[] = [];
+
+            results.forEach((result) => {
               results.push({
                 name: `${result.name} ${result.type}`,
                 score: 100,
@@ -126,7 +127,10 @@ class BloombergSearchService {
       }
     }
 
-    function searchResultActionCallback(params: any) {
+    function searchResultActionCallback(params: {
+      item: { bbgSecurity: string };
+      action: { name: string; bbgSecurity: string };
+    }) {
       //Push context to the FDC3 Channel we setup a reference to
       Logger.log(`searchResultActionCallback called with params: `, params);
       const { item, action } = params;
@@ -223,15 +227,15 @@ class BloombergSearchService {
   //-----------------------------------------------------------------------------------------
 }
 
-const FSBLReady = () => {
+function onFSBLReady() {
   const serviceInstance = new BloombergSearchService();
   serviceInstance.start(() => {
     FSBL.publishReady();
   });
-};
+}
 
 if (window.FSBL && FSBL.addEventListener) {
-  FSBL.addEventListener("onReady", FSBLReady);
+  FSBL.addEventListener("onReady", onFSBLReady);
 } else {
-  window.addEventListener("FSBLReady", FSBLReady);
+  window.addEventListener("FSBLReady", onFSBLReady);
 }
