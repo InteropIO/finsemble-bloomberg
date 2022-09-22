@@ -1,28 +1,59 @@
-import React from "react";
-import Autosuggest from "react-autosuggest";
+import React, { ChangeEvent, FormEvent } from "react";
+import Autosuggest, {
+  FetchRequestedReasons,
+  InputProps,
+  SuggestionsFetchRequestedParams,
+} from "react-autosuggest";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import Select from "react-select";
-
-import { BloombergBridgeClient as BloombergBridgeClientConstructor } from "@finsemble/finsemble-core";
-
-const BloombergBridgeClient = new BloombergBridgeClientConstructor();
 
 /** When a suggestion is clicked, Autosuggest needs to populate the input
  *  field based on the clicked suggestion (such that the search will return
  *  the suggestion as the first result).
  */
-const getSuggestionValue = (suggestion: any) =>
+const getSuggestionValue = (suggestion: { name: string; type: string }) =>
   suggestion.name + " " + suggestion.type;
 
 /** Render suggestions for display in the suggestions list.
  */
-const renderSuggestion = (suggestion: any) => (
+const renderSuggestion = (suggestion: { name: string; type: string }) => (
   <div>{suggestion.name + " <" + suggestion.type + ">"}</div>
 );
 
-class SecurityFinder extends React.Component<any, any> {
+type SecurityFinderState = {
+  value: string;
+  suggestions: { name: string; type: string }[];
+  isLoading: boolean;
+  isConnected: boolean;
+  isRemote: boolean;
+  commandMnemonic: string;
+  commandPanel: number;
+  commandTails: string;
+  commandError: string;
+  commandSuccess: string;
+  groupError: string;
+  groupSuccess: string;
+  launchPadGroup: null | { value: string; label: string };
+  launchPadGroups: { value: string; label: string }[];
+  linkerError: string;
+  linkerSuccess: string;
+  suppressLinkerLoops: null | boolean;
+  worksheet: null | { value: string; label: string };
+  worksheets: { value: string; label: string }[];
+  worksheetError: string;
+  worksheetSuccess: string;
+  finsembleToLaunchpad: boolean;
+  launchpadToFinsemble: boolean;
+  linkerToLaunchpad: boolean;
+};
+class SecurityFinder extends React.Component<any, SecurityFinderState> {
+  BloombergBridgeClient;
+
   constructor(props: any) {
     super(props);
+
+    // @ts-ignore - provided by preload
+    this.BloombergBridgeClient = FSBL.Clients.BloombergBridgeClient;
 
     this.state = {
       value: "",
@@ -31,13 +62,13 @@ class SecurityFinder extends React.Component<any, any> {
       isConnected: false,
       isRemote: false,
       commandMnemonic: "DES",
-      commandPanel: "1",
+      commandPanel: 1,
       commandTails: "",
       commandError: "",
       commandSuccess: "",
       groupError: "",
       groupSuccess: "",
-      launchPadGroup: "",
+      launchPadGroup: null,
       launchPadGroups: [],
       linkerError: "",
       linkerSuccess: "",
@@ -48,6 +79,7 @@ class SecurityFinder extends React.Component<any, any> {
       worksheetSuccess: "",
       finsembleToLaunchpad: true,
       launchpadToFinsemble: true,
+      linkerToLaunchpad: false,
     };
 
     this.handleTabSelected = this.handleTabSelected.bind(this);
@@ -66,8 +98,8 @@ class SecurityFinder extends React.Component<any, any> {
     this.setupGroupEventListener = this.setupGroupEventListener.bind(this);
     this.handleNoOptionMessage = this.handleNoOptionMessage.bind(this);
 
-    this.subscribeToLinker = this.subscribeToContext.bind(this);
-    this.handleLinkerPublish = this.handleContextPublish.bind(this);
+    this.subscribeToContext = this.subscribeToContext.bind(this);
+    this.handleContextPublish = this.handleContextPublish.bind(this);
 
     this.getWorksheets = this.getWorksheets.bind(this);
     this.handleWorksheetInput = this.handleWorksheetInput.bind(this);
@@ -83,14 +115,14 @@ class SecurityFinder extends React.Component<any, any> {
   }
 
   checkConfig() {
-    let configHandler = (err: any, remote: any) => {
+    const configHandler = (err: any, remote: any) => {
       if (err) {
         FSBL.Clients.Logger.error(
           "Error received when checking bloomberg bridge config",
           err
         );
       } else {
-        let isRemote =
+        const isRemote =
           typeof remote.value == "undefined" ? remote : remote.value;
         console.log("Connection is configured for a remote terminal: ", remote);
         this.setState({
@@ -112,7 +144,7 @@ class SecurityFinder extends React.Component<any, any> {
    * Checks the connection to the BloombergBride and performs setup tasks if we've just connected.
    */
   checkConnection() {
-    BloombergBridgeClient.checkConnection((err, resp) => {
+    this.BloombergBridgeClient.checkConnection((err: any, resp: any) => {
       if (!err && resp === true) {
         if (!this.state.isConnected) {
           //we are connecting, setup LaunchPad group lsiteners
@@ -151,10 +183,12 @@ class SecurityFinder extends React.Component<any, any> {
     this.checkConfig();
 
     //listen for connection events (listen/transmit)
-    BloombergBridgeClient.setConnectionEventListener(this.checkConnection);
+    this.BloombergBridgeClient.setConnectionEventListener(() =>
+      this.checkConnection()
+    );
     //its also possible to poll for connection status,
     //  worth doing in case the bridge process is killed off and doesn't get a chance to send an update
-    setInterval(this.checkConnection, 30000);
+    setInterval(() => this.checkConnection(), 30000);
     //do the initial check
     this.checkConnection();
   }
@@ -164,7 +198,7 @@ class SecurityFinder extends React.Component<any, any> {
    * @param {*} value Input text to attempt to resolve
    * @param {*} cb Optional callback to run once suggestions are received
    */
-  loadSuggestions(value, cb) {
+  loadSuggestions(value: string, cb?: Function) {
     //could cancel a previous request here
 
     this.setState({
@@ -175,40 +209,54 @@ class SecurityFinder extends React.Component<any, any> {
     const inputLength = inputValue.length;
 
     //Expects the client to have been preloaded via config
-    BloombergBridgeClient.runSecurityLookup(inputValue, (err, data) => {
-      if (err) {
-        FSBL.Clients.Logger.error(
-          `Error received from runSecurityLookup: search string: ${inputValue}, error: `,
-          err
-        );
-        this.setState({
-          isLoading: false,
-          suggestions: [],
-        });
-      } else {
-        let securities = [];
-        data.results.forEach((result) => {
-          securities.push({ name: result.name, type: result.type });
-        });
-        this.setState({
-          isLoading: false,
-          suggestions: securities,
-        });
+    this.BloombergBridgeClient.runSecurityLookup(
+      inputValue,
+      (err: any, data: any) => {
+        if (err) {
+          FSBL.Clients.Logger.error(
+            `Error received from runSecurityLookup: search string: ${inputValue}, error: `,
+            err
+          );
+          this.setState({
+            isLoading: false,
+            suggestions: [],
+          });
+        } else {
+          const securities: { name: string; type: string }[] = [];
+          data.results.forEach((result: { name: string; type: string }) => {
+            securities.push({ name: result.name, type: result.type });
+          });
+          this.setState({
+            isLoading: false,
+            suggestions: securities,
+          });
+        }
+        if (cb) {
+          cb();
+        }
       }
-      if (cb) {
-        cb();
-      }
-    });
+    );
   }
 
-  onChange = (event, { newValue }) => {
+  onChange = (
+    event: FormEvent<HTMLElement>,
+    params: Autosuggest.ChangeEvent
+  ) => {
     this.setState({
-      value: newValue,
+      value: params.newValue,
     });
   };
 
-  onSuggestionsFetchRequested = ({ value }, cb) => {
-    this.loadSuggestions(value, cb);
+  onSuggestionsFetchRequested = (
+    {
+      value,
+    }: {
+      value: string;
+      reason: FetchRequestedReasons;
+    },
+    callback?: Function
+  ) => {
+    this.loadSuggestions(value, callback);
   };
 
   /**
@@ -221,9 +269,17 @@ class SecurityFinder extends React.Component<any, any> {
   };
 
   /** Handler function for terminal command panel input fields. */
-  handleCommandPanelInput(event) {
+  handleCommandPanelInput(
+    event: ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>
+  ) {
     const name = event.target.name;
-    this.setState({ [name]: event.target.value });
+    if (name === "commandMnemonic") {
+      this.setState({ commandMnemonic: event.target.value });
+    } else if (name === "commandTails") {
+      this.setState({ commandTails: event.target.value });
+    } else if (name === "commandPanel") {
+      this.setState({ commandPanel: parseFloat(event.target.value) });
+    }
   }
 
   /**
@@ -246,12 +302,12 @@ class SecurityFinder extends React.Component<any, any> {
         console.log(
           `Executing ${this.state.commandMnemonic} on panel ${this.state.commandPanel} with tails ${this.state.commandTails} and security ${this.state.value}`
         );
-        BloombergBridgeClient.runBBGCommand(
+        this.BloombergBridgeClient.runBBGCommand(
           mnemonic,
           securities,
           panel,
           tails,
-          (err, response) => {
+          (err: any, response: any) => {
             if (err) {
               this.setState({
                 commandError: `Error: ${JSON.stringify(err)}`,
@@ -288,16 +344,23 @@ class SecurityFinder extends React.Component<any, any> {
    * Retrieve the current set of LaunchPad groups and selects a group if none are selected.
    */
   getLaunchPadGroups() {
-    BloombergBridgeClient.runGetAllGroups((err, response) => {
+    this.BloombergBridgeClient.runGetAllGroups((err: any, response: any) => {
       if (response && response.groups && Array.isArray(response.groups)) {
-        const launchPadGroups = [];
-        response.groups.forEach((element) => {
+        const launchPadGroups: { value: string; label: string }[] = [];
+        response.groups.forEach((element: { name: string }) => {
           launchPadGroups.push({ value: element.name, label: element.name });
         });
-        const _state = { groupError: "", launchPadGroups: launchPadGroups };
+        const _state: Pick<
+          SecurityFinderState,
+          "groupError" | "launchPadGroup" | "launchPadGroups"
+        > = {
+          groupError: "",
+          launchPadGroup: null,
+          launchPadGroups: launchPadGroups,
+        };
         //if no group is selected, select one
         if (
-          (!this.state.launchPadGroup || this.state.launchPadGroup === "") &&
+          (!this.state.launchPadGroup || this.state.launchPadGroup === null) &&
           launchPadGroups.length > 0
         ) {
           _state.launchPadGroup = launchPadGroups[0];
@@ -306,12 +369,12 @@ class SecurityFinder extends React.Component<any, any> {
         if (this.state.launchPadGroup) {
           let found = false;
           launchPadGroups.forEach((group) => {
-            if (group.value === this.state.launchPadGroup.value) {
+            if (group.value === this.state.launchPadGroup?.value) {
               found = true;
             }
           });
           if (!found) {
-            _state.launchPadGroup = "";
+            _state.launchPadGroup = null;
           }
         }
 
@@ -339,7 +402,7 @@ class SecurityFinder extends React.Component<any, any> {
    * and used to search for securities. Note that the channel for FDC3 channel integration
    * must be selected on the SecurityFinder's via the menu on the titlebar. */
   setupGroupEventListener() {
-    BloombergBridgeClient.setGroupEventListener((err, resp) => {
+    this.BloombergBridgeClient.setGroupEventListener((err: any, resp: any) => {
       //push context to Finsemble context FDC3 APIs if its a security
       //Note this reacts to *all* LaunchPad groups as no filter is offered in the UI
       if (this.state.launchpadToFinsemble) {
@@ -389,7 +452,7 @@ class SecurityFinder extends React.Component<any, any> {
    * Handler for Launchpad group selection on the LaunchPad tab.
    * @param {*} value
    */
-  handleLaunchPadGroupInput(value) {
+  handleLaunchPadGroupInput(value: any) {
     this.setState({ launchPadGroup: value });
   }
 
@@ -398,6 +461,8 @@ class SecurityFinder extends React.Component<any, any> {
    */
   handleNoOptionMessage() {
     // this.setState({ launchPadGroup: "", groupError: "No LaunchPad groups", groupSuccess: "" });
+
+    return <></>;
   }
 
   /**
@@ -409,14 +474,14 @@ class SecurityFinder extends React.Component<any, any> {
     if (this.state.isConnected) {
       //A launchpad group must be selected on the Launchpad tab and there must be a security string value
       if (this.state.launchPadGroup && this.state.value) {
-        BloombergBridgeClient.runSetGroupContext(
+        this.BloombergBridgeClient.runSetGroupContext(
           this.state.launchPadGroup.value,
           this.state.value,
           null,
-          (err, data) => {
+          (err: any, data: any) => {
             if (err) {
               FSBL.Clients.Logger.error(
-                `Error received from runSetGroupContext, group: ${this.state.launchPadGroup.value}, value: ${this.state.value}, error: `,
+                `Error received from runSetGroupContext, group: ${this.state.launchPadGroup?.value}, value: ${this.state.value}, error: `,
                 err
               );
               this.setState({
@@ -427,7 +492,7 @@ class SecurityFinder extends React.Component<any, any> {
             } else {
               this.setState({
                 groupError: "",
-                groupSuccess: `Set ${this.state.launchPadGroup.value} context`,
+                groupSuccess: `Set ${this.state.launchPadGroup?.value} context`,
               });
             }
           }
@@ -469,7 +534,7 @@ class SecurityFinder extends React.Component<any, any> {
     fdc3.addContextListener((context) => {
       if (context.type === "fdc3.instrument") {
         //setContext(context.id.ticker)
-        let data = context.id?.BBG ? context.id.BBG : context.id?.ticker;
+        let data = context.id?.BBG ? context.id.BBG : context.id?.ticker || "";
         this.setState({ value: data, suppressLinkerLoops: null });
         this.onSuggestionsFetchRequested(
           { value: data, reason: "input-changed" },
@@ -520,51 +585,62 @@ class SecurityFinder extends React.Component<any, any> {
    */
 
   getAllWorksheets() {
-    BloombergBridgeClient.runGetAllWorksheets((err, response) => {
-      if (
-        response &&
-        response.worksheets &&
-        Array.isArray(response.worksheets)
-      ) {
-        const worksheetsArr = response.worksheets.map((element) => {
-          return { value: element.id, label: element.name };
-        });
+    this.BloombergBridgeClient.runGetAllWorksheets(
+      (err: any, response: any) => {
+        if (
+          response &&
+          response.worksheets &&
+          Array.isArray(response.worksheets)
+        ) {
+          const worksheetsArr: { value: string; label: string }[] =
+            response.worksheets.map((element: any) => {
+              return { value: element.id, label: element.name };
+            });
 
-        let _state = { worksheets: worksheetsArr };
-        //if no worksheet is selected, select one
-        if (!this.state.worksheet && worksheetsArr.length > 0) {
-          _state.worksheet = worksheetsArr[0];
-        }
-        //if the selected worksheet doesn't exist deselect it
-        if (this.state.worksheet) {
-          let found = false;
-          worksheetsArr.forEach((aWorksheet) => {
-            if (aWorksheet.value === this.state.worksheets.value) {
-              found = true;
-            }
-          });
-          if (!found) {
-            _state.worksheet = "";
+          let _state: Pick<SecurityFinderState, "worksheet" | "worksheets"> = {
+            worksheets: worksheetsArr,
+            worksheet: null,
+          };
+          //if no worksheet is selected, select one
+          if (!this.state.worksheet && worksheetsArr.length > 0) {
+            _state.worksheet = worksheetsArr[0];
           }
-        }
 
-        this.setState(_state);
-      } else if (err) {
-        console.error("Error retrieving worksheets:", err);
-        this.setState({
-          worksheetError: `Error retrieving worksheets: ${JSON.stringify(err)}`,
-          worksheetSuccess: "",
-          worksheets: [],
-        });
-      } else {
-        console.error("invalid response from runGetAllWorksheets", response);
-        this.setState({
-          worksheetError: "Error retrieving worksheets",
-          worksheetSuccess: "",
-          worksheets: [],
-        });
+          const currentWorksheet = this.state.worksheet;
+
+          //if the selected worksheet doesn't exist deselect it
+          if (currentWorksheet) {
+            let found = false;
+            worksheetsArr.forEach((aWorksheet) => {
+              if (aWorksheet.value === currentWorksheet.value) {
+                found = true;
+              }
+            });
+            if (!found) {
+              _state.worksheet = null;
+            }
+          }
+
+          this.setState(_state);
+        } else if (err) {
+          console.error("Error retrieving worksheets:", err);
+          this.setState({
+            worksheetError: `Error retrieving worksheets: ${JSON.stringify(
+              err
+            )}`,
+            worksheetSuccess: "",
+            worksheets: [],
+          });
+        } else {
+          console.error("invalid response from runGetAllWorksheets", response);
+          this.setState({
+            worksheetError: "Error retrieving worksheets",
+            worksheetSuccess: "",
+            worksheets: [],
+          });
+        }
       }
-    });
+    );
   }
 
   getWorksheets() {
@@ -596,73 +672,76 @@ class SecurityFinder extends React.Component<any, any> {
     if (this.state.isConnected) {
       if (this.state.worksheet && this.state.value) {
         const worksheetId = this.state.worksheet.value;
-        BloombergBridgeClient.runGetWorksheet(worksheetId, (err, response) => {
-          //TODO: support other types of worksheet
-          if (
-            response &&
-            response.worksheet &&
-            response.worksheet.id !== "Error" &&
-            Array.isArray(response.worksheet.securities)
-          ) {
-            //replace the securities in the worksheet
-            const securities = response.worksheet.securities;
-            securities.push(this.state.value);
-            BloombergBridgeClient.runReplaceWorksheet(
-              worksheetId,
-              securities,
-              (err, data) => {
-                if (err) {
-                  console.error("Error replacing worksheet securities:", err);
-                  this.setState({
-                    worksheetError: `Error replacing worksheet securities: ${JSON.stringify(
-                      err
-                    )}`,
-                    worksheetSuccess: "",
-                  });
-                } else {
-                  this.setState({
-                    worksheetError: "",
-                    worksheetSuccess: "Worksheet updated",
-                  });
+        this.BloombergBridgeClient.runGetWorksheet(
+          worksheetId,
+          (err: any, response: any) => {
+            //TODO: support other types of worksheet
+            if (
+              response &&
+              response.worksheet &&
+              response.worksheet.id !== "Error" &&
+              Array.isArray(response.worksheet.securities)
+            ) {
+              //replace the securities in the worksheet
+              const securities = response.worksheet.securities;
+              securities.push(this.state.value);
+              this.BloombergBridgeClient.runReplaceWorksheet(
+                worksheetId,
+                securities,
+                (err: any, data: any) => {
+                  if (err) {
+                    console.error("Error replacing worksheet securities:", err);
+                    this.setState({
+                      worksheetError: `Error replacing worksheet securities: ${JSON.stringify(
+                        err
+                      )}`,
+                      worksheetSuccess: "",
+                    });
+                  } else {
+                    this.setState({
+                      worksheetError: "",
+                      worksheetSuccess: "Worksheet updated",
+                    });
+                  }
+                  this.getWorksheets();
                 }
-                this.getWorksheets();
-              }
-            );
-          } else if (response.worksheet.id === "Error") {
-            //handle non-existent worksheets
-            console.error(
-              `Error retrieving worksheet: worksheetId: ${worksheetId}, error:`,
-              response.worksheet.name
-            );
-            this.setState({
-              worksheetError: `${response.worksheet.name}`,
-              worksheetSuccess: "",
-            });
-            this.getWorksheets();
-          } else if (err) {
-            console.error(
-              `Error retrieving worksheet: worksheetId: ${worksheetId}, error:`,
-              err
-            );
-            this.setState({
-              worksheetError: `Error retrieving worksheet: ${JSON.stringify(
+              );
+            } else if (response.worksheet.id === "Error") {
+              //handle non-existent worksheets
+              console.error(
+                `Error retrieving worksheet: worksheetId: ${worksheetId}, error:`,
+                response.worksheet.name
+              );
+              this.setState({
+                worksheetError: `${response.worksheet.name}`,
+                worksheetSuccess: "",
+              });
+              this.getWorksheets();
+            } else if (err) {
+              console.error(
+                `Error retrieving worksheet: worksheetId: ${worksheetId}, error:`,
                 err
-              )}`,
-              worksheetSuccess: "",
-            });
-            this.getWorksheets();
-          } else {
-            FSBL.Clients.Logger.error(
-              `invalid response from runGetWorksheet: worksheetId: ${worksheetId}, response:`,
-              response
-            );
-            this.setState({
-              worksheetError: `invalid response from runGetWorksheet`,
-              worksheetSuccess: "",
-            });
-            this.getWorksheets();
+              );
+              this.setState({
+                worksheetError: `Error retrieving worksheet: ${JSON.stringify(
+                  err
+                )}`,
+                worksheetSuccess: "",
+              });
+              this.getWorksheets();
+            } else {
+              FSBL.Clients.Logger.error(
+                `invalid response from runGetWorksheet: worksheetId: ${worksheetId}, response:`,
+                response
+              );
+              this.setState({
+                worksheetError: `invalid response from runGetWorksheet`,
+                worksheetSuccess: "",
+              });
+              this.getWorksheets();
+            }
           }
-        });
+        );
       } else if (!this.state.value) {
         console.error(`Unable to dd to worksheet, no security value set`);
         this.setState({
@@ -696,7 +775,7 @@ class SecurityFinder extends React.Component<any, any> {
    * @param {*} event
    * @returns
    */
-  handleTabSelected(index, lastIndex, event) {
+  handleTabSelected(index: number, last: number, event: Event) {
     if (index == 2) {
       //selected worksheets
       this.getWorksheets();
@@ -708,7 +787,7 @@ class SecurityFinder extends React.Component<any, any> {
    * Handler function for the Finsemble-to-Launchpad sharing checkbox
    * @param {*} changeEvent
    */
-  handleFinsembleToLaunchpad(changeEvent) {
+  handleFinsembleToLaunchpad(changeEvent: ChangeEvent<HTMLInputElement>) {
     this.setState((prevState) => {
       return {
         finsembleToLaunchpad: !prevState.linkerToLaunchpad,
@@ -720,7 +799,7 @@ class SecurityFinder extends React.Component<any, any> {
    * Handler function for the Launchpad-to-Finsemble sharing checkbox
    * @param {*} changeEvent
    */
-  handleLaunchpadToFinsemble(changeEvent) {
+  handleLaunchpadToFinsemble(changeEvent: ChangeEvent<HTMLInputElement>) {
     this.setState((prevState) => {
       return {
         launchpadToFinsemble: !prevState.launchpadToFinsemble,
@@ -755,10 +834,13 @@ class SecurityFinder extends React.Component<any, any> {
     } = this.state;
 
     // Autosuggest will pass through all these props to the input.
-    const inputProps = {
+    const inputProps: InputProps<any> = {
       placeholder: "Enter a security...",
       value,
-      onChange: this.onChange,
+      onChange: (
+        event: FormEvent<HTMLElement>,
+        params: Autosuggest.ChangeEvent
+      ) => this.onChange(event, params),
     };
     /*eslint no-nested-ternary: "off"*/
     const status = isConnected
@@ -775,18 +857,23 @@ class SecurityFinder extends React.Component<any, any> {
         <Autosuggest
           id="securitySearch"
           suggestions={suggestions}
-          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+          onSuggestionsFetchRequested={(
+            params: SuggestionsFetchRequestedParams
+          ) => this.onSuggestionsFetchRequested(params)}
+          onSuggestionsClearRequested={() => this.onSuggestionsClearRequested()}
           getSuggestionValue={getSuggestionValue}
           renderSuggestion={renderSuggestion}
           alwaysRenderSuggestions={true}
           highlightFirstSuggestion={true}
           inputProps={inputProps}
-          className="flex-grow flex-shrink"
         />
 
         <div id="tools" className="flex-dont-grow flex-dont-shrink">
-          <Tabs onSelect={this.handleTabSelected}>
+          <Tabs
+            onSelect={(index: number, lastIndex: number, event: Event) =>
+              this.handleTabSelected(index, lastIndex, event)
+            }
+          >
             <TabList>
               <Tab>LaunchPad</Tab>
               <Tab>Commands</Tab>
@@ -807,15 +894,15 @@ class SecurityFinder extends React.Component<any, any> {
                     classNamePrefix="react-select"
                     defaultValue={launchPadGroup}
                     menuPlacement="auto"
-                    noOptionsMessage={this.handleNoOptionMessage}
-                    onChange={this.handleLaunchPadGroupInput}
+                    noOptionsMessage={() => this.handleNoOptionMessage()}
+                    onChange={(e) => this.handleLaunchPadGroupInput(e)}
                   />
                 </div>
                 <div className="controlsRow justify-flex-start">
                   <button
                     className="button"
                     id="setGroupContextButton"
-                    onClick={this.handleSetGroupContext}
+                    onClick={() => this.handleSetGroupContext()}
                   >
                     set context
                   </button>
@@ -839,10 +926,10 @@ class SecurityFinder extends React.Component<any, any> {
                       name="commandMnemonic"
                       className="textField"
                       value={commandMnemonic}
-                      size="6"
-                      maxLength="6"
+                      size={6}
+                      maxLength={6}
                       placeholder="Mnemonic"
-                      onChange={this.handleCommandPanelInput}
+                      onChange={(e) => this.handleCommandPanelInput(e)}
                     ></input>
                   </label>
                   <label className="inputLabel flex-dont-grow">
@@ -852,10 +939,10 @@ class SecurityFinder extends React.Component<any, any> {
                     name="commandTails"
                     className="textField flex-grow"
                     value={commandTails}
-                    size="15"
-                    maxLength="255"
+                    size={15}
+                    maxLength={255}
                     placeholder="optional..."
-                    onChange={this.handleCommandPanelInput}
+                    onChange={(e) => this.handleCommandPanelInput(e)}
                   ></input>
 
                   <label className="inputLabel flex-dont-grow">
@@ -864,7 +951,7 @@ class SecurityFinder extends React.Component<any, any> {
                       name="commandPanel"
                       className="textField"
                       value={commandPanel}
-                      onChange={this.handleCommandPanelInput}
+                      onChange={(e) => this.handleCommandPanelInput(e)}
                     >
                       <option value="1">1</option>
                       <option value="2">2</option>
@@ -877,7 +964,7 @@ class SecurityFinder extends React.Component<any, any> {
                   <button
                     className="button"
                     id="runCommandButton"
-                    onClick={this.handleCommandExecute}
+                    onClick={() => this.handleCommandExecute()}
                   >
                     execute
                   </button>
@@ -905,13 +992,13 @@ class SecurityFinder extends React.Component<any, any> {
                     classNamePrefix="react-select"
                     defaultValue={worksheet}
                     menuPlacement="auto"
-                    noOptionsMessage={this.handleNoOptionMessage}
-                    onChange={this.handleWorksheetInput}
+                    noOptionsMessage={() => this.handleNoOptionMessage()}
+                    onChange={(e) => this.handleWorksheetInput(e)}
                   />
                   <button
                     className="button flex-dont-grow"
                     id="refreshWorksheetsButton"
-                    onClick={this.getWorksheets}
+                    onClick={() => this.getWorksheets()}
                   >
                     refresh
                   </button>
@@ -920,7 +1007,7 @@ class SecurityFinder extends React.Component<any, any> {
                   <button
                     className="button"
                     id="addToWorksheetButton"
-                    onClick={this.handleAddToWorksheet}
+                    onClick={(e) => this.handleAddToWorksheet()}
                   >
                     Add to worksheet
                   </button>
@@ -942,7 +1029,9 @@ class SecurityFinder extends React.Component<any, any> {
                     <input
                       type="checkbox"
                       name="linkerToLaunchpadCheckbox"
-                      onChange={this.handleFinsembleToLaunchpad}
+                      onChange={(e) => {
+                        this.handleFinsembleToLaunchpad(e);
+                      }}
                       defaultChecked={true}
                       className="form-check-input"
                     />
@@ -954,7 +1043,9 @@ class SecurityFinder extends React.Component<any, any> {
                     <input
                       type="checkbox"
                       name="launchpadToLinkerCheckbox"
-                      onChange={this.handleLaunchpadToFinsemble}
+                      onChange={(e) => {
+                        this.handleLaunchpadToFinsemble(e);
+                      }}
                       defaultChecked={true}
                       className="form-check-input"
                     />

@@ -12,12 +12,11 @@
 		"target": "ES2020",
 		"typeRoots": [
 			"node_modules/@types",
-			"node_modules/@finsemble",
-			"node_modules/@finsemble/finsemble-core/types"
+			"node_modules/@finsemble"
 		]
 	},
 	"include": [
-		"src/**/*"
+		"src/components/Bloomberg Demo/*"
 	],
 	"exclude": []
 }

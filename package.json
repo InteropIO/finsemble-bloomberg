@@ -5,8 +5,8 @@
   "scripts": {
     "docs": "npx typedoc",
     "lintTS": "tsc --noemit && eslint . --ext .ts,.tsx",
-    "start": "cross-env NODE_ENV=development webpack --config webpack.config.js",
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "start": "cross-env NODE_ENV=development webpack serve --config webpack.config.js",
+    "build": "cross-env NODE_ENV=development webpack --config webpack.config.js",
     "lint": "eslint 'src/**/*.js' || true",
     "prettify": "prettier --write 'src/**/*.js'"
   },
@@ -26,11 +26,12 @@
     "@babel/plugin-proposal-class-properties": "^7.14.5",
     "@babel/preset-env": "^7.15.8",
     "@types/node": "^14.18.22",
-    "@types/react": "^18.0.15",
+    "@types/react": "^18.0.21",
     "@types/react-autosuggest": "^10.1.5",
     "@types/react-dom": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
+    "ajv": "^7.2.4",
     "babel-loader": "^8.2.2",
     "chokidar": "^3.5.2",
     "clean-webpack-plugin": "^4.0.0",
@@ -63,14 +64,16 @@
     "typescript": "^4.3.5",
     "webpack": "^5.58.2",
     "webpack-cli": "^4.9.0",
-    "webpack-dev-server": "^4.3.1",
+    "webpack-dev-server": "^4.11.1",
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
     "@finsemble/finsemble-core": "8.0.0",
     "@finsemble/finsemble-ui": "8.0.0",
-    "react": "17.0.2",
+    "ajv-keywords": "^5.1.0",
+    "react": "18.2.0",
     "react-autosuggest": "^10.1.0",
+    "react-dom": "18.2.0",
     "react-select": "^5.2.1",
     "react-tabs": "^5.1.0"
   }

@@ -7,6 +7,18 @@ module.exports = {
   // Where webpack looks to start building the bundle
   entry: {"components/Bloomberg Demo": path.resolve(__dirname, 'src/components/Bloomberg Demo/index.tsx')},
 
+  // mode: process.env.NODE_ENV,
+  
+  // watch: process.env.NODE_ENV === "development",
+
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
+    compress: true,
+    port: 9000,
+  },
+
   // Where webpack outputs the assets and bundles
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -73,7 +85,7 @@ module.exports = {
 
   resolve: {
     modules: ['src', 'node_modules'],
-    extensions: ['.js', '.jsx', '.json'],
+    extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     alias: {
       '@': 'src',
     },
