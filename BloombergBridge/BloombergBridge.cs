@@ -415,9 +415,9 @@ namespace BloombergBridge
             try
             {
 				FSBL.Logger.Log("Removing query responders");
-				FSBL.RouterClient.RemoveResponder("BBG_connect", true);
-				FSBL.RouterClient.RemoveResponder("BBG_connection_status", true);
-				FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function", true);
+				FSBL.RouterClient.RemoveResponder("BBG_connect");
+				FSBL.RouterClient.RemoveResponder("BBG_connection_status");
+				FSBL.RouterClient.RemoveResponder("BBG_run_terminal_function");
 			}
 			catch (Exception) { }
 
