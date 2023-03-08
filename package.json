@@ -1,6 +1,6 @@
 {
   "name": "finsemble-bloomberg",
-  "version": "6.2.0",
+  "version": "8.4.1",
   "description": "Finsemble's Bloomberg Terminal Connect Integration",
   "scripts": {
     "watch": "node ./fpe-scripts/watch.js",
@@ -30,14 +30,13 @@
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "fs-extra": "^9.1.0",
+    "redux-loop": "6.1.0",
     "typedoc": "^0.17.8",
     "typedoc-plugin-markdown": "^2.4.2",
-    "typescript": "4.3.5",
-    "redux-loop": "6.1.0"
+    "typescript": "4.3.5"
   },
   "dependencies": {
-    "@finsemble/finsemble-core": "6.3.0",
-    "@finsemble/finsemble-ui": "6.3.0",
+    "@finsemble/finsemble-core": "8.4.1",
     "@types/node": "^14.17.27",
     "react": "17.0.2",
     "react-autosuggest": "^10.1.0",

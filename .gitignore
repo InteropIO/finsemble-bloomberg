@@ -361,3 +361,4 @@ MigrationBackup/
 _site
 log.txt
 .vscode
+.yarn
