@@ -26,7 +26,7 @@ namespace BloombergBridge
 		private static Finsemble FSBL = null;
 
 		private static bool shutdown = false;
-		private static bool connect = true;
+		private static bool connect = false;
 		private static bool isRegistered = false;
 		private static bool remote = false;
 		private static string remoteAddress = null;
@@ -884,7 +884,7 @@ namespace BloombergBridge
                     debounceTimer.Elapsed += (sender2, args2) =>
                     {
 						debounceTimer.Stop();
-						//update time of last set to allow debouncing   
+						//update time of last set to allow debouncingï¿½ ï¿½
 						debounceMap[groupName].LastQueryTime = now;
 						DoSetGroupContext(queryMessage, queryResponse, queryData);
 					};
@@ -899,7 +899,7 @@ namespace BloombergBridge
 				}
 				else
 				{
-					//save time of last set to allow debouncing   
+					//save time of last set to allow debouncingï¿½ ï¿½
 					debounceMap[groupName] = new DebouncedQuery()
 					{
 						Timer = null,
