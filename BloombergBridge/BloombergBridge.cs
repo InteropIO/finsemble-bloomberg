@@ -884,7 +884,7 @@ namespace BloombergBridge
                     debounceTimer.Elapsed += (sender2, args2) =>
                     {
 						debounceTimer.Stop();
-						//update time of last set to allow debouncing� �
+						//update time of last set to allow debouncing
 						debounceMap[groupName].LastQueryTime = now;
 						DoSetGroupContext(queryMessage, queryResponse, queryData);
 					};
@@ -899,7 +899,7 @@ namespace BloombergBridge
 				}
 				else
 				{
-					//save time of last set to allow debouncing� �
+					//save time of last set to allow debouncing
 					debounceMap[groupName] = new DebouncedQuery()
 					{
 						Timer = null,
