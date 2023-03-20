@@ -362,3 +362,5 @@ _site
 log.txt
 .vscode
 dist
+
+.yarn
