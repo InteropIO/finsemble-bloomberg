@@ -1,7 +1,7 @@
 {
   "name": "finsemble-bloomberg",
-  "version": "6.2.0",
-  "description": "Finsemble's Bloomberg Terminal Connect Integration",
+  "version": "8.9.1",
+  "description": "Finsemble's Bloomberg Terminal Connect Integration examples",
   "scripts": {
     "docs": "npx typedoc",
     "lintTS": "tsc --noemit && eslint . --ext .ts,.tsx",
@@ -16,7 +16,7 @@
     "Terminal connect",
     "FDC3"
   ],
-  "author": "Cosaic <support@finsemble.com> (https://www.chartiq.com/finsemble/)",
+  "author": "interop.io <support@finsemble.com> (https://interop.io)",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=12"
@@ -68,8 +68,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@finsemble/finsemble-core": "8.0.0",
-    "@finsemble/finsemble-ui": "8.0.0",
+    "@finsemble/finsemble-core": "8.9.1",
     "ajv-keywords": "^5.1.0",
     "react": "18.2.0",
     "react-autosuggest": "^10.1.0",
