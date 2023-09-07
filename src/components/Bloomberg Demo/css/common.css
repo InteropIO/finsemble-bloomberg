@@ -1,0 +1,40 @@
+/* chverons */
+.chevron-container {
+	display: flex;
+	align-items: center;
+}
+
+.ff-chevron-left::before {
+	padding-right: 2px;
+}
+
+.ff-chevron-right::before {
+	padding-left: 2px;
+}
+
+.scroll-button {
+	color: var(--toolbar-scroll-button-color);
+	margin: 8px 3px;
+	padding: 5px;
+	font-size: 10px;
+	border: 1px solid transparent;
+	border-radius: 50px;
+	height: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.scroll-button:hover {
+	background: var(--toolbar-button-hover-color);
+	cursor: pointer;
+}
+
+.greyedOut {
+	opacity: 0.3;
+}
+
+.greyedOut:hover {
+	background: transparent;
+	cursor: default;
+}
