@@ -1,12 +1,54 @@
-body {
+html, body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  height: 100vh;
+  height: 100vw;
+  background: #171a20;
 }
 
 #webpack-dev-server-client-overlay {
   display: none;
+}
+
+
+.container {
+  margin: auto;
+  width: 50%;
+  height: 100%;
+  background: var(--titleBar-background-inactive-color);
+}
+
+.header {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+}
+
+.tabs {
+  background: var(--titleBar-background-inactive-color);
+}
+
+.tabs .tab {
+  background-color: var(--titlebar-tab-inactive-background-color);
+  color: var(--titlebar-tab-inactive-font-color);
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  border: none;
+  padding: 5px 10px;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tab.active-tab {
+  background-color: var(--titlebar-tab-active-background-color);
+  color: var(--titlebar-tab-active-font-color);
+}
+
+.tab-content {
+  padding: 10px;
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
 }
