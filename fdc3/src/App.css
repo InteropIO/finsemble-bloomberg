@@ -1,0 +1,68 @@
+body {
+  background-color: white;
+}
+
+
+#container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 20px);
+}
+
+/* Search Box */
+
+.search {
+  display: flex;
+  justify-content: space-around;
+}
+
+.search input {
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 4px;
+  width: 80vw;
+  margin: 8px;
+  text-align: center;
+}
+
+
+/* Tabs */
+[role='tab']{
+  background-color: #999;
+  border-radius: 4px;
+  border: 1px solid black;
+  padding: 4px;
+  cursor: pointer;
+}
+
+[role='tab'][aria-selected='true']{
+  background-color: white;
+}
+
+[role='tablist']{
+  margin-top: 8px;
+  display: flex;
+}
+
+[role='tabpanel']{
+  position: relative;
+  top: -1px;
+  width: calc(100vw - 48px);
+  border: 1px solid black;
+  border-radius: 4px;
+  flex-grow: 2;
+  padding: 16px;
+}
+
+[role='tabpanel'][data-active='false']{
+  display: none;
+}
+
+.checkbox-container {
+  display: block;
+  margin-top: 12px;
+}
+
+.checkbox-container label {
+  display: block;
+}
