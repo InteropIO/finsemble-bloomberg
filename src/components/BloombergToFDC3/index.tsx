@@ -7,7 +7,6 @@ import BBGToFDC3 from "./BBGToFDC3";
 window.addEventListener("BloombergBridgeClientReady", BBGReady);
 
 function BBGReady() {
- // Place render here
+	ReactDOM.render(<BBGToFDC3 />, document.getElementById("root"));
 }
 
-ReactDOM.render(<BBGToFDC3 />, document.getElementById("root"));
