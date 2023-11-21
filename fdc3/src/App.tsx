@@ -8,13 +8,38 @@ function App() {
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [selectedTab, setSelectedTab] = useState(1);
 
-  const noGroups = Object.keys(groupInfo).length === 0;
+  const shouldShowGroupZeroState = Object.keys(groupInfo).length === 0;
+
+  const toggleIds = (id: number) => {
+    const selected = new Set(selectedGroupIds);
+    if(selected.has(id)){
+      selected.delete(id);
+    }else{
+      selected.add(id);
+      maybeGrabGroupContext(id);
+    }
+
+    setSelectedGroupIds([...selected]);
+  }
 
   const maybeSetSecurity = (ctx: string, id: number) => {
     console.log(selectedGroupIds, id, security);
     if(selectedGroupIds.includes(id)){
       setSecurity(ctx);
     }
+  };
+
+  const maybeGrabGroupContext = (groupId: number) => {
+    if(security !== ""){
+      return;
+    }
+    
+    FSBL.Clients.BloombergBridgeClient.runGetAllGroups((err, {groups}) => {
+      const relevantGroup = groups.find(({id}) => id == groupId);
+      if(relevantGroup.value !== security){
+        setSecurity(relevantGroup.value);
+      }
+    });
   };
 
   useEffect(() => {
@@ -76,34 +101,6 @@ function App() {
     });
   }, [security]);
 
-  const toggleIds = (id: number) => {
-    const selected = new Set(selectedGroupIds);
-    if(selected.has(id)){
-      selected.delete(id);
-    }else{
-      selected.add(id);
-      maybeGrabGroupContext(id);
-    }
-
-    setSelectedGroupIds([...selected]);
-  }
-
-  const maybeGrabGroupContext = (groupId: number) => {
-    console.log("maybe 1");
-    if(security !== ""){
-      return;
-    }
-    console.log("maybe 2");
-    
-    FSBL.Clients.BloombergBridgeClient.runGetAllGroups((err, {groups}) => {
-      const relevantGroup = groups.find(({id}) => id == groupId);
-      console.log("maybe 3", relevantGroup);
-      if(relevantGroup.value !== security){
-        setSecurity(relevantGroup.value);
-      }
-    });
-  };
-
 
   return (
     <div id="container">
@@ -122,7 +119,7 @@ function App() {
         <div role="tabpanel" data-active={selectedTab === 1}>
           Select Launchpad groups to link to:
           <div className="checkbox-container">
-            {noGroups && <span>No groups found in Launchpad.</span>}
+            {shouldShowGroupZeroState && <span>No groups found in Launchpad.</span>}
             {Object.entries(groupInfo).map(([id, name]) => <label key={id}>
               <input type="checkbox" value={id} checked={selectedGroupIds.includes(+id)} onChange={() => toggleIds(+id)} />
               {name}
