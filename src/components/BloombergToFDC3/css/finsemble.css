@@ -1,0 +1,37 @@
+/*!
+ * finsemble.css
+ * Copyright 2017 - 2020 by ChartIQ, Inc.
+ * All rights reserved.
+ */
+
+@import url("./defaultTheme.css");
+@import url("./font-finance.css");
+@import url("./fonts/Open_Sans/OpenSans-Definition.css");
+
+@import url("./common.css");
+
+.hidden {
+	/* stylelint-disable-next-line declaration-no-important */
+	display: none !important;
+}
+
+.flex-start {
+	align-self: flex-start;
+}
+
+/* Gives the control icons the proper width on websites using bootstrap. */
+
+i,
+i::before,
+i::after,
+.fsbl-window-manager-icon {
+	box-sizing: content-box;
+}
+
+body {
+	font-weight: var(--font-weight);
+	font-family: var(--font-family);
+	color: var(--font-color);
+	font-size: var(--font-size);
+	background: var(--core-primary-1);
+}

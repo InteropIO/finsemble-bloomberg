@@ -1,0 +1,292 @@
+@import url("./finsemble.css");
+@import url(".theme.css");
+
+/* stylelint-disable declaration-no-important */
+
+/* theme.css */
+
+/* Styles for the autosuggest component */
+.react-autosuggest__container {
+	background-color: var(--core-primary);
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 64px;
+}
+
+.react-autosuggest__input {
+	font-family: var(--font-family);
+	font-weight: var(--font-weight);
+	font-size: 16px;
+	background-color: white;
+	height: 24px;
+	flex-grow: 0;
+	flex-shrink: 0;
+}
+
+.react-autosuggest__input--focused {
+	outline: var(--accent-primary) auto 1px;
+	outline-offset: 1px;
+}
+
+.react-autosuggest__suggestions-container {
+	background-color: var(--core-primary-3);
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 40;
+}
+
+.react-autosuggest__suggestions-container--open {
+	flex-grow: 1;
+	flex-shrink: 1;
+}
+
+.react-autosuggest__suggestions-list {
+	/* max-height: 180; */
+	overflow-y: auto;
+	margin: 8px 0;
+	padding: 0 30;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 40;
+}
+
+.react-autosuggest__suggestion {
+	color: var(--font-color-1);
+	font-family: var(--font-family);
+	font-weight: var(--font-weight-1);
+	font-size: 15px;
+}
+
+.react-autosuggest__suggestion--highlighted {
+	color: var(--font-color);
+}
+
+.react-autosuggest__section-container {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 40;
+}
+
+/* Styles for the controls tabs */
+.react-tabs {
+	-webkit-tap-highlight-color: transparent;
+}
+
+.react-tabs__tab-list {
+	border-bottom: 1px solid var(--core-primary-3);
+	margin: 0;
+	padding: 0;
+}
+
+.react-tabs__tab {
+	display: inline-block;
+	border: 1px solid transparent;
+	border-bottom: none;
+	bottom: -1px;
+	position: relative;
+	list-style: none;
+	padding: 3px 6px;
+	cursor: pointer;
+	font-family: var(--font-family);
+	font-weight: var(--font-weight-1);
+	font-size: 14px;
+	color: white;
+}
+
+.react-tabs__tab--selected {
+	background-color: var(--core-primary);
+	border-color: var(--core-primary-3);
+	color: white;
+	border-radius: 5px 5px 0 0;
+}
+
+.react-tabs__tab--disabled {
+	color: GrayText;
+	cursor: default;
+}
+
+.react-tabs__tab:focus {
+	/* box-shadow: 0 0 5px hsl(208, 99%, 50%);
+	border-color: hsl(208, 99%, 50%);
+	outline: none; */
+}
+
+.react-tabs__tab:focus::after {
+	/* content: "";
+	position: absolute;
+	height: 5px;
+	left: -4px;
+	right: -4px;
+	bottom: -5px;
+	background: #fff; */
+}
+
+.react-tabs__tab-panel {
+	display: none;
+	padding: 5px;
+	color: var(--toolbar-font-color);
+	height: 53px;
+}
+
+.react-tabs__tab-panel--selected {
+	display: block;
+	background-color: var(--core-primary);
+}
+
+/* Styles for custom select dropdowns */
+.react-select-container {
+	display: inline-flex;
+	flex-grow: 1;
+	min-height: 24px;
+	height: 24px;
+	font-family: var(--font-family);
+	font-weight: var(--font-weight-1);
+	font-size: 12px;
+	color: var(--font-color-1);
+}
+
+.react-select__control {
+	min-height: 24px !important;
+	height: 24px !important;
+	flex-grow: 1;
+}
+
+.react-select__value-container {
+	height: 20;
+	padding: 0 6px !important;
+}
+
+.react-select__indicators {
+	height: 20;
+}
+
+.react-select__indicator {
+	height: 20;
+	padding: 0 6px !important;
+}
+
+.react-select__menu {
+	margin: 0;
+	padding: 0;
+}
+
+.react-select__menu-list {
+	margin: 0;
+	padding: 0;
+}
+
+.react-select__option {
+	/* height: 20; */
+	padding: 0 4px;
+	margin: 0;
+}
+
+/* Styles for custom elements */
+#tools {
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--core-primary);
+	bottom: 0;
+	width: 100%;
+}
+
+.controlsColumn {
+	display: flex;
+	flex-direction: column;
+}
+
+.controlsRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.flex-grow {
+	flex-grow: 1;
+}
+
+.flex-dont-grow {
+	flex-grow: 0;
+}
+
+.flex-shrink {
+	flex-shrink: 1;
+}
+
+.flex-dont-shrink {
+	flex-shrink: 0;
+}
+
+.justify-flex-start {
+	justify-content: flex-start;
+}
+
+.justify-flex-end {
+	justify-content: flex-end;
+}
+
+.inputLabel {
+	font-family: var(--font-family);
+	font-weight: var(--font-weight-1);
+	font-size: 10pt;
+	margin: 3px;
+}
+
+.errorLabel {
+	font-family: var(--font-family);
+	font-weight: var(--font-weight-1);
+	font-size: 9pt;
+	margin: 5px 0;
+	color: var(--accent-negative);
+}
+
+.successLabel {
+	font-family: var(--font-family);
+	font-weight: var(--font-weight-1);
+	font-size: 10pt;
+	margin: 5px 0;
+	color: var(--accent-positive);
+}
+
+.button {
+	align-self: stretch;
+	text-align: center !important;
+	margin: 3px;
+	max-width: 200;
+	background-color: var(--button-affirmative-background-color);
+	color: #fff;
+	font-family: var(--font-family);
+	font-weight: var(--font-weight-1);
+	font-size: 10pt;
+	border: 0;
+	border-radius: 3px;
+	padding: 3px 5px;
+	vertical-align: middle;
+	transition: all 0.2s ease;
+}
+
+#status {
+	color: var(--core-secondary);
+	font-size: 12px;
+	padding: 5px 0;
+}
+
+#root {
+	height: calc(100% - 25px);
+}
+
+#container {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+	padding: 10;
+	height: 100%;
+	justify-content: space-between;
+}

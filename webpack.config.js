@@ -5,7 +5,11 @@ const path = require('path');
 
 module.exports = {
   // Where webpack looks to start building the bundle
-  entry: {"components/Bloomberg Demo": path.resolve(__dirname, 'src/components/Bloomberg Demo/index.tsx')},
+  entry: {
+    "components/Bloomberg Demo": path.resolve(__dirname, 'src/components/Bloomberg Demo/index.tsx'),
+    "components/BloombergToFDC3": path.resolve(__dirname, 'src/components/BloombergToFDC3/index.tsx'),
+  },
+  watch:true,
 
   // mode: process.env.NODE_ENV,
   
