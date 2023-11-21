@@ -7,11 +7,28 @@ export const BBGToFDC3 = () => {
   const [activeTab, setActiveTab]  = useState("launchpad")
 
   useEffect(() => {
-    setActiveTab("launchpad")
     // Initial setup
-  })
+    FSBL.Clients.WindowClient.getComponentState(
+        {
+          fields: ["activeTab"],
+        },
+        (err, state) => {
+          if (!err) {
+            const fetchedTab = state["activeTab"];
+            if(fetchedTab) {
+              changeTab(fetchedTab)
+            }
+          }
+        },
+    );
+  }, [])
 
-  console.log(activeTab);
+  const changeTab = (tabName:string) => {
+    // Persist to storage
+    FSBL.Clients.WindowClient.setComponentState({field: "activeTab", value: tabName,})
+    setActiveTab(tabName);
+  }
+
 
   return <div className="container">
     <div className="header">
@@ -19,8 +36,17 @@ export const BBGToFDC3 = () => {
     </div>
     <div className="body">
       <div className="tabs">
-        <div className={`tab launchpad-tab ${activeTab == "launchpad" ? "active-tab" : ""}`}>Launchpad</div>
-        <div className={`tab terminal-tab ${activeTab == "terminal" ? "active-tab" : ""}`}>Terminal</div>
+        <div
+            className={`tab launchpad-tab ${activeTab == "launchpad" ? "active-tab" : ""}`}
+            onClick={() => {
+              changeTab("launchpad")
+            }}
+        >Launchpad</div>
+        <div className={`tab terminal-tab ${activeTab == "terminal" ? "active-tab" : ""}`}
+             onClick={() => {
+               changeTab("terminal")
+             }}
+        >Terminal</div>
       </div>
       <div className="tab-content-container">
         <div className={`tab-content launchpad-tab-content ${activeTab == "launchpad" ? "active" : ""}`}>

@@ -12,7 +12,7 @@ export const LaunchPadContent = ({security}:LaunchPadContentProps) => {
 		if(componentState) {
 			linkGroup();
 		}
-	})
+	}, [])
 
 	const changed:ChangeEventHandler = () => {
 		// The button has been clicked link or unlink the groups and store it in component state
