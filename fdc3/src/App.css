@@ -66,3 +66,24 @@ body {
 .checkbox-container label {
   display: block;
 }
+
+pre {
+  display: inline;
+  border-radius: 2px;
+  border: 1px solid black;
+  padding: 0 2px;
+  background-color: antiquewhite;
+}
+
+.history-log {
+  list-style: none;
+  padding-left: 0;
+}
+
+.history-log li {
+  border: 2px solid black;
+  margin: 4px 0;
+  padding: 4px;
+  border-radius: 4px;
+  background-color: #eee;
+}
