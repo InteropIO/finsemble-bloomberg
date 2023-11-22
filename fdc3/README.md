@@ -18,19 +18,6 @@ This tab demonstrates:
 - Listening for changes to the actual Launchpad groups themselves and taking an appropriate action (in this updating the list of groups). 
 - Searching for a security in Bloomberg
 
-## The Terminal tab
-
-The Terminal tab sets up automatic relays that listen for intents, changes in launchpad and take the specified action. 
-
-[Add image of the terminal tab here]
-
-### What it does
-
-This functionality on this tab hooks into of the capabilities of the Bloomberg Bridge Service. This tab works by creating a list of relays stored in the Finsemble user preferences. The preferences are picked up by the Bloomberg Bridge service where it is acted upon. This is a simplified version the Bloomberg preferences tab. 
-
-The functionality capable from this tab:
-- Listening for when an intent is raised and relaying that 
-
 
 ## Running the example
 
