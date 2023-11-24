@@ -10,8 +10,6 @@ The Launchpad tab demonstrates two-way communication between apps in Finsemble a
 
 ![img.png](img.png)
 
-### What it does
-
 This tab demonstrates:
 - Listening for instruments broadcast via FDC3 and setting the Launchpad group accordingly.
 - Listening for changes in the Launchpad groups' securities and using FDC3 to broadcasting the appropriate context to linked apps.  
@@ -24,13 +22,11 @@ The Terminal tab sets up automatic relays that listen for intents, changes in la
 
 [Add image of the terminal tab here]
 
-### What it does
-
 This functionality on this tab hooks into of the capabilities of the Bloomberg Bridge Service. This tab works by creating a list of relays stored in the Finsemble user preferences. The preferences are picked up by the Bloomberg Bridge service where it is acted upon. This is a simplified version the Bloomberg preferences tab.
 
 The functionality capable from this tab:
-- Listening for when an intent is raised and relaying that
 
+- Listening for when an intent is raised and relaying that
 
 ## Running the example
 

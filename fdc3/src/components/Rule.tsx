@@ -2,19 +2,23 @@
 
 import {getDisplayName} from "../common.ts";
 
-const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
-
-
-export const Rule = ({link, security, editFunction}) => {
+export const Rule = ({link, bbgSecurity, editFunction}) => {
+  const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
   return <tr>
     <td>{getDisplayName(link)}</td>
     <td>
-      <button disabled={security === ""} onClick={() => {
+      <button disabled={bbgSecurity === ""} onClick={() => {
+
         BloombergBridgeClient.runBBGCommand(
           link.target.id,
-          security,
+          [bbgSecurity],
+          link.target.args.panel ?? 1,
           link.target.args.tails,
-          link.target.args.panel ?? 1
+          (err) => {
+            if (err) {
+              console.error("Error on running terminal command: ", err);
+            }
+          }
         )
       }}>Run Command
       </button>
