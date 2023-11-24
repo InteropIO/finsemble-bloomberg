@@ -60,7 +60,7 @@ function BloombergBridgeApp() {
             reject (`Error received from runSecurityLookup: search string: ${searchString}, error: ${JSON.stringify(err)}`);
           } else {
             if(data?.results && data?.results.length > 1 && data?.results[0].name) {
-              resolve(data?.results[0].name);
+              resolve(data?.results[0].name + " " + data?.results[0].type);
             } else {
               resolve(null);
             }
@@ -71,22 +71,25 @@ function BloombergBridgeApp() {
 
   /** Handles events from LaunchPad groups */
   const maybeSetSecurity = async (ctx: string, id: number) => {
-    //remove any Bloomberg market and security type details
-    //TODO: improve this to represent the market details in the FDC3 context and security state
     const contextParts = ctx.split(" ");
     const ticker = contextParts[0];
     const ticketMarket = contextParts[1];
 
     //ignore events for non-selected groups and if we are already showing that security (as changes we pushed out are sent back to us)
-    if ((instrument != ticker || market != ticketMarket) && selectedGroupIds.includes(id)) {
-      console.log(`handling event from selected group ${id}: ${JSON.stringify(groupInfo[id])}`);
-      setBbgSecurityString(ctx);
-      setInstrument(ticker);
-      setMarket(ticketMarket);
-      relayContextToFdc3(ticker, ticketMarket);
+    if (instrument != ticker || market != ticketMarket){
+      if (selectedGroupIds.includes(id)) {
+        console.log(`handling event from selected group ${id}: ${JSON.stringify(groupInfo[id])}`);
+        setBbgSecurityString(ctx);
+        setInstrument(ticker);
+        setMarket(ticketMarket);
+        relayContextToFdc3(ticker, ticketMarket);
+      } else {
+        console.log(`ignoring event from unselected group ${id}: ${JSON.stringify(groupInfo[id])}`);
+      }
     } else {
-      console.log(`ignoring event from unselected group ${id}: ${JSON.stringify(groupInfo[id])}`);
+      console.log(`ignoring event as it wouldn't change the current ticker (${ticker}) and market (${market})`);
     }
+    
   };
 
   const maybeGrabGroupContext = (groupId: number) => {

@@ -49,18 +49,18 @@ The example is now ready to be run in the Finsemble environment. Add the example
   },
   "hostManifests": {
     "Finsemble": {
-      "foreign": {
-        "components": {
-          "App Launcher": {
-            "launchableByUser": true
-          },
-          "Window Manager": {
-            "titlebarType": "injected"
-          }
-        }
-      },
       "component": {
         "preload": ["$moduleRoot/preloads/BloombergBridgePreload.js"]
+      }
+    },
+    "foreign": {
+      "components": {
+        "App Launcher": {
+          "launchableByUser": true
+        },
+        "Window Manager": {
+          "titlebarType": "injected"
+        }
       }
     }
   }
