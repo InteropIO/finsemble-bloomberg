@@ -7,12 +7,12 @@ export const RuleForm = ({activeLink, editFunction}) => {
   const [intent, setIntent] = useState("")
   const [command, setCommand] = useState("")
   const [tails, setTails] = useState("")
-  const [panel, setPanel] = useState(1)
+  const [panel, setPanel] = useState("1")
 
 
   useEffect(() => {
     if(activeLink) {
-      setIntent(activeLink.source.intent);
+      setIntent(activeLink.source.id);
       setCommand(activeLink.target.id)
       setTails(activeLink.target.args.tails)
       setPanel(activeLink.target.args.panel)
@@ -63,7 +63,7 @@ export const RuleForm = ({activeLink, editFunction}) => {
       setIntent("")
       setTails("")
       setCommand("")
-      setPanel(1);
+      setPanel("");
       editFunction(null);
     }
   }
@@ -72,14 +72,12 @@ export const RuleForm = ({activeLink, editFunction}) => {
     <tbody>
     <tr>
       <th>Display Name</th>
-      <td><input type="text" value={displayName} onChange={(e) => {
-        setDisplayName(e.target.value);
-      }} /></td>
+      <td><input type="text" value={displayName ?? ""} onChange={(e) => setDisplayName(e.target.value)} /></td>
     </tr>
     <tr>
       <th>FDC3 Intent</th>
       <td><select value={intent} onChange={(e) => setIntent(e.target.value)}>
-        <option value="blank">Select Intent</option>
+        <option value="">Select Intent</option>
         <option value="CreateTradeTicket">CreateTradeTicket</option>
         <option value="ViewChart">ViewChart</option>
         <option value="ViewAnalysis">ViewAnalysis</option>
@@ -106,8 +104,8 @@ export const RuleForm = ({activeLink, editFunction}) => {
     </tr>
     <tr>
       <th>Panel</th>
-      <td><select>
-        <option>1</option>
+      <td><select value={panel} onChange={(e) => setPanel(e.target.value)}>
+        <option value="">1</option>
         <option value={2}>2</option>
         <option value={3}>3</option>
         <option value={4}>4</option>
@@ -115,7 +113,9 @@ export const RuleForm = ({activeLink, editFunction}) => {
     </tr>
     <tr>
       <td>
-        <button onClick={saveLink}>Save</button>
+        <div
+          className="finsemble__btn" title="Edit"
+          onClick={saveLink}><span className="btn-label">Save</span></div>
       </td>
     </tr>
     </tbody>
