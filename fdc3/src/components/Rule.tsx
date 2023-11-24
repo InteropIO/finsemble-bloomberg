@@ -1,11 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export const getDisplayName = (link) => {
-  console.log(link);
-  const tailsPart = link.target.args?.tails ? ` ${link.target.args.tails}` : "";
-  const panelPart = link.target.args?.panel ? ` on panel ${link.target.args.panel}` : "";
-  return link.displayName ? link.displayName : `Bloomberg: ${link.target.id}${tailsPart}${panelPart}`;
-}
+import {getDisplayName} from "../common.ts";
 
 const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
 

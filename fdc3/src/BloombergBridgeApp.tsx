@@ -3,7 +3,8 @@
 
 import {useState, useEffect} from "react";
 import {Rule} from "./components/Rule.tsx";
-import {LINK_PREFERENCES_PATH, RuleForm} from "./components/RuleForm.tsx";
+import {RuleForm} from "./components/RuleForm.tsx";
+import {LINK_PREFERENCES_PATH} from "./common.ts";
 
 /**
  * Todo:

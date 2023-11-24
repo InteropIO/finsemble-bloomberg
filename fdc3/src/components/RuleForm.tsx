@@ -1,6 +1,5 @@
 import {useEffect, useState} from "react";
-
-export const LINK_PREFERENCES_PATH = ["finsemble", "custom", "bloomberg", "links"];
+import {LINK_PREFERENCES_PATH} from "../common.ts";
 
 
 export const RuleForm = ({activeLink, editFunction}) => {
