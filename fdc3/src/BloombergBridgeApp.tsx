@@ -1,11 +1,34 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {useState, useEffect} from "react";
+import React from "react";
 import {Rule} from "./components/Rule.tsx";
 import {RuleForm} from "./components/RuleForm.tsx";
 import {LINK_PREFERENCES_PATH} from "./common.ts";
 import { Listener } from "@finsemble/finsemble-core/dist/lib/typedefs/FDC3/api/Listener";
+import { FEAGlobals } from "@finsemble/finsemble-core";
+
+const {useState, useEffect, useRef} = React;
+
+function useRefState<T>(
+  initialState: T,
+): [React.MutableRefObject<T>, React.Dispatch<React.SetStateAction<T>>] {
+  const [internalState, setInternalState] = React.useState<T>(initialState);
+
+  const state = React.useRef<T>(internalState);
+
+  const setState = (newState: React.SetStateAction<T>) => {
+    if (newState instanceof Function) {
+      state.current = newState(state.current);
+      setInternalState(newState);
+    } else {
+      state.current = newState;
+      setInternalState(newState);
+    }
+  };
+
+  return [state, setState];
+}
 
 /**
  * @TODO
@@ -13,21 +36,21 @@ import { Listener } from "@finsemble/finsemble-core/dist/lib/typedefs/FDC3/api/L
  * Persist Groups to ComponentState
  */
 
-
-
 function BloombergBridgeApp() {
   const [editLink, setEditLink] = useState(null);
   const [instrument, setInstrument] = useState("");
   const [market, setMarket] = useState("");
   const [bbgSecurityString, setBbgSecurityString] = useState("");
-  const [groupInfo, setGroupInfo] = useState<Record<number, string>>({});
-  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [selectedTab, setSelectedTab] = useState(1);
 
+  
+  const [groupInfo, setGroupInfo] = useRefState<Record<number, string>>({});
+  const [selectedGroupIds, setSelectedGroupIds] = useRefState<number[]>([]);
   const [links, setLinks] = useState<any[]>([]);
+
   let contextListener: Listener | null = null;
 
-  const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
+  const bbgClient = (FSBL.Clients as any).BloombergBridgeClient;
 
   const changeTab = (tabName: number) => {
     // Persist to storage
@@ -35,10 +58,11 @@ function BloombergBridgeApp() {
     setSelectedTab(tabName);
   }
 
-  const shouldShowGroupZeroState = Object.keys(groupInfo).length === 0;
+  const shouldShowGroupZeroState = Object.keys(groupInfo.current).length === 0;
 
   const toggleIds = (id: number) => {
-    const selected = new Set(selectedGroupIds);
+    console.log(`toggleIds: toggle ${id} in set ${JSON.stringify(selectedGroupIds.current)}`);
+    const selected = new Set<number>([...selectedGroupIds.current]);
     if (selected.has(id)) {
       selected.delete(id);
     } else {
@@ -46,13 +70,15 @@ function BloombergBridgeApp() {
       maybeGrabGroupContext(id);
     }
 
-    setSelectedGroupIds([...selected]);
+    const newSelectedGroupIds = [...selected];
+    console.log(`toggleIds: toggle ${id} new set ${JSON.stringify(newSelectedGroupIds)}`);
+    setSelectedGroupIds(newSelectedGroupIds);    
   }
 
   const resolveSecurity = async (ticker: string, market: string): Promise<string | null> => {
     const searchString = ticker + " " + market;
     return new Promise((resolve,reject) => {
-      BloombergBridgeClient.runSecurityLookup(
+      bbgClient.runSecurityLookup(
         searchString,
         (err: any, data: any) => {
           if (err) {
@@ -69,26 +95,25 @@ function BloombergBridgeApp() {
   }
 
   /** Handles events from LaunchPad groups */
-  const maybeSetSecurity = async (ctx: string, id: number) => {
+  const maybeSetSecurity = (ctx: string, id: number) => {
     const contextParts = ctx.split(" ");
     const ticker = contextParts[0];
     const ticketMarket = contextParts[1];
 
     //ignore events for non-selected groups and if we are already showing that security (as changes we pushed out are sent back to us)
     if (instrument != ticker || market != ticketMarket){
-      if (selectedGroupIds.includes(id)) {
-        console.log(`handling event from selected group ${id}: ${JSON.stringify(groupInfo[id])}`);
+      if (selectedGroupIds.current.includes(id)) {
+        console.log(`handling event from selected group ${id}: ${JSON.stringify(groupInfo.current[id])}`, " Selected Groups: ", selectedGroupIds.current);
         setBbgSecurityString(ctx);
         setInstrument(ticker);
         setMarket(ticketMarket);
         relayContextToFdc3(ticker, ticketMarket);
       } else {
-        console.log(`ignoring event from unselected group ${id}: ${JSON.stringify(groupInfo[id])}`);
+        console.log(`ignoring event from unselected group ${id}:`, groupInfo.current[id], " Selected Groups: ", selectedGroupIds.current);
       }
     } else {
       console.log(`ignoring event as it wouldn't change the current ticker (${ticker}) and market (${market})`);
     }
-    
   };
 
   const maybeGrabGroupContext = (groupId: number) => {
@@ -96,30 +121,34 @@ function BloombergBridgeApp() {
       return;
     }
 
-    BloombergBridgeClient.runGetAllGroups((err, {groups}: { groups }) => {
+    bbgClient.runGetAllGroups((err, {groups}: { groups }) => {
       if (!err) {
         const relevantGroup = groups.find(({id}) => id == groupId);
-        if (relevantGroup?.value !== instrument) {
-          setInstrument(relevantGroup?.value);
+
+        if (relevantGroup?.value && relevantGroup?.value !== instrument) {
+          setBbgSecurityString(`${relevantGroup.value} ${relevantGroup.type}`);
+          const contextParts = relevantGroup.value.split(" ");
+          setInstrument(contextParts[0]);
+          setMarket(contextParts[1]);
+
         }
       }
     });
   };
 
-  const relayContextToBloomberg = async (instrument: string, market: string) => {
+  const relayContextToBloomberg = (ticker: string, market: string) => {
     //lookup the security first
-    try {
-      let securityString = await resolveSecurity(instrument, market);
+    resolveSecurity(ticker, market).then((securityString) => {
       if (securityString) {
         setBbgSecurityString(securityString);
-        selectedGroupIds.forEach((groupId) => {
-          BloombergBridgeClient.runSetGroupContext(groupInfo[groupId], securityString, "", () => {
+        selectedGroupIds.current.forEach((groupId) => {
+          bbgClient.runSetGroupContext(groupInfo.current[groupId], securityString, "", () => {
           });
         });
       }
-    } catch (err) {
+    }).catch((err) => {
       console.warn("Not relaying security to BBG as it couldn't resolve it: ", err);
-    }
+    });
   }
 
   const relayContextToFdc3 = (ticker: string, market: string) => {
@@ -134,25 +163,84 @@ function BloombergBridgeApp() {
     });
   }
 
-  const fdc3ContextListener = (ctx) => {
-    console.log("Received context broadcast: ", ctx);
-    const ticker = ctx?.id?.ticker ?? instrument;
-    const tickerMarket = ctx?.market?.BBG ?? ctx?.market?.COUNTRY_ISOALPHA2 ?? ctx?.market?.MIC ?? "US";
-    setInstrument(ticker);
-    setMarket(tickerMarket);
-    relayContextToBloomberg(ticker, tickerMarket);
+  const groupEventHandler = (err, {data}: { data }) => {
+    if (err) {
+      console.error("Error on launchpad group event: ", err);
+      return;
+    }
+
+    console.log("Launchpad group event received: ", data);
+
+    const {group} = data;
+
+    switch (group.eventType) {
+      case "VALUE_CHANGED": {
+        maybeSetSecurity(group.value, group.id);
+        break;
+      }
+      case "DELETED": {
+        const newGroupInfo = groupInfo.current;
+        delete newGroupInfo[group.id];
+        setGroupInfo(newGroupInfo);
+        break;
+      }
+      case "RENAMED": // Explicit fall-through
+      case "CREATED": {
+        setGroupInfo({
+          ...groupInfo.current,
+          [group.id]: group.name
+        });
+        break;
+      }
+      default: {
+        console.log("Unknown eventType: ", group.eventType);
+      }
+    }
   };
 
-  async function setupContextListener() {
+  const handleLaunchPadGroups = () => {
+    console.log("Retrieving launchpad groups and setting up listener...");
+    bbgClient.runGetAllGroups((err, data: { groups }) => {
+      if (err) {
+        console.error("Error on retrieving launchpad groups: ", err);
+        return;
+      }
+      const {groups} = data;
+      const newGroupsInfo = Object.fromEntries(groups.map(({id, name}) => [id, name])); 
+      setGroupInfo(newGroupsInfo);
+      console.log("Initial set of launchpad groups retrieved: ", newGroupsInfo);
+
+      console.log("Listening for launchpad group events...");
+      bbgClient.setGroupEventListener(groupEventHandler);
+    });
+  };
+
+  const fdc3ContextListener = (ctx) => {
+    console.log("Received context broadcast: ", ctx);
+    const ticker = ctx?.id?.ticker ?? ctx?.id?.CUSIP ?? ctx?.id?.ISIN ?? instrument;
+    const tickerMarket = ctx?.market?.BBG ?? ctx?.market?.COUNTRY_ISOALPHA2 ?? ctx?.market?.MIC ?? "US";
+    
+    relayContextToBloomberg(ticker, tickerMarket);
+    setInstrument(ticker);
+    setMarket(tickerMarket);
+  };
+
+  const setupContextListener = async () => {
     console.log("Listening for instruments from FDC3 user channels...")
     contextListener = await fdc3.addContextListener("fdc3.instrument", fdc3ContextListener);
-  }
+  };
 
-  async function tearDownContextListener() {
+  const tearDownContextListener = async () => {
     if (contextListener){
       contextListener.unsubscribe();
     }
-  }
+  };
+
+  const retrieveBloombergLinkPreferences = () => {
+    console.log("Retrieving Bloomberg link preferences...");
+    FSBL.Clients.ConfigClient.get(LINK_PREFERENCES_PATH, updateLinks);
+    FSBL.Clients.ConfigClient.addListener( LINK_PREFERENCES_PATH, updateLinks);
+  };
 
   const updateLinks = (err: any, links: any) => {
     if (!err) {
@@ -169,63 +257,7 @@ function BloombergBridgeApp() {
     }
   };
 
-  useEffect(() => {
-    console.log("Initializing...");
-    FSBL.Clients.ConfigClient.get(LINK_PREFERENCES_PATH, updateLinks)
-
-    // Get initial list of groups
-    console.log("Retrieving launchpad groups...");
-    BloombergBridgeClient.runGetAllGroups((err, data: { groups }) => {
-      if (err) {
-        console.error("Error on retrieving launchpad groups: ", err);
-        return;
-      }
-      const {groups} = data;
-      const newGroupsInfo = Object.fromEntries(groups.map(({id, name}) => [id, name])); 
-      setGroupInfo(newGroupsInfo);
-      console.log("Initial set of launchpad groups retrieved: ", JSON.stringify(newGroupsInfo, null, 2));
-    });
-
-    // Add event listeners for changes in the group
-    console.log("Listening for launchpad group events...");
-    BloombergBridgeClient.setGroupEventListener((err, {data}: { data }) => {
-      if (err) {
-        console.error("Error on launchpad group event: ", err);
-        return;
-      }
-
-      console.log("Launchpad group event received: ", JSON.stringify(data, null, 2));
-
-      const {group} = data;
-
-      switch (group.eventType) {
-        case "VALUE_CHANGED": {
-          maybeSetSecurity(group.value, group.id);
-          break;
-        }
-        case "DELETED": {
-          const newGroupInfo = groupInfo;
-          delete newGroupInfo[group.id];
-          setGroupInfo(newGroupInfo);
-          break;
-        }
-        case "RENAMED": // Explicit fall-through
-        case "CREATED": {
-          setGroupInfo({
-            ...groupInfo,
-            [group.id]: group.name
-          });
-          break;
-        }
-        default: {
-          console.log("Unknown eventType: ", group.eventType);
-        }
-      }
-    });
-
-    // Listen for context broadcasts
-    setupContextListener();
-
+  const retrieveComponentState = () => {
     console.log("Retrieving component state...");
     FSBL.Clients.WindowClient.getComponentState(
       {
@@ -240,15 +272,27 @@ function BloombergBridgeApp() {
         }
       },
     );
+  };
+  
+  useEffect(() => {
+    // Retrieve configuration for terminal commands and listen for changes
+    retrieveBloombergLinkPreferences();
 
-    console.log("Listening for Bloomberg link preferences...");
-    FSBL.Clients.ConfigClient.addListener( LINK_PREFERENCES_PATH, updateLinks);
+    // Get initial list of groups and setup event listeners
+    handleLaunchPadGroups();
+
+    // Listen for context broadcasts
+    setupContextListener();
+
+    //retrieve and restore any saved state in the workspace
+    retrieveComponentState();
 
     return () => {
+      //remove listeners added above
       FSBL.Clients.ConfigClient.removeListener(LINK_PREFERENCES_PATH, updateLinks);
+      bbgClient.removeGroupEventListener();
       tearDownContextListener();
     };
-
 
   }, []);
 
@@ -270,8 +314,8 @@ function BloombergBridgeApp() {
           Select Launchpad groups to link to:
           <div className="checkbox-container">
             {shouldShowGroupZeroState && <span>No groups found in Launchpad.</span>}
-            {Object.entries(groupInfo).map(([id, name]) => <label key={id}>
-              <input type="checkbox" value={id} checked={selectedGroupIds.includes(+id)} onChange={() => toggleIds(+id)} />
+            {Object.entries(groupInfo.current).map(([id, name]) => <label key={id}>
+              <input type="checkbox" value={id} checked={selectedGroupIds.current.includes(parseInt(id))} onChange={() => toggleIds(parseInt(id))} />
               {name}
             </label>)}
           </div>
