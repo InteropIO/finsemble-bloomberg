@@ -63,7 +63,7 @@ export const RuleForm = ({activeLink, editFunction}) => {
       setIntent("")
       setTails("")
       setCommand("")
-      setPanel(1);
+      setPanel("");
       editFunction(null);
     }
   }
@@ -105,7 +105,7 @@ export const RuleForm = ({activeLink, editFunction}) => {
     <tr>
       <th>Panel</th>
       <td><select value={panel} onChange={(e) => setPanel(e.target.value)}>
-        <option>1</option>
+        <option value="">1</option>
         <option value={2}>2</option>
         <option value={3}>3</option>
         <option value={4}>4</option>
