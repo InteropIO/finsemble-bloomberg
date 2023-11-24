@@ -7,12 +7,12 @@ export const RuleForm = ({activeLink, editFunction}) => {
   const [intent, setIntent] = useState("")
   const [command, setCommand] = useState("")
   const [tails, setTails] = useState("")
-  const [panel, setPanel] = useState(1)
+  const [panel, setPanel] = useState("1")
 
 
   useEffect(() => {
     if(activeLink) {
-      setIntent(activeLink.source.intent);
+      setIntent(activeLink.source.id);
       setCommand(activeLink.target.id)
       setTails(activeLink.target.args.tails)
       setPanel(activeLink.target.args.panel)
@@ -77,7 +77,7 @@ export const RuleForm = ({activeLink, editFunction}) => {
     <tr>
       <th>FDC3 Intent</th>
       <td><select value={intent} onChange={(e) => setIntent(e.target.value)}>
-        <option value="blank">Select Intent</option>
+        <option value="">Select Intent</option>
         <option value="CreateTradeTicket">CreateTradeTicket</option>
         <option value="ViewChart">ViewChart</option>
         <option value="ViewAnalysis">ViewAnalysis</option>
@@ -104,7 +104,7 @@ export const RuleForm = ({activeLink, editFunction}) => {
     </tr>
     <tr>
       <th>Panel</th>
-      <td><select>
+      <td><select value={panel} onChange={(e) => setPanel(e.target.value)}>
         <option>1</option>
         <option value={2}>2</option>
         <option value={3}>3</option>

@@ -8,10 +8,9 @@ import {LINK_PREFERENCES_PATH} from "./common.ts";
 import { Listener } from "@finsemble/finsemble-core/dist/lib/typedefs/FDC3/api/Listener";
 
 /**
- * Todo:
- * Comment and organise code into logical chunks
+ * @TODO
+ * Comment code
  * Persist Groups to ComponentState
- * Edit Rule - select does not work
  */
 
 
