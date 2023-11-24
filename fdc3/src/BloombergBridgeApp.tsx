@@ -91,35 +91,41 @@ function BloombergBridgeApp() {
         // get and the listener have different return values
         links = links.value;
       }
-      console.log(links)
+      
       const filteredLinks = links.filter((link: any, index) => {
         link.index = index;
         return link.source.type == "fdc3.intent" && link.target.type == "BloombergCommand" && !link.bidirectional
       })
+      console.log("Updating (FDC3 Intent related) links to: ", JSON.stringify(filteredLinks));
       setLinks(filteredLinks);
     }
   };
 
   useEffect(() => {
-
     FSBL.Clients.ConfigClient.get(LINK_PREFERENCES_PATH, updateLinks)
 
     // Get initial list of groups
     BloombergBridgeClient?.runGetAllGroups((err, data: { groups }) => {
       if (err) {
+        console.error("Error on retrieving launchpad groups: ", err);
         return;
       }
       const {groups} = data;
       setGroupInfo(
         Object.fromEntries(groups.map(({id, name}) => [id, name]))
       );
+      console.log("Initial set of launchpad groups retrieved: ", JSON.stringify(groupInfo, null, 2));
     });
 
     // Add event listeners for changes in the group
     BloombergBridgeClient?.setGroupEventListener((err, {data}: { data }) => {
       if (err) {
+        console.error("Error on launchpad group event: ", err);
         return;
       }
+
+      console.log("Launchpad group event received: ", JSON.stringify(data, null, 2));
+
       const {group} = data;
 
       switch (group.eventType) {
@@ -145,6 +151,8 @@ function BloombergBridgeApp() {
           console.log("Unknown eventType: ", group.eventType);
         }
       }
+
+      console.log("groupinfo updated to: ", JSON.stringify(groupInfo, null, 2));
     });
 
     // Listen for context broadcasts
@@ -216,8 +224,8 @@ function BloombergBridgeApp() {
             </tr>
             </thead>
             <tbody>
-            {links.map((link) =>
-              <Rule link={link} security={security} editFunction={setEditLink}/>)}
+            {links.map((link, index) =>
+              <Rule link={link} security={security} editFunction={setEditLink} key={`rule-${index}`}/>)}
             </tbody>
           </table>
 
