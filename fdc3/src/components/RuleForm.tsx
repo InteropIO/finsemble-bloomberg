@@ -72,9 +72,7 @@ export const RuleForm = ({activeLink, editFunction}) => {
     <tbody>
     <tr>
       <th>Display Name</th>
-      <td><input type="text" value={displayName} onChange={(e) => {
-        setDisplayName(e.target.value);
-      }} /></td>
+      <td><input type="text" value={displayName ?? ""} onChange={(e) => setDisplayName(e.target.value)} /></td>
     </tr>
     <tr>
       <th>FDC3 Intent</th>
@@ -115,7 +113,9 @@ export const RuleForm = ({activeLink, editFunction}) => {
     </tr>
     <tr>
       <td>
-        <button onClick={saveLink}>Save</button>
+        <div
+          className="finsemble__btn" title="Edit"
+          onClick={saveLink}><span className="btn-label">Save</span></div>
       </td>
     </tr>
     </tbody>
