@@ -10,8 +10,7 @@ import {LINK_PREFERENCES_PATH} from "./common.ts";
  * Todo:
  * Comment and organise code into logical chunks
  * Persist Groups to ComponentState
- * Edit Rule - select do not work
- * Make it look decent
+ * Edit Rule - select does not work
  */
 
 const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
@@ -30,8 +29,6 @@ function BloombergBridgeApp() {
     FSBL.Clients.WindowClient.setComponentState({field: "activeTab", value: tabName,})
     setSelectedTab(tabName);
   }
-
-
 
   const shouldShowGroupZeroState = Object.keys(groupInfo).length === 0;
 
@@ -91,7 +88,6 @@ function BloombergBridgeApp() {
         // get and the listener have different return values
         links = links.value;
       }
-      console.log(links)
       const filteredLinks = links.filter((link: any, index) => {
         link.index = index;
         return link.source.type == "fdc3.intent" && link.target.type == "BloombergCommand" && !link.bidirectional
@@ -133,7 +129,7 @@ function BloombergBridgeApp() {
           setGroupInfo(newGroupInfo);
           break;
         }
-        case "RENAMED":   // Explicit fall-through
+        case "RENAMED": // Explicit fall-through
         case "CREATED": {
           setGroupInfo({
             ...groupInfo,
@@ -170,10 +166,10 @@ function BloombergBridgeApp() {
       },
     );
 
-    FSBL.Clients.ConfigClient.addListener({field: LINK_PREFERENCES_PATH.join(".")}, updateLinks);
+    FSBL.Clients.ConfigClient.addListener( LINK_PREFERENCES_PATH, updateLinks);
 
     return () => {
-      FSBL.Clients.ConfigClient.removeListener({field: LINK_PREFERENCES_PATH.join(".")}, updateLinks);
+      FSBL.Clients.ConfigClient.removeListener(LINK_PREFERENCES_PATH, updateLinks);
     };
 
 
@@ -205,12 +201,13 @@ function BloombergBridgeApp() {
         </div>
 
         <div role="tabpanel" data-active={selectedTab === 2}>
-          {security === "" && <div id="error-warning" style={{color: "red", fontWeight: "bold"}}>Must have a security to run a command.</div>}
+          {links.length > 0 && <>
+          {security === "" && <div id="error-warning">Must have a security to run a command.</div>}
 
           <table role="presentation">
             <thead>
             <tr>
-              <th>Display Name</th>
+              <th>Command List</th>
               <th></th>
               <th></th>
             </tr>
@@ -220,7 +217,7 @@ function BloombergBridgeApp() {
               <Rule link={link} security={security} editFunction={setEditLink}/>)}
             </tbody>
           </table>
-
+          </>}
           <h3>Add</h3>
           <RuleForm activeLink={editLink} editFunction={setEditLink}/>
         </div>

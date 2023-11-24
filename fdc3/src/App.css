@@ -1,12 +1,14 @@
-body {
-  background-color: white;
+html, body, #root {
+  height: 100%;
+  background: var(--core-primary-1);
+  color: var(--font-color);
 }
-
 
 #container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 20px);
+  height: 100%;
+  background: var(--titleBar-background-inactive-color);
 }
 
 /* Search Box */
@@ -25,18 +27,24 @@ body {
   text-align: center;
 }
 
+.content {
+  padding: 10px;
+}
 
 /* Tabs */
 [role='tab']{
-  background-color: #999;
-  border-radius: 4px;
-  border: 1px solid black;
-  padding: 4px;
+  background-color: var(--titlebar-tab-inactive-background-color);
+  color: var(--titlebar-tab-inactive-font-color);
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  border: none;
+  padding: 5px 10px;
   cursor: pointer;
 }
 
 [role='tab'][aria-selected='true']{
-  background-color: white;
+  background-color: var(--titlebar-tab-active-background-color);
+  color: var(--titlebar-tab-active-font-color);
 }
 
 [role='tablist']{
@@ -46,9 +54,8 @@ body {
 
 [role='tabpanel']{
   position: relative;
+  background-color: var(--core-primary-4);
   top: -1px;
-  width: calc(100vw - 48px);
-  border: 1px solid black;
   border-radius: 4px;
   flex-grow: 2;
   padding: 16px;
@@ -67,23 +74,65 @@ body {
   display: block;
 }
 
-pre {
-  display: inline;
-  border-radius: 2px;
-  border: 1px solid black;
-  padding: 0 2px;
-  background-color: antiquewhite;
+#error-warning {
+  color: var(--accent-negative);
+  font-weight: bold;
 }
 
-.history-log {
-  list-style: none;
-  padding-left: 0;
+table th {
+  text-align: left;
 }
 
-.history-log li {
-  border: 2px solid black;
-  margin: 4px 0;
-  padding: 4px;
-  border-radius: 4px;
-  background-color: #eee;
+button {
+  cursor: pointer;
 }
+
+/**
+Copied From Finsemble can get this using including <FinsembleCss />
+ */
+/* Button */
+.finsemble__btn {
+  align-items: center;
+  background-color: var(--core-primary-3);
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 5px;
+}
+
+.finsemble__btn span.btn-label {
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  padding: 4px 10px;
+  color: var(--font-color);
+}
+
+.finsemble__btn:hover,
+.finsemble__btn:focus {
+  background-color: var(--core-primary-2);
+}
+
+.finsemble__btn.accent {
+  background-color: var(--accent-primary);
+}
+
+
+.finsemble__btn.accent:hover,
+.finsemble__btn.accent:focus {
+  background-color: var(--accent-primary-1);
+}
+
+
+.finsemble__btn.disabled {
+
+}
+
+.finsemble__btn.disabled:hover,
+.finsemble__btn.disabled:focus {
+  
+}
+

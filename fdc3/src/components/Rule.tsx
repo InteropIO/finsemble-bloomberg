@@ -7,20 +7,22 @@ const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
 
 export const Rule = ({link, security, editFunction}) => {
   return <tr>
-    <td>{getDisplayName(link)}</td>
     <td>
-      <button disabled={security === ""} onClick={() => {
+      <div className={`finsemble__btn accent ${security === "" ? "disabled" : ""}}`} title={getDisplayName(link)}
+         onClick={() => {
         BloombergBridgeClient.runBBGCommand(
           link.target.id,
           security,
           link.target.args.tails,
           link.target.args.panel ?? 1
         )
-      }}>Run Command
-      </button>
+      }}
+      ><span className="btn-label">{getDisplayName(link)}</span></div>
     </td>
     <td>
-      <button onClick={() => {editFunction(link)}}>Edit</button>
+      <div
+        className="finsemble__btn" title="Edit"
+        onClick={() => {editFunction(link)}}><span className="btn-label">Edit</span></div>
     </td>
   </tr>
 }
