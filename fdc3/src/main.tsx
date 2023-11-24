@@ -2,14 +2,14 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import "./App.css";
 
-const FSBLReady = () => {
+const BridgeReady = () => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
       <App />,
   )
 };
 
-if (window.FSBL && FSBL.addEventListener) {
-  FSBL.addEventListener("onReady", FSBLReady);
+if (window.FSBL && window.FSBL.Clients && Object.prototype.hasOwnProperty.call(FSBL.Clients,"BloombergBridgeClient")) {
+  BridgeReady();
 } else {
-  window.addEventListener("FSBLReady", FSBLReady);
+  window.addEventListener("BloombergBridgeClientReady", BridgeReady);
 }
