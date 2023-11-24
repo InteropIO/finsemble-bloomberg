@@ -1,27 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import {useState, useEffect} from "react";
+import {Rule} from "./components/Rule.tsx";
+import {LINK_PREFERENCES_PATH, RuleForm} from "./components/RuleForm.tsx";
 
 /**
  * Todo:
- * Organise code into logical chunks
- * Add UI for tails
+ * Comment and organise code into logical chunks
  * Persist Groups to ComponentState
- * Save Rule
- * Edit Rule
+ * Edit Rule - select do not work
+ * Make it look decent
  */
 
-import {useState, useEffect} from "react";
-
-
-const linkPreferencesPath = ["finsemble", "custom", "bloomberg", "links"];
-
 const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
-
-const getDisplayName = (link) => {
-  console.log(link);
-  const tailsPart = link.target.args?.tails ? ` ${link.target.args.tails}` : "";
-  const panelPart = link.target.args?.panel ? ` on panel ${link.target.args.panel}` : "";
-  return link.displayName ? link.displayName : `Bloomberg: ${link.target.id}${tailsPart}${panelPart}`;
-}
 
 function BloombergBridgeApp() {
   const [editLink, setEditLink] = useState(null);
@@ -109,7 +101,7 @@ function BloombergBridgeApp() {
 
   useEffect(() => {
 
-    FSBL.Clients.ConfigClient.get(linkPreferencesPath, updateLinks)
+    FSBL.Clients.ConfigClient.get(LINK_PREFERENCES_PATH, updateLinks)
 
     // Get initial list of groups
     BloombergBridgeClient?.runGetAllGroups((err, data: { groups }) => {
@@ -177,10 +169,10 @@ function BloombergBridgeApp() {
       },
     );
 
-    FSBL.Clients.ConfigClient.addListener({field: linkPreferencesPath.join(".")}, updateLinks);
+    FSBL.Clients.ConfigClient.addListener({field: LINK_PREFERENCES_PATH.join(".")}, updateLinks);
 
     return () => {
-      FSBL.Clients.ConfigClient.removeListener({field: linkPreferencesPath.join(".")}, updateLinks);
+      FSBL.Clients.ConfigClient.removeListener({field: LINK_PREFERENCES_PATH.join(".")}, updateLinks);
     };
 
 
@@ -236,152 +228,6 @@ function BloombergBridgeApp() {
   )
 }
 
-const Rule = ({link, security, editFunction}) => {
-  return <tr>
-    <td>{getDisplayName(link)}</td>
-    <td>{link.target.args.panel ?? 1}</td>
-    <td>
-      <button disabled={security === ""} onClick={() => {
-        BloombergBridgeClient.runBBGCommand(
-          link.target.id,
-          security,
-          link.target.args.tails,
-          link.target.args.panel ?? 1
-        )
-      }}>Run Command
-      </button>
-    </td>
-    <td>
-      <button onClick={() => {editFunction(link)}}>Edit</button>
-    </td>
-  </tr>
-}
 
-const RuleForm = ({activeLink, editFunction}) => {
-  const [displayName, setDisplayName] = useState("")
-  const [intent, setIntent] = useState("")
-  const [command, setCommand] = useState("")
-  const [tails, setTails] = useState("")
-  const [panel, setPanel] = useState(1)
-
-
-  useEffect(() => {
-    if(activeLink) {
-      setIntent(activeLink.source.intent);
-      setCommand(activeLink.target.id)
-      setTails(activeLink.target.args.tails)
-      setPanel(activeLink.target.args.panel)
-      setDisplayName(activeLink.displayName);
-    }
-
-  }, [activeLink])
-
-  useEffect(() => {
-
-  }, [intent])
-
-
-  const saveLink = async () => {
-    const value = {
-      bidirectional: false,
-      displayName,
-      source: {
-        id: intent,
-        data: "fdc3.instrument",
-        type: "fdc3.intent"
-      },
-      target: {
-        id: command,
-        data: "bbg.security",
-        type: "BloombergCommand",
-        args: {
-          tails,
-          panel
-        }
-      }
-    }
-
-    const response = await FSBL.Clients.ConfigClient.get(linkPreferencesPath);
-
-    if (!response.err) {
-      let links = response.data;
-      if (!Array.isArray(links)) {
-        links = [];
-      }
-      links[activeLink?.index ?? links.length] = value;
-
-      await FSBL.Clients.ConfigClient.setPreference({
-        field: linkPreferencesPath.join("."),
-        value: links,
-      });
-
-      setDisplayName("")
-      setIntent("")
-      setTails("")
-      setCommand("")
-      setPanel(1);
-      editFunction(null);
-    }
-  }
-
-  return <table role="presentation">
-    <tbody>
-    <tr>
-      <th>Display Name</th>
-      <td><input type="text" value={displayName} onChange={(e) => {
-        setDisplayName(e.target.value);
-    }} /></td>
-    </tr>
-    <tr>
-      <th>FDC3 Intent</th>
-      <td><select value={intent} onChange={(e) => setIntent(e.target.value)}>
-        <option value="blank">Select Intent</option>
-        <option value="ViewChart">ViewChart</option>
-        <option value="ViewInstrument">ViewInstrument</option>
-        <option value="CreateInteraction">CreateInteraction</option>
-        <option value="StartCall">StartCall</option>
-        <option value="StartChat">StartChat</option>
-        <option value="StartEmail">StartEmail</option>
-        <option value="ViewAnalysis">ViewAnalysis</option>
-        <option value="ViewChat">ViewChat</option>
-        <option value="ViewHoldings">ViewHoldings</option>
-        <option value="ViewInteractions">ViewInteractions</option>
-        <option value="ViewMessages">ViewMessages</option>
-        <option value="ViewNews">ViewNews</option>
-        <option value="ViewOrders">ViewOrders</option>
-        <option value="ViewProfile">ViewProfile</option>
-        <option value="ViewQuote">ViewQuote</option>
-        <option value="ViewResearch">ViewResearch</option>
-      </select>
-      </td>
-    </tr>
-    <tr>
-      <th>Command</th>
-      <td>
-        <input value={command} aria-label="Command" type="text" size={5} maxLength={5}
-         onChange={(e) => {
-           setCommand(e.target.value)
-         }}/> <strong>Tails</strong> <input value={tails} aria-label="Tails" type="text" onChange={(e) => {
-           setTails(e.target.value)
-      } }/>
-      </td>
-    </tr>
-    <tr>
-      <th>Panel</th>
-      <td><select>
-        <option>1</option>
-        <option value={2}>2</option>
-        <option value={3}>3</option>
-        <option value={4}>4</option>
-      </select></td>
-    </tr>
-    <tr>
-      <td>
-        <button onClick={saveLink}>Save</button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-}
 
 export default BloombergBridgeApp
