@@ -12,10 +12,16 @@
 import {useState, useEffect} from "react";
 
 
-
 const linkPreferencesPath = ["finsemble", "custom", "bloomberg", "links"];
 
 const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
+
+const getDisplayName = (link) => {
+  console.log(link);
+  const tailsPart = link.target.args?.tails ? ` ${link.target.args.tails}` : "";
+  const panelPart = link.target.args?.panel ? ` on panel ${link.target.args.panel}` : "";
+  return link.displayName ? link.displayName : `Bloomberg: ${link.target.id}${tailsPart}${panelPart}`;
+}
 
 function BloombergBridgeApp() {
   const [editLink, setEditLink] = useState(null);
@@ -31,6 +37,7 @@ function BloombergBridgeApp() {
     FSBL.Clients.WindowClient.setComponentState({field: "activeTab", value: tabName,})
     setSelectedTab(tabName);
   }
+
 
 
   const shouldShowGroupZeroState = Object.keys(groupInfo).length === 0;
@@ -71,7 +78,8 @@ function BloombergBridgeApp() {
 
   const relayContextToBloomberg = (instrument: string) => {
     selectedGroupIds.forEach((groupId) => {
-      BloombergBridgeClient.runSetGroupContext(groupInfo[groupId], instrument, "", () => {});
+      BloombergBridgeClient.runSetGroupContext(groupInfo[groupId], instrument, "", () => {
+      });
     });
   }
 
@@ -86,6 +94,10 @@ function BloombergBridgeApp() {
 
   const updateLinks = (err: any, links: any) => {
     if (!err) {
+      if (links.value) {
+        // get and the listener have different return values
+        links = links.value;
+      }
       console.log(links)
       const filteredLinks = links.filter((link: any, index) => {
         link.index = index;
@@ -150,6 +162,7 @@ function BloombergBridgeApp() {
       setSecurity(instrument);
     })
 
+
     FSBL.Clients.WindowClient.getComponentState(
       {
         fields: ["activeTab"],
@@ -164,8 +177,14 @@ function BloombergBridgeApp() {
       },
     );
 
-  }, []);
+    FSBL.Clients.ConfigClient.addListener({field: linkPreferencesPath.join(".")}, updateLinks);
 
+    return () => {
+      FSBL.Clients.ConfigClient.removeListener({field: linkPreferencesPath.join(".")}, updateLinks);
+    };
+
+
+  }, []);
 
   return (
     <div id="container">
@@ -199,35 +218,27 @@ function BloombergBridgeApp() {
             <thead>
             <tr>
               <th>Display Name</th>
-              <th>FDC3 Intent</th>
-              <th>Context</th>
-              <th>&nbsp;</th>
-              <th>Command::Tails</th>
-              <th>Panel</th>
+              <th></th>
+              <th></th>
             </tr>
             </thead>
             <tbody>
             {links.map((link) =>
-              <Rule link={link} security={security}/>)}
+              <Rule link={link} security={security} editFunction={setEditLink}/>)}
             </tbody>
           </table>
 
           <h3>Add</h3>
-          <RuleForm activeLink={editLink} />
-
+          <RuleForm activeLink={editLink} editFunction={setEditLink}/>
         </div>
       </div>
     </div>
   )
 }
 
-const Rule = ({link, security}) => {
+const Rule = ({link, security, editFunction}) => {
   return <tr>
-    <td></td>
-    <td>{link.source.id}</td>
-    <td>{link.source.data}</td>
-    <td>---&gt;</td>
-    <td>{`${link.target.id}::${link.target.args.tails}`}</td>
+    <td>{getDisplayName(link)}</td>
     <td>{link.target.args.panel ?? 1}</td>
     <td>
       <button disabled={security === ""} onClick={() => {
@@ -240,50 +251,91 @@ const Rule = ({link, security}) => {
       }}>Run Command
       </button>
     </td>
+    <td>
+      <button onClick={() => {editFunction(link)}}>Edit</button>
+    </td>
   </tr>
 }
 
-const RuleForm = (activeLink) => {
+const RuleForm = ({activeLink, editFunction}) => {
   const [displayName, setDisplayName] = useState("")
   const [intent, setIntent] = useState("")
   const [command, setCommand] = useState("")
   const [tails, setTails] = useState("")
   const [panel, setPanel] = useState(1)
 
-  const saveLink = () => {
+
+  useEffect(() => {
+    if(activeLink) {
+      setIntent(activeLink.source.intent);
+      setCommand(activeLink.target.id)
+      setTails(activeLink.target.args.tails)
+      setPanel(activeLink.target.args.panel)
+      setDisplayName(activeLink.displayName);
+    }
+
+  }, [activeLink])
+
+  useEffect(() => {
+
+  }, [intent])
+
+
+  const saveLink = async () => {
     const value = {
       bidirectional: false,
       displayName,
       source: {
         id: intent,
-        data:"fdc3.instrument",
-        type:"fdc3.intent"
+        data: "fdc3.instrument",
+        type: "fdc3.intent"
       },
       target: {
         id: command,
-        data:"bbg.security",
-        type:"BloombergCommand",
+        data: "bbg.security",
+        type: "BloombergCommand",
         args: {
           tails,
           panel
         }
       }
     }
+
+    const response = await FSBL.Clients.ConfigClient.get(linkPreferencesPath);
+
+    if (!response.err) {
+      let links = response.data;
+      if (!Array.isArray(links)) {
+        links = [];
+      }
+      links[activeLink?.index ?? links.length] = value;
+
+      await FSBL.Clients.ConfigClient.setPreference({
+        field: linkPreferencesPath.join("."),
+        value: links,
+      });
+
+      setDisplayName("")
+      setIntent("")
+      setTails("")
+      setCommand("")
+      setPanel(1);
+      editFunction(null);
+    }
   }
 
-  console.log(activeLink)
   return <table role="presentation">
+    <tbody>
     <tr>
-      <th>Display Name</th> <td><input type="text"value={displayName} onChange={(e) => {
+      <th>Display Name</th>
+      <td><input type="text" value={displayName} onChange={(e) => {
         setDisplayName(e.target.value);
     }} /></td>
     </tr>
     <tr>
       <th>FDC3 Intent</th>
-      <td><select value={intent} onChange={(e) => {
-        setIntent(e.target.value);
-      }}>
-        <option>Select Intent</option>
+      <td><select value={intent} onChange={(e) => setIntent(e.target.value)}>
+        <option value="blank">Select Intent</option>
         <option value="ViewChart">ViewChart</option>
         <option value="ViewInstrument">ViewInstrument</option>
         <option value="CreateInteraction">CreateInteraction</option>
@@ -303,7 +355,6 @@ const RuleForm = (activeLink) => {
       </select>
       </td>
     </tr>
-    <tbody>
     <tr>
       <th>Command</th>
       <td>
@@ -317,7 +368,12 @@ const RuleForm = (activeLink) => {
     </tr>
     <tr>
       <th>Panel</th>
-      <td></td>
+      <td><select>
+        <option>1</option>
+        <option value={2}>2</option>
+        <option value={3}>3</option>
+        <option value={4}>4</option>
+      </select></td>
     </tr>
     <tr>
       <td>
