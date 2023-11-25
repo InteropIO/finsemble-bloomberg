@@ -156,6 +156,7 @@ h3 {
   text-align: center;
   flex-grow: 0;
   box-sizing: border-box;
+  text-transform: uppercase;
 }
 
 .add-form-container .stretchy-input {

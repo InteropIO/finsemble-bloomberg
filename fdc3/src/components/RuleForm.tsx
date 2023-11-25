@@ -40,7 +40,7 @@ export const RuleForm = ({ activeLink, editFunction, hideForm }) => {
         type: "fdc3.intent"
       },
       target: {
-        id: command,
+        id: command.toUpperCase(),
         data: "bbg.security",
         type: "BloombergCommand",
         args: {

@@ -312,7 +312,7 @@ function BloombergBridgeApp() {
     );
   };
 
-  const editARule = (link) => {
+  const editCommand = (link) => {
     console.log("click");
     setEditLink(link);
     setShowAddEditForm(true)
@@ -377,7 +377,7 @@ function BloombergBridgeApp() {
             </thead>
             <tbody>
             {links.map((link, index) =>
-              <Rule index={index} link={link} bbgSecurity={bbgSecurityString} editFunction={editARule} key={`rule-${index}`}/>)}
+              <Rule index={index} link={link} bbgSecurity={bbgSecurityString} editFunction={editCommand} key={`rule-${index}`}/>)}
             </tbody>
           </table>
           </>}
