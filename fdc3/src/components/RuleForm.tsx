@@ -79,32 +79,6 @@ export const RuleForm = ({ activeLink, editFunction, hideForm }) => {
     <table role="presentation" className="full-width">
       <tbody>
         <tr>
-          <th>Display Name</th>
-          <td>
-            <input type="text" value={displayName ?? ""} size={5} maxLength={64} 
-              className="stretchy-input"
-              onChange={(e) => setDisplayName(e.target.value)} />
-          </td>
-        </tr>
-        <tr>
-          <th>FDC3 Intent</th>
-          <td><select value={intent} className="stretchy-input"
-              onChange={(e) => setIntent(e.target.value)}>
-            <option value="">Select Intent</option>
-            <option value="CreateTradeTicket">CreateTradeTicket</option>
-            <option value="ViewChart">ViewChart</option>
-            <option value="ViewAnalysis">ViewAnalysis</option>
-            <option value="ViewHoldings">ViewHoldings</option>
-            <option value="ViewInstrument">ViewInstrument</option>
-            <option value="ViewNews">ViewNews</option>
-            <option value="ViewOptions">ViewOptions</option>
-            <option value="ViewOrders">ViewOrders</option>
-            <option value="ViewQuote">ViewQuote</option>
-            <option value="ViewResearch">ViewResearch</option>
-          </select>
-          </td>
-        </tr>
-        <tr>
           <th>Command</th>
           <td>
             <input value={command} aria-label="Command" type="text" size={5} maxLength={9} placeholder="DES"
@@ -127,6 +101,32 @@ export const RuleForm = ({ activeLink, editFunction, hideForm }) => {
             <option value={3}>3</option>
             <option value={4}>4</option>
           </select></td>
+        </tr>
+        <tr>
+          <th>FDC3 Intent</th>
+          <td><select value={intent} className="stretchy-input"
+              onChange={(e) => setIntent(e.target.value)}>
+            <option value="">Select Intent</option>
+            <option value="CreateTradeTicket">CreateTradeTicket</option>
+            <option value="ViewChart">ViewChart</option>
+            <option value="ViewAnalysis">ViewAnalysis</option>
+            <option value="ViewHoldings">ViewHoldings</option>
+            <option value="ViewInstrument">ViewInstrument</option>
+            <option value="ViewNews">ViewNews</option>
+            <option value="ViewOptions">ViewOptions</option>
+            <option value="ViewOrders">ViewOrders</option>
+            <option value="ViewQuote">ViewQuote</option>
+            <option value="ViewResearch">ViewResearch</option>
+          </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Display Name</th>
+          <td>
+            <input type="text" value={displayName ?? ""} size={5} maxLength={64} placeholder="optional"
+              className="stretchy-input"
+              onChange={(e) => setDisplayName(e.target.value)} />
+          </td>
         </tr>
         <tr>
           <th>&nbsp;</th>
