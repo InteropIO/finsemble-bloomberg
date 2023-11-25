@@ -42,10 +42,11 @@ function BloombergBridgeApp() {
   const [market, setMarket] = useState("");
   const [bbgSecurityString, setBbgSecurityString] = useState("");
   const [selectedTab, setSelectedTab] = useState(1);
-
+  const [showAddEditForm, setShowAddEditForm] = useState(false);
   
   const [groupInfo, setGroupInfo] = useRefState<Record<number, string>>({});
   const [selectedGroupIds, setSelectedGroupIds] = useRefState<number[]>([]);
+
   const [links, setLinks] = useState<any[]>([]);
 
   let contextListener: Listener | null = null;
@@ -310,6 +311,12 @@ function BloombergBridgeApp() {
       },
     );
   };
+
+  const editARule = (link) => {
+    console.log("click");
+    setEditLink(link);
+    setShowAddEditForm(true)
+  };
   
   useEffect(() => {
     // Retrieve configuration for terminal commands and listen for changes
@@ -362,22 +369,29 @@ function BloombergBridgeApp() {
 	{links.length > 0 && <>
           {instrument === "" && <div id="error-warning">Must have a security to run a command.</div>}
 
-          <table role="presentation">
+          <table role="presentation" className="full-width">
             <thead>
             <tr>
               <th>Command List</th>
-              <th></th>
-              <th></th>
             </tr>
             </thead>
             <tbody>
             {links.map((link, index) =>
-              <Rule link={link} bbgSecurity={bbgSecurityString} editFunction={setEditLink} key={`rule-${index}`}/>)}
+              <Rule index={index} link={link} bbgSecurity={bbgSecurityString} editFunction={editARule} key={`rule-${index}`}/>)}
             </tbody>
           </table>
           </>}
-          <h3>Add</h3>
-          <RuleForm activeLink={editLink} editFunction={setEditLink}/>
+          <div className="add-form-container" aria-disabled={!showAddEditForm}>
+            <h3>Add/edit terminal command</h3>
+            <RuleForm activeLink={editLink} editFunction={setEditLink} hideForm={() => {setShowAddEditForm(false)}}/>
+          </div>
+          <div className="flex center margin-top-10">
+            <div aria-disabled={showAddEditForm}
+              className="finsemble__btn add-form-button" title="Add terminal command"
+              onClick={() => {setShowAddEditForm(true)}}><span className="btn-label">Add command</span>
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>

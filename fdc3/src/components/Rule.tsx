@@ -1,12 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {getDisplayName} from "../common.ts";
+import {LINK_PREFERENCES_PATH, getDisplayName} from "../common.ts";
 
-export const Rule = ({link, bbgSecurity, editFunction}) => {
+const deleteLink = async (index: number) => {
+  const response = await FSBL.Clients.ConfigClient.get(LINK_PREFERENCES_PATH);
+
+  if (!response.err) {
+    let links = response.data as {}[];
+    if (!Array.isArray(links)) {
+      links = [];
+    }
+    links.splice(index);
+    
+    await FSBL.Clients.ConfigClient.setPreference({
+      field: LINK_PREFERENCES_PATH.join("."),
+      value: links,
+    });
+  }
+}
+
+export const Rule = ({index, link, bbgSecurity, editFunction}) => {
   const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
   return <tr>
-    <td>
-      <div className={`finsemble__btn accent ${bbgSecurity === "" ? "disabled" : ""}}`} title={getDisplayName(link)}
+    <td className="flex">
+      <span className={`finsemble__btn accent command-btn ${bbgSecurity === "" ? "disabled" : ""}}`} title={getDisplayName(link)}
            onClick={() => {
              BloombergBridgeClient.runBBGCommand(
                link.target.id,
@@ -19,12 +36,16 @@ export const Rule = ({link, bbgSecurity, editFunction}) => {
                  }
                }
              )
-           }}><span className="btn-label">{getDisplayName(link)}</span></div>
-    </td>
-    <td>
-      <div
-        className="finsemble__btn" title="Edit"
-        onClick={() => {editFunction(link)}}><span className="btn-label">Edit</span></div>
+           }}><span className="btn-label">{getDisplayName(link)}</span>
+      </span>
+      <span
+        className="finsemble__btn edit-btn" title="Edit"
+        onClick={() => {editFunction(link)}}><i className="ff-adp-edit"></i>
+      </span>
+      <span
+        className="finsemble__btn delete-btn" title="Delete"
+        onClick={() => {deleteLink(index)}}><i className="ff-adp-trash-outline"></i>
+      </span>
     </td>
   </tr>
 }

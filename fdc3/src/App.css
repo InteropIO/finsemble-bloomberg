@@ -82,12 +82,92 @@ html, body, #root {
   font-weight: bold;
 }
 
+.full-width {
+  width: 100%
+}
+
+.flex {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex.center {
+  justify-content: center;
+}
+
+.margin-top-10 {
+  margin-top: 10px;
+}
+
 table th {
   text-align: left;
+  min-width: 90px;
+  max-width: 90px;
+}
+
+td { 
+  padding: 1px;
 }
 
 button {
   cursor: pointer;
+}
+
+.add-form-container[aria-disabled=true] {
+  display: none;
+}
+
+.add-form-container[aria-disabled=false] {
+  display: block;
+}
+
+.add-form-button[aria-disabled=true] {
+  display: none;
+}
+
+.add-form-button[aria-disabled=false] {
+  display: flex;
+}
+
+.add-form-button {
+  flex-grow: 0;
+  height: 24px;
+  width: 120px;
+}
+
+.add-form-container {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: var(--core-primary-3);
+  overflow: auto;
+}
+
+.add-form-container table td {
+  display:flex;
+  flex-direction: row;
+}
+
+h3 {
+  margin-top: 5px;
+}
+
+.add-form-container .mnemonic-input {
+  width: 54px;
+  text-align: center;
+  flex-grow: 0;
+  box-sizing: border-box;
+}
+
+.add-form-container .stretchy-input {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 40px;
+  box-sizing: border-box;
+}
+
+.buttons-cell {
+  margin-top: 8px;
+  justify-content: flex-end;
 }
 
 /**
@@ -101,7 +181,18 @@ Copied From Finsemble can get this using including <FinsembleCss />
   cursor: pointer;
   display: flex;
   justify-content: center;
-  margin-bottom: 5px;
+  /* margin-bottom: 5px; */
+  
+}
+
+.edit-btn, .delete-btn {
+  width: 24px;
+  height: 24px;
+  background-color: var(--core-primary-4);
+}
+
+.command-btn {
+  flex-grow: 1;
 }
 
 .finsemble__btn span.btn-label {
