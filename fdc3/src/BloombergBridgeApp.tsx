@@ -367,7 +367,7 @@ function BloombergBridgeApp() {
 
         <div role="tabpanel" data-active={selectedTab === 2}>
 	{links.length > 0 && <>
-          {instrument === "" && <div id="error-warning">Must have a security to run a command.</div>}
+          {instrument === "" && <div className="error-warning">Must have a security to run a command.</div>}
 
           <table role="presentation" className="full-width">
             <thead>

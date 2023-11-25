@@ -77,9 +77,13 @@ html, body, #root {
   display: block;
 }
 
-#error-warning {
+.error-warning {
   color: var(--accent-negative);
   font-weight: bold;
+}
+
+.error-warning[aria-disabled=true]{
+  display: none;
 }
 
 .full-width {
