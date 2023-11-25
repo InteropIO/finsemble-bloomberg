@@ -52,14 +52,17 @@ function BloombergBridgeApp() {
 
   const bbgClient = (FSBL.Clients as any).BloombergBridgeClient;
 
+  /** Handles clicks on teh tab headers and stores state in teh workspace ensuring 
+   *  that the component restores with teh same taab selected. */
   const changeTab = (tabName: number) => {
     // Persist to storage
-    FSBL.Clients.WindowClient.setComponentState({field: "activeTab", value: tabName,})
+    FSBL.Clients.WindowClient.setComponentState({field: "activeTab", value: tabName})
     setSelectedTab(tabName);
   }
 
   const shouldShowGroupZeroState = Object.keys(groupInfo.current).length === 0;
 
+  /** Handles events from the LaunchPad group checkboxes. */
   const toggleIds = (id: number) => {
     console.log(`toggleIds: toggle ${id} in set ${JSON.stringify(selectedGroupIds.current)}`);
     const selected = new Set<number>([...selectedGroupIds.current]);
@@ -72,9 +75,12 @@ function BloombergBridgeApp() {
 
     const newSelectedGroupIds = [...selected];
     console.log(`toggleIds: toggle ${id} new set ${JSON.stringify(newSelectedGroupIds)}`);
+    FSBL.Clients.WindowClient.setComponentState({field: "selectedGroupIds", value: newSelectedGroupIds})
     setSelectedGroupIds(newSelectedGroupIds);    
   }
 
+  /** resolves a ticker and market string to Bloomberg Security String by conducting a search 
+   *  and taking the first result. */
   const resolveSecurity = async (ticker: string, market: string): Promise<string | null> => {
     const searchString = ticker + " " + market;
     return new Promise((resolve,reject) => {
@@ -116,6 +122,9 @@ function BloombergBridgeApp() {
     }
   };
 
+  /** If we don't have a current context, retrieve the current security of the indicated
+   *  Launchpad group and use that to set the current security.
+   */
   const maybeGrabGroupContext = (groupId: number) => {
     if (instrument !== "") {
       return;
@@ -130,12 +139,14 @@ function BloombergBridgeApp() {
           const contextParts = relevantGroup.value.split(" ");
           setInstrument(contextParts[0]);
           setMarket(contextParts[1]);
-
         }
       }
     });
   };
 
+  /** Sends the indicated ticker and market to the currently selected LaunchPad groups.
+   *  The ticker and market are resolved to a Bloomberg security string first.
+  */
   const relayContextToBloomberg = (ticker: string, market: string) => {
     //lookup the security first
     resolveSecurity(ticker, market).then((securityString) => {
@@ -151,11 +162,15 @@ function BloombergBridgeApp() {
     });
   }
 
+  /** Sends the indicated ticker and market to the current FDC3 user channel  as an
+   *  fdc3.instrument.
+  */
   const relayContextToFdc3 = (ticker: string, market: string) => {
     fdc3.broadcast({
       type: "fdc3.instrument",
       id: {
-        ticker: ticker
+        ticker: ticker,
+        BBG: `${ticker}:${market}` 
       },
       market: {
         BBG: market
@@ -163,6 +178,9 @@ function BloombergBridgeApp() {
     });
   }
 
+  /** Handles events from Launchpad groups which are sent on creating, renaming or 
+   *  deleting a group, and when the current context (secuity) of each group changes.
+   **/
   const groupEventHandler = (err, {data}: { data }) => {
     if (err) {
       console.error("Error on launchpad group event: ", err);
@@ -198,6 +216,10 @@ function BloombergBridgeApp() {
     }
   };
 
+  /**
+   * Retrieves the current set of LaunchPad groups and sets up listener
+   * for group events.
+   */
   const handleLaunchPadGroups = () => {
     console.log("Retrieving launchpad groups and setting up listener...");
     bbgClient.runGetAllGroups((err, data: { groups }) => {
@@ -215,6 +237,7 @@ function BloombergBridgeApp() {
     });
   };
 
+  /** Handles FDC3 context messages (fdc3.instrument) received from the FDC3 User Channel. */
   const fdc3ContextListener = (ctx) => {
     console.log("Received context broadcast: ", ctx);
     const ticker = ctx?.id?.ticker ?? ctx?.id?.CUSIP ?? ctx?.id?.ISIN ?? instrument;
@@ -225,18 +248,27 @@ function BloombergBridgeApp() {
     setMarket(tickerMarket);
   };
 
+  /** Sets up the FDC3 User Channel context listener */
   const setupContextListener = async () => {
     console.log("Listening for instruments from FDC3 user channels...")
     contextListener = await fdc3.addContextListener("fdc3.instrument", fdc3ContextListener);
   };
 
+  /** Removes the FDC3 User Channel context listener. */
   const tearDownContextListener = async () => {
     if (contextListener){
       contextListener.unsubscribe();
+      contextListener = null;
+    } else {
+      console.trace("tearDownContextListener: there was no context listener to remove...");
     }
   };
 
-  const retrieveBloombergLinkPreferences = () => {
+  /** Retrieves teh user preference used as state for the Bloomberg terminal commands
+   *  then listens for changes from the user prefences panel or other coopies of the 
+   *  app.
+   */
+  const handleBloombergLinkPreferences = () => {
     console.log("Retrieving Bloomberg link preferences...");
     FSBL.Clients.ConfigClient.get(LINK_PREFERENCES_PATH, updateLinks);
     FSBL.Clients.ConfigClient.addListener( LINK_PREFERENCES_PATH, updateLinks);
@@ -257,17 +289,22 @@ function BloombergBridgeApp() {
     }
   };
 
+  /** Retrieves the component state from the workspace and uses it to restore those settings. */
   const retrieveComponentState = () => {
     console.log("Retrieving component state...");
     FSBL.Clients.WindowClient.getComponentState(
       {
-        fields: ["activeTab"],
+        fields: ["activeTab","selectedGroupIds"],
       },
       (err, state) => {
         if (!err) {
           const fetchedTab = state["activeTab"];
           if (fetchedTab) {
             changeTab(fetchedTab)
+          }
+          const fetchedGroupIds = state["selectedGroupIds"];
+          if (fetchedGroupIds) {
+            setSelectedGroupIds(fetchedGroupIds);
           }
         }
       },
@@ -276,16 +313,16 @@ function BloombergBridgeApp() {
   
   useEffect(() => {
     // Retrieve configuration for terminal commands and listen for changes
-    retrieveBloombergLinkPreferences();
+    handleBloombergLinkPreferences();
+
+    //retrieve and restore any saved state in the workspace
+    retrieveComponentState();
 
     // Get initial list of groups and setup event listeners
     handleLaunchPadGroups();
 
     // Listen for context broadcasts
     setupContextListener();
-
-    //retrieve and restore any saved state in the workspace
-    retrieveComponentState();
 
     return () => {
       //remove listeners added above
