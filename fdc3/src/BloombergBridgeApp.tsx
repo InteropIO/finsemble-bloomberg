@@ -6,7 +6,9 @@ import {Rule} from "./components/Rule.tsx";
 import {RuleForm} from "./components/RuleForm.tsx";
 import {LINK_PREFERENCES_PATH} from "./common.ts";
 import { Listener } from "@finsemble/finsemble-core/dist/lib/typedefs/FDC3/api/Listener";
-import { FEAGlobals } from "@finsemble/finsemble-core";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { FEAGlobals/*, BloombergBridgeClient */ } from "@finsemble/finsemble-core";
+import { SecuritySearch } from "./components/SecuritySearch.tsx";
 
 const {useState, useEffect, useRef} = React;
 
@@ -15,7 +17,7 @@ function useRefState<T>(
 ): [React.MutableRefObject<T>, React.Dispatch<React.SetStateAction<T>>] {
   const [internalState, setInternalState] = React.useState<T>(initialState);
 
-  const state = React.useRef<T>(internalState);
+  const state = useRef<T>(internalState);
 
   const setState = (newState: React.SetStateAction<T>) => {
     if (newState instanceof Function) {
@@ -32,7 +34,8 @@ function useRefState<T>(
 
 
 function BloombergBridgeApp() {
-  const [editLink, setEditLink] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+	const [editLink, setEditLink] = useState(null);
   const [instrument, setInstrument] = useState("");
   const [market, setMarket] = useState("");
   const [bbgSecurityString, setBbgSecurityString] = useState("");
@@ -57,6 +60,65 @@ function BloombergBridgeApp() {
   }
 
   const shouldShowGroupZeroState = Object.keys(groupInfo.current).length === 0;
+
+  /**
+	 * Checks the connection to the BloombergBride and performs setup tasks if we've just connected.
+	 */
+	const checkConnection = () => {
+		bbgClient.checkConnection((err: any, resp: any /*BBGConnectionStatusMessage*/) => {
+      if (!err && resp === true) {
+        setIsConnected(true);
+      } else if (err) {
+        FSBL.Clients.Logger.error(
+          "Error received when checking connection",
+          err
+        );
+        setIsConnected(false);
+      } else {
+        FSBL.Clients.Logger.debug(
+          "Negative response when checking connection: ",
+          resp
+        );
+        setIsConnected(false);
+      }
+		});
+	};
+
+  /**
+   * Setup an event listener and periodic checks on the BloombergBridge connection.
+   */
+ const setupConnectionLifecycleChecks = () => {
+    //listen for connection events (listen/transmit)
+    bbgClient.setConnectionEventListener((event: { registered: boolean; enabled: boolean; connectedTo: string } /*BBGConnectionStatusMessage*/) => {
+      if (event.registered && event.enabled){
+        setIsConnected(true);
+        console.log("Connected to Bloomberg", event);
+      } else {
+        setIsConnected(false);
+        console.log("Disonnected to Bloomberg", event);
+      }
+    });
+  };
+
+  const handleConnectionToBloomberg = () => {
+    checkConnection();
+    setupConnectionLifecycleChecks();
+  };
+
+  const splitBbgSecurityString = (bbgSecurityString: string) => {
+    const contextParts = bbgSecurityString.split(" ");
+    const ticker = contextParts[0];
+    const tickerMarket = contextParts[1] ?? null;
+    const tickerType = contextParts[2] ?? null;
+    return {ticker, market: tickerMarket, type: tickerType};
+  }
+
+  const setCurrentSecurity = (bbgSecurityString: string) => {
+    setBbgSecurityString(bbgSecurityString);
+    const {ticker, market} = splitBbgSecurityString(bbgSecurityString);
+    setInstrument(ticker);
+    setMarket(market);
+  };
 
   /** Handles events from the LaunchPad group checkboxes. */
   const toggleIds = (id: number) => {
@@ -96,22 +158,22 @@ function BloombergBridgeApp() {
     });
   }
 
-  /** Handles events from LaunchPad groups */
-  const maybeSetSecurity = (ctx: string, id: number) => {
-    const contextParts = ctx.split(" ");
-    const ticker = contextParts[0];
-    const ticketMarket = contextParts[1];
+  /** Handles events from LaunchPad groups and search */
+  const maybeSetSecurity = (ctx: string, id?: number) => {
+    const {ticker, market: tickerMarket} = splitBbgSecurityString(ctx);
 
     //ignore events for non-selected groups and if we are already showing that security (as changes we pushed out are sent back to us)
-    if (instrument != ticker || market != ticketMarket){
-      if (selectedGroupIds.current.includes(id)) {
-        console.log(`handling event from selected group ${id}: ${JSON.stringify(groupInfo.current[id])}`, " Selected Groups: ", selectedGroupIds.current);
-        setBbgSecurityString(ctx);
-        setInstrument(ticker);
-        setMarket(ticketMarket);
-        relayContextToFdc3(ticker, ticketMarket);
+    if (instrument != ticker || market != tickerMarket){
+      if (id && selectedGroupIds.current.includes(id)) {
+        console.log(`handling event security event '${ctx}' from selected Launchpad group ${id}: ${JSON.stringify(groupInfo.current[id])}`, " Selected Groups: ", selectedGroupIds.current);
+        setCurrentSecurity(ctx);
+        relayContextToFdc3(ticker, tickerMarket);
+      } else if (!id) {
+        console.log(`Setting security '${ctx}' from search`);
+        setCurrentSecurity(ctx);
+        relayContextToFdc3(ticker, tickerMarket);
       } else {
-        console.log(`ignoring event from unselected group ${id}:`, groupInfo.current[id], " Selected Groups: ", selectedGroupIds.current);
+        console.log(`ignoring event from unselected Launchpad group ${id}:`, groupInfo.current[id], " Selected Groups: ", selectedGroupIds.current);
       }
     } else {
       console.log(`ignoring event as it wouldn't change the current ticker (${ticker}) and market (${market})`);
@@ -314,6 +376,9 @@ function BloombergBridgeApp() {
   };
   
   useEffect(() => {
+    //Make the component aware of the status of the bloomerg connection
+    handleConnectionToBloomberg();
+
     // Retrieve configuration for terminal commands and listen for changes
     handleBloombergLinkPreferences();
 
@@ -337,11 +402,13 @@ function BloombergBridgeApp() {
 
   return (
     <div id="container">
-      <div className="search">
+      {/* <div className="search">
         <input type="text" placeholder="Security search box" aria-label="Security" value={instrument} onChange={(e) => {
           setInstrument(e.target.value);
         }}/>
-      </div>
+      </div> */}
+
+      <SecuritySearch isConnected={isConnected} maybeSetSecurity={maybeSetSecurity} instrument={instrument} market={market}/>
 
       <div className="content">
         <div role="tablist">
@@ -386,13 +453,10 @@ function BloombergBridgeApp() {
               onClick={() => {setShowAddEditForm(true)}}><span className="btn-label">Add command</span>
             </div>
           </div>
-          
         </div>
       </div>
     </div>
   )
 }
-
-
 
 export default BloombergBridgeApp

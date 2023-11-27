@@ -19,7 +19,9 @@ const deleteLink = async (index: number) => {
   }
 }
 
-export const Rule = ({index, link, bbgSecurity, editFunction}) => {
+interface RuleProps {index: number, link: any, bbgSecurity: string, editFunction: (link: any) => void}
+
+export const Rule = ({index, link, bbgSecurity, editFunction}: RuleProps) => {
   const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
   return <tr>
     <td className="flex">
