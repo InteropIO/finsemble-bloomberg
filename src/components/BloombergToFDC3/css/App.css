@@ -98,7 +98,7 @@ html, body, #root {
 	flex-grow: 1;
 	flex-shrink: 1;
   overflow-y: auto;
-  /* height: 130px; */
+  flex-basis: 50px;
 }
 
 .react-autosuggest__suggestions-container--open {
