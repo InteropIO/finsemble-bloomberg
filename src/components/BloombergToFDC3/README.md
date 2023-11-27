@@ -8,8 +8,6 @@ See [Integrating Bloomberg Terminal Connect](https://documentation.finsemble.com
 
 The Launchpad tab demonstrates two-way communication between apps in Finsemble and Bloomberg Terminal connect using the linker.
 
-![img.png](img.png)
-
 This tab demonstrates:
 - Listening for instruments broadcast via FDC3 and setting the Launchpad group accordingly.
 - Listening for changes in the Launchpad groups' securities and using FDC3 to broadcasting the appropriate context to linked apps.  
@@ -20,17 +18,14 @@ This tab demonstrates:
 
 The Terminal tab sets up automatic relays that listen for intents, changes in launchpad and take the specified action.
 
-[Add image of the terminal tab here]
+This functionality demonstrated on this tab hooks into of the capabilities of the Bloomberg Bridge Service. This tab works by creating a list of relays stored in the Finsemble user preferences. The preferences are picked up by the Bloomberg Bridge service where it is acted upon. This is a simplified and improved version the Bloomberg preferences tab.
 
-This functionality on this tab hooks into of the capabilities of the Bloomberg Bridge Service. This tab works by creating a list of relays stored in the Finsemble user preferences. The preferences are picked up by the Bloomberg Bridge service where it is acted upon. This is a simplified version the Bloomberg preferences tab.
-
-The functionality capable from this tab:
-
-- Listening for when an intent is raised and relaying that
+This functionality available on this tab demonstrates:
+- Listening for when an intent is raised and running a Bloomberg command
 
 ## Running the example
 
-On the command line, from the root of the project, `cd fdc3` into the example's folder and run `npm install`. Run `npm run dev`.
+On the command line at the root of the project, install the project's dependencies `yarn install`. Build the source code by running `yarn build`. In a second commandline window run `yarn serve` 
 This will run and serve the example from a local server, the default should be `http://localhost:5173/`.
 
 ### Finsemble Config
@@ -41,29 +36,26 @@ The example is now ready to be run in the Finsemble environment. Add the example
 
 ```json
 {
-  "appId": "BloombergFDC3Demo",
-  "name": "Bloomberg FDC3 Demo",
-  "type": "web",
-  "details": {
-    "url": "http://localhost:5173/"
-  },
-  "hostManifests": {
-    "Finsemble": {
-      "component": {
-        "preload": ["$moduleRoot/preloads/BloombergBridgePreload.js"],
-      },
-      "foreign": {
-        "components": {
-          "Window Manager": {
-            "titlebarType": "injected"
-          },
-          "App Launcher": {
-            "launchableByUser": true
-          }
-        }
-      }
-    }
-  }
+	"appId": "BloombergFDC3Demo",
+	"name": "Bloomberg FDC3 Demo",
+	"type": "web",
+	"details": {
+		"url": "http://localhost:8080/components/BloombergToFDC3/"
+	},
+	"hostManifests": {
+		"Finsemble": {
+			"component": {
+				"preload": ["$moduleRoot/preloads/BloombergBridgePreload.js"]
+			}
+		},
+		"foreign": {
+			"components": {
+				"App Launcher": {
+					"launchableByUser": true
+				}
+			}
+		}
+	}
 }
 ```
 

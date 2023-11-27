@@ -3,7 +3,7 @@
 	"name": "Bloomberg FDC3 Demo",
 	"type": "web",
 	"details": {
-		"url": "http://localhost:5173/"
+		"url": "http://localhost:8080/components/BloombergToFDC3/"
 	},
 	"hostManifests": {
 		"Finsemble": {
@@ -15,9 +15,6 @@
 			"components": {
 				"App Launcher": {
 					"launchableByUser": true
-				},
-				"Window Manager": {
-					"titlebarType": "injected"
 				}
 			}
 		}
