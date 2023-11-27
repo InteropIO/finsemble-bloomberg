@@ -1,3 +1,40 @@
+/* Proposed standard for styling scrollbars. Not yet supported in 
+Webkit/Chrome/Electron but will be in the future.*/
+html, body {
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar-color) var(--core-primary)
+}
+
+/* Vendor prefix styles currently supported by Webkit/Chrome/Electron.*/
+/* html::-webkit-scrollbar,body::-webkit-scrollbar {
+	width: 6px;
+}
+
+html::-webkit-scrollbar-track,body::-webkit-scrollbar-track {
+	background: var(--core-primary);
+}
+
+html::-webkit-scrollbarS-thumb,body::-webkit-scrollbar-thumb {
+	background-color: var(--core-primary-4);
+	border-radius: 8px;
+	border: 1px solid var(--core-primary-3);
+} */
+
+::-webkit-scrollbar {
+	width: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--core-primary);
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: var(--core-primary-4);
+	border-radius: 8px;
+	border: 1px solid var(--core-primary-3);
+}
+
+
 html, body, #root {
   height: 100%;
   background: var(--core-primary-1);
@@ -32,14 +69,15 @@ html, body, #root {
 
 .content {
   font-weight: var(--font-weight);
-  padding: 10px;
+  margin: 8px;
   flex-grow: 1;
   flex-shrink: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Styles for the autosuggest component */
+/* Styles for the autosuggest component.
+   TODO: replace these with a react-themable theme: https://github.com/moroshko/react-autosuggest#theme-prop */
 .react-autosuggest__container {
 	background-color: var(--core-primary);
 	display: flex;
@@ -68,19 +106,20 @@ html, body, #root {
 
 .react-autosuggest__suggestions-container {
 	background-color: var(--core-primary-3);
-	display: block;
-	flex-grow: 1;
-	flex-shrink: 1;
+	display: flex;
+	flex-grow: 0;
+	flex-shrink: 0;
+  overflow-y: auto;
+  height: 130px;
 }
 
 .react-autosuggest__suggestions-container--open {
-	flex-grow: 0;
-	flex-shrink: 0;
+
 }
 
 .react-autosuggest__suggestions-list {
-	overflow-y: auto;
-  height: 130px;
+	flex-grow: 1;
+	flex-shrink: 1;
 }
 
 .react-autosuggest__suggestion {
@@ -118,7 +157,7 @@ html, body, #root {
 }
 
 [role='tablist']{
-  margin-top: 8px;
+  margin-top: 0px;
   display: flex;
   flex-grow: 0;
 	flex-shrink: 0;
