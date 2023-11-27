@@ -97,7 +97,7 @@ export const RuleForm = ({ activeLink, editFunction, hideForm }) => {
           <th>Panel</th>
           <td>  
             <select value={panel} onChange={(e) => setPanel(e.target.value)}>
-              <option value="">1</option>
+              <option value={1}>1</option>
               <option value={2}>2</option>
               <option value={3}>3</option>
               <option value={4}>4</option>
