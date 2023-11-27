@@ -1,10 +1,12 @@
+import {FEAGlobals, FinsembleCSS, FinsembleProvider} from "@finsemble/finsemble-core";
+import React from 'react';
 import ReactDOM from 'react-dom/client'
 import App from './App'
-import "./App.css";
+import "./css/App.css";
 
 const BridgeReady = () => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
-      <App />,
+    <><FinsembleCSS /><App /></>,
   )
 };
 

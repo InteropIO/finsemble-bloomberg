@@ -7,12 +7,12 @@ module.exports = {
   // Where webpack looks to start building the bundle
   entry: {
     "components/Bloomberg Demo": path.resolve(__dirname, 'src/components/Bloomberg Demo/index.tsx'),
-    "components/BloombergToFDC3": path.resolve(__dirname, 'src/components/BloombergToFDC3/index.tsx'),
+    "components/BloombergToFDC3": path.resolve(__dirname, 'src/components/BloombergToFDC3/main.tsx'),
   },
   watch:true,
 
   // mode: process.env.NODE_ENV,
-  
+
   // watch: process.env.NODE_ENV === "development",
 
   devServer: {
@@ -20,7 +20,7 @@ module.exports = {
       directory: path.join(__dirname, 'dist'),
     },
     compress: true,
-    port: 9000,
+    port: 8000,
   },
 
   // Where webpack outputs the assets and bundles
@@ -66,7 +66,10 @@ module.exports = {
       {
         test: /\.(sass|scss|css)$/,
         use: [
-          'style-loader',
+          {
+            loader:'style-loader',
+            options: { injectType: "lazySingletonStyleTag" }
+          },
           {
             loader: 'css-loader',
             options: { sourceMap: true, importLoaders: 1, modules: false },

@@ -2,13 +2,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React from "react";
-import {Rule} from "./components/Rule.tsx";
-import {RuleForm} from "./components/RuleForm.tsx";
-import {LINK_PREFERENCES_PATH} from "./common.ts";
+import {Rule} from "./components/Rule";
+import {RuleForm} from "./components/RuleForm";
+import {LINK_PREFERENCES_PATH} from "./common";
 import { Listener } from "@finsemble/finsemble-core/dist/lib/typedefs/FDC3/api/Listener";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FEAGlobals/*, BloombergBridgeClient */ } from "@finsemble/finsemble-core";
-import { SecuritySearch } from "./components/SecuritySearch.tsx";
+import { SecuritySearch } from "./components/SecuritySearch";
 
 const {useState, useEffect, useRef} = React;
 
@@ -233,7 +233,7 @@ function BloombergBridgeApp() {
       market: {
         BBG: market
       }
-    });
+    } as any);
   }
 
   /** Handles events from Launchpad groups which are sent on creating, renaming or 

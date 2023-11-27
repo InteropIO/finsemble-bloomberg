@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { LINK_PREFERENCES_PATH } from "../common.ts";
+import React, { useEffect, useState } from "react";
+import { LINK_PREFERENCES_PATH } from "../common";
 
 
 export const RuleForm = ({ activeLink, editFunction, hideForm }) => {

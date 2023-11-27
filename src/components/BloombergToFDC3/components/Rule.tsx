@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {LINK_PREFERENCES_PATH, getDisplayName} from "../common.ts";
+import {LINK_PREFERENCES_PATH, getDisplayName} from "../common";
+import React from 'react';
 
 const deleteLink = async (index: number) => {
   const response = await FSBL.Clients.ConfigClient.get(LINK_PREFERENCES_PATH);

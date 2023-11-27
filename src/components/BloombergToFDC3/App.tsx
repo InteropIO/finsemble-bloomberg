@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any  */
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import BloombergBridgeApp from "./BloombergBridgeApp";
 
 // This line imports type declarations for Finsemble's globals such as FSBL and fdc3. You can ignore any warnings that it is defined but never used.
