@@ -41,21 +41,19 @@ export const SecuritySearch = ({ isConnected, maybeSetSecurity, instrument, mark
 			BloombergBridgeClient.runSecurityLookup(
 				inputValue,
 				(err: any, data: any) => {
+					const securities: { name: string; type: string }[] = [];
 					if (err) {
 						FSBL.Clients.Logger.error(
 							`Error received from runSecurityLookup: search string: ${inputValue}, error: `,
 							err
 						);
-						setIsLoading(false);
-						setSuggestions([]);
 					} else {
-						const securities: { name: string; type: string }[] = [];
 						data.results.forEach((result: { name: string; type: string }) => {
 							securities.push({ name: result.name, type: result.type });
 						});
-						setIsLoading(true);
-						setSuggestions(securities);
 					}
+					setIsLoading(false);
+					setSuggestions(securities);
 					if (cb) {
 						cb();
 					}

@@ -51,22 +51,6 @@ html, body, #root {
   background: var(--titleBar-background-inactive-color);
 }
 
-/* Search Box */
-
-/* .search {
-  display: flex;
-  justify-content: space-around;
-}
-
-.search input {
-  border: 1px solid black;
-  border-radius: 4px;
-  padding: 4px;
-  width: 80vw;
-  margin: 8px;
-  text-align: center;
-} */
-
 .content {
   font-weight: var(--font-weight);
   margin: 8px;
@@ -76,8 +60,11 @@ html, body, #root {
   flex-direction: column;
 }
 
-/* Styles for the autosuggest component.
-   TODO: replace these with a react-themable theme: https://github.com/moroshko/react-autosuggest#theme-prop */
+/* Search Box 
+   Styles for the autosuggest component.
+
+   TODO: replace these with a react-themable theme: https://github.com/moroshko/react-autosuggest#theme-prop 
+*/
 .react-autosuggest__container {
 	background-color: var(--core-primary);
 	display: flex;
@@ -120,6 +107,8 @@ html, body, #root {
 .react-autosuggest__suggestions-list {
 	flex-grow: 1;
 	flex-shrink: 1;
+  list-style-type: none;
+	padding-left: 12px;
 }
 
 .react-autosuggest__suggestion {
@@ -140,7 +129,7 @@ html, body, #root {
 }
 
 
-/* Tabs */
+/* Tabs and forms */
 [role='tab']{
   background-color: var(--titlebar-tab-inactive-background-color);
   color: var(--titlebar-tab-inactive-font-color);
@@ -217,13 +206,11 @@ table th {
   max-width: 90px;
 }
 
-td { 
-  padding: 1px;
+#command-list tbody tr td { 
+  padding: 0px;
 }
 
-button {
-  cursor: pointer;
-}
+
 
 .add-form-container[aria-disabled=true] {
   display: none;
@@ -254,9 +241,10 @@ button {
   overflow: auto;
 }
 
-.add-form-container table td {
+.add-form-container table tbody tr td {
   display:flex;
   flex-direction: row;
+  padding: 2px;
 }
 
 h3 {
@@ -278,15 +266,27 @@ h3 {
   box-sizing: border-box;
 }
 
+/* Button styles */
+button {
+  cursor: pointer;
+}
+
 .buttons-cell {
   margin-top: 8px;
   justify-content: flex-end;
 }
 
-/**
-Copied From Finsemble can get this using including <FinsembleCss />
- */
-/* Button */
+.edit-btn, .delete-btn, .command-btn {
+  width: 25px;
+  height: 25px;
+  background-color: var(--core-primary-4);
+  margin-bottom: 0px;
+}
+
+.command-btn {
+  flex-grow: 1;
+}
+
 .finsemble__btn {
   align-items: center;
   background-color: var(--core-primary-3);
@@ -294,18 +294,10 @@ Copied From Finsemble can get this using including <FinsembleCss />
   cursor: pointer;
   display: flex;
   justify-content: center;
-}
-
-.edit-btn, .delete-btn {
-  width: 24px;
-  height: 24px;
-  background-color: var(--core-primary-4);
-  margin-bottom: 0px;
-}
-
-.command-btn {
-  flex-grow: 1;
-  margin-bottom: 0px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
 }
 
 .finsemble__btn span.btn-label {

@@ -36,26 +36,27 @@ The example is now ready to be run in the Finsemble environment. Add the example
 
 ```json
 {
-	"appId": "BloombergFDC3Demo",
-	"name": "Bloomberg FDC3 Demo",
-	"type": "web",
-	"details": {
-		"url": "http://localhost:8080/components/BloombergToFDC3/"
-	},
-	"hostManifests": {
-		"Finsemble": {
-			"component": {
-				"preload": ["$moduleRoot/preloads/BloombergBridgePreload.js"]
-			}
-		},
-		"foreign": {
-			"components": {
-				"App Launcher": {
-					"launchableByUser": true
-				}
-			}
-		}
-	}
+    "appId": "BloombergCPanel",
+    "name": "Bloomberg CPanel",
+    "title": "Bloomberg CPanel",
+    "type": "web",
+    "details": {
+        "url": "http://localhost:8080/components/BloombergToFDC3/"
+    },
+    "hostManifests": {
+        "Finsemble": {
+            "component": {
+                "preload": ["$moduleRoot/preloads/BloombergBridgePreload.js", "$moduleRoot/preloads/zoom.js"]
+            },
+            "foreign": {
+                "components": {
+                    "App Launcher": {
+                        "launchableByUser": true
+                    }
+                }
+            }
+        }
+    }
 }
 ```
 

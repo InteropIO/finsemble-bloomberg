@@ -431,7 +431,7 @@ function BloombergBridgeApp() {
 	{links.length > 0 && <>
           {instrument === "" && <div className="error-warning">Must have a security to run a command.</div>}
 
-          <table role="presentation" className="full-width">
+          <table role="presentation" className="full-width" id="command-list">
             <thead>
             <tr>
               <th>Command List</th>
