@@ -30,11 +30,6 @@ function useRefState<T>(
   return [state, setState];
 }
 
-/**
- * @TODO
- * Comment code
- * Persist Groups to ComponentState
- */
 
 function BloombergBridgeApp() {
   const [editLink, setEditLink] = useState(null);
@@ -53,8 +48,8 @@ function BloombergBridgeApp() {
 
   const bbgClient = (FSBL.Clients as any).BloombergBridgeClient;
 
-  /** Handles clicks on teh tab headers and stores state in teh workspace ensuring 
-   *  that the component restores with teh same taab selected. */
+  /** Handles clicks on the tab headers and stores state in the workspace ensuring
+   *  that the component restores with teh same tab selected. */
   const changeTab = (tabName: number) => {
     // Persist to storage
     FSBL.Clients.WindowClient.setComponentState({field: "activeTab", value: tabName})

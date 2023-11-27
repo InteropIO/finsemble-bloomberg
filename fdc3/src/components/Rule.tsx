@@ -10,7 +10,7 @@ const deleteLink = async (index: number) => {
     if (!Array.isArray(links)) {
       links = [];
     }
-    links.splice(index);
+    links.splice(index, 1);
     
     await FSBL.Clients.ConfigClient.setPreference({
       field: LINK_PREFERENCES_PATH.join("."),
