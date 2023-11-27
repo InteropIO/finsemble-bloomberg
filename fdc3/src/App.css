@@ -186,18 +186,18 @@ Copied From Finsemble can get this using including <FinsembleCss />
   cursor: pointer;
   display: flex;
   justify-content: center;
-  /* margin-bottom: 5px; */
-  
 }
 
 .edit-btn, .delete-btn {
   width: 24px;
   height: 24px;
   background-color: var(--core-primary-4);
+  margin-bottom: 0px;
 }
 
 .command-btn {
   flex-grow: 1;
+  margin-bottom: 0px;
 }
 
 .finsemble__btn span.btn-label {
