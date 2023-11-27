@@ -55,9 +55,10 @@ html, body, #root {
   font-weight: var(--font-weight);
   margin: 8px;
   flex-grow: 1;
-  flex-shrink: 1;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  flex-basis: 150px;
 }
 
 /* Search Box 
@@ -69,9 +70,9 @@ html, body, #root {
 	background-color: var(--core-primary);
 	display: flex;
 	flex-direction: column;
-	flex-grow: 0;
+	flex-grow: 1;
 	flex-shrink: 0;
-	height: 160px;
+	min-height: 80px;
   justify-content: space-around;
   margin: 8px;
 }
@@ -94,10 +95,10 @@ html, body, #root {
 .react-autosuggest__suggestions-container {
 	background-color: var(--core-primary-3);
 	display: flex;
-	flex-grow: 0;
-	flex-shrink: 0;
+	flex-grow: 1;
+	flex-shrink: 1;
   overflow-y: auto;
-  height: 130px;
+  /* height: 130px; */
 }
 
 .react-autosuggest__suggestions-container--open {
