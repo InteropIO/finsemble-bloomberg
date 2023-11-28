@@ -388,7 +388,6 @@ function BloombergBridgeApp() {
   };
 
   const editCommand = (link) => {
-    console.log("click");
     setEditLink(link);
     setShowAddEditForm(true)
   };
