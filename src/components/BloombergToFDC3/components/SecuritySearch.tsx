@@ -67,7 +67,8 @@ export const SecuritySearch = ({ isConnected, maybeSetSecurity, searchValue, set
 
 	const shouldRenderSuggestions = (value: string, reason: string) => {
 		//search string must contain a space and be at least 2 characters long (minus any trailing spaces)
-		return (!!value && (value.trim().length > 2 || (value.length == 2 && value.indexOf(' ') > -1)));
+		const trimmedValue = value.trim();
+		return (!!value && trimmedValue.length > 1);
 	};
 
 	const onSuggestionsFetchRequested = (
