@@ -5,10 +5,14 @@ const path = require('path');
 
 module.exports = {
   // Where webpack looks to start building the bundle
-  entry: {"components/Bloomberg Demo": path.resolve(__dirname, 'src/components/Bloomberg Demo/index.tsx')},
+  entry: {
+    "components/Bloomberg Demo": path.resolve(__dirname, 'src/components/Bloomberg Demo/index.tsx'),
+    "components/BloombergToFDC3": path.resolve(__dirname, 'src/components/BloombergToFDC3/main.tsx'),
+  },
+  watch:true,
 
   // mode: process.env.NODE_ENV,
-  
+
   // watch: process.env.NODE_ENV === "development",
 
   devServer: {
@@ -16,7 +20,7 @@ module.exports = {
       directory: path.join(__dirname, 'dist'),
     },
     compress: true,
-    port: 9000,
+    port: 8000,
   },
 
   // Where webpack outputs the assets and bundles
@@ -56,13 +60,37 @@ module.exports = {
       { test: /\.(?:ico|gif|png|jpg|jpeg)$/i, type: 'asset/resource' },
 
       // Fonts and SVGs: Inline files
-      { test: /\.(woff(2)?|eot|ttf|otf|svg|)$/, type: 'asset/inline' },
+      { test: /\.(woff(2)?|eot|ttf|otf)$/, type: 'asset/inline' },
+      {
+        test: /\.svg$/,
+        use: [
+          {
+            loader: "@svgr/webpack",
+            "options": {
+              "svgoConfig": {
+                "plugins": [
+                  {
+                    "name": "removeViewBox",
+                    "active": false
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "loader": "url-loader"
+          }
+        ]
+      },
       
       // Styles: Inject CSS into the head with source maps
       {
         test: /\.(sass|scss|css)$/,
         use: [
-          'style-loader',
+          {
+            loader:'style-loader',
+            options: { injectType: "lazySingletonStyleTag" }
+          },
           {
             loader: 'css-loader',
             options: { sourceMap: true, importLoaders: 1, modules: false },

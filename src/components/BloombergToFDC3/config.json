@@ -1,0 +1,22 @@
+{
+	"appId": "BloombergFDC3Demo",
+	"name": "Bloomberg FDC3 Demo",
+	"type": "web",
+	"details": {
+		"url": "http://localhost:8080/components/BloombergToFDC3/"
+	},
+	"hostManifests": {
+		"Finsemble": {
+			"component": {
+				"preload": ["$moduleRoot/preloads/BloombergBridgePreload.js"]
+			}
+		},
+		"foreign": {
+			"components": {
+				"App Launcher": {
+					"launchableByUser": true
+				}
+			}
+		}
+	}
+}
