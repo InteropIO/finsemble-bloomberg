@@ -419,12 +419,6 @@ function BloombergBridgeApp() {
 
   return (
     <div id="container">
-      {/* <div className="search">
-        <input type="text" placeholder="Security search box" aria-label="Security" value={instrument} onChange={(e) => {
-          setInstrument(e.target.value);
-        }}/>
-      </div> */}
-
       <SecuritySearch isConnected={isConnected} maybeSetSecurity={maybeSetSecurity} searchValue={searchValue} setSearchValue={setSearchValue}/>
 
       <div className="content">
