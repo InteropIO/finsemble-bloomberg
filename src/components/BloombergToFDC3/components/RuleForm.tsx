@@ -7,7 +7,7 @@ export const RuleForm = ({ activeLink, editFunction, hideForm }) => {
   const [intent, setIntent] = useState("")
   const [command, setCommand] = useState("")
   const [tails, setTails] = useState("")
-  const [panel, setPanel] = useState("1")
+  const [panel, setPanel] = useState("0")
   const [errorString, setErrorString] = useState("");
 
 
@@ -26,7 +26,7 @@ export const RuleForm = ({ activeLink, editFunction, hideForm }) => {
     setIntent("")
     setTails("")
     setCommand("")
-    setPanel("");
+    setPanel("0");
     editFunction(null);
     hideForm();
   }
