@@ -126,7 +126,7 @@ export const RuleForm = ({ activeLink, editFunction, hideForm }) => {
         <tr>
           <th>Display Name</th>
           <td>
-            <input type="text" value={displayName ?? ""} size={5} maxLength={64} placeholder="optional"
+            <input type="text" value={displayName} size={5} maxLength={64} placeholder="optional"
               className="stretchy-input"
               onChange={(e) => setDisplayName(e.target.value)} />
           </td>
