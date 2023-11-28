@@ -2,13 +2,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React from "react";
-import {Rule} from "./components/Rule";
-import {RuleForm} from "./components/RuleForm";
-import {LINK_PREFERENCES_PATH} from "./common";
+import { Rule } from "./components/Rule";
+import { RuleForm } from "./components/RuleForm";
+import { SecuritySearch } from "./components/SecuritySearch";
+import { LINK_PREFERENCES_PATH } from "./common";
 import { Listener } from "@finsemble/finsemble-core/dist/lib/typedefs/FDC3/api/Listener";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FEAGlobals/*, BloombergBridgeClient */ } from "@finsemble/finsemble-core";
-import { SecuritySearch } from "./components/SecuritySearch";
 
 const {useState, useEffect, useRef} = React;
 
@@ -39,11 +39,13 @@ function BloombergBridgeApp() {
   const [instrument, setInstrument] = useState("");
   const [market, setMarket] = useState("");
   const [bbgSecurityString, setBbgSecurityString] = useState("");
+  
   const [selectedTab, setSelectedTab] = useState(1);
   const [showAddEditForm, setShowAddEditForm] = useState(false);
   
   const [groupInfo, setGroupInfo] = useRefState<Record<number, string>>({});
   const [selectedGroupIds, setSelectedGroupIds] = useRefState<number[]>([]);
+  const [searchValue, setSearchValue] = useRefState<string>("");
 
   const [links, setLinks] = useState<any[]>([]);
 
@@ -95,7 +97,7 @@ function BloombergBridgeApp() {
         console.log("Connected to Bloomberg", event);
       } else {
         setIsConnected(false);
-        console.log("Disonnected to Bloomberg", event);
+        console.log("Disconnected from Bloomberg", event);
       }
     });
   };
@@ -107,9 +109,14 @@ function BloombergBridgeApp() {
 
   const splitBbgSecurityString = (bbgSecurityString: string) => {
     const contextParts = bbgSecurityString.split(" ");
-    const ticker = contextParts[0];
-    const tickerMarket = contextParts[1] ?? null;
-    const tickerType = contextParts[2] ?? null;
+    let ticker = contextParts[0];
+    let tickerMarket = contextParts[1] ?? null;
+    let tickerType = contextParts[2] ?? null;
+
+    if (ticker) { ticker = ticker.trim(); }
+    if (tickerMarket) { tickerMarket = tickerMarket.trim(); }
+    if (tickerType) { tickerType = tickerType.trim(); }
+
     return {ticker, market: tickerMarket, type: tickerType};
   }
 
@@ -118,6 +125,8 @@ function BloombergBridgeApp() {
     const {ticker, market} = splitBbgSecurityString(bbgSecurityString);
     setInstrument(ticker);
     setMarket(market);
+
+    //do not set the search value as this may have come from search
   };
 
   /** Handles events from the LaunchPad group checkboxes. */
@@ -149,7 +158,7 @@ function BloombergBridgeApp() {
             reject (`Error received from runSecurityLookup: search string: ${searchString}, error: ${JSON.stringify(err)}`);
           } else {
             if(data?.results && data?.results.length > 1 && data?.results[0].name) {
-              resolve(data?.results[0].name + " " + data?.results[0].type);
+              resolve(`${data?.results[0].name} ${data?.results[0].type}`);
             } else {
               resolve(null);
             }
@@ -162,21 +171,28 @@ function BloombergBridgeApp() {
   const maybeSetSecurity = (ctx: string, id?: number) => {
     const {ticker, market: tickerMarket} = splitBbgSecurityString(ctx);
 
-    //ignore events for non-selected groups and if we are already showing that security (as changes we pushed out are sent back to us)
-    if (instrument != ticker || market != tickerMarket){
-      if (id && selectedGroupIds.current.includes(id)) {
-        console.log(`handling event security event '${ctx}' from selected Launchpad group ${id}: ${JSON.stringify(groupInfo.current[id])}`, " Selected Groups: ", selectedGroupIds.current);
-        setCurrentSecurity(ctx);
-        relayContextToFdc3(ticker, tickerMarket);
-      } else if (!id) {
-        console.log(`Setting security '${ctx}' from search`);
-        setCurrentSecurity(ctx);
-        relayContextToFdc3(ticker, tickerMarket);
+    //ignore events that don't provide us with a ticker and market - might be a partial search entry
+    if (!!ticker && ticker.length > 1 && !!tickerMarket && tickerMarket.length > 1) {
+      //ignore events for non-selected groups and if we are already showing that security (as changes we pushed out are sent back to us)
+      if (instrument != ticker || market != tickerMarket){
+        if (id && selectedGroupIds.current.includes(id)) {
+          console.log(`Setting security '${ctx}' from selected Launchpad group ${id}: ${JSON.stringify(groupInfo.current[id])}`, " Selected Groups: ", selectedGroupIds.current);
+          setCurrentSecurity(ctx);
+          relayContextToFdc3(ticker, tickerMarket);
+          setSearchValue(ctx);
+        } else if (!id) {
+          console.log(`Setting security '${ctx}' from search`);
+          setCurrentSecurity(ctx);
+          relayContextToFdc3(ticker, tickerMarket);
+          relayContextToBloomberg(ticker, tickerMarket);
+        } else {
+          console.debug(`ignoring event from unselected Launchpad group ${id}:`, groupInfo.current[id], " Selected Groups: ", selectedGroupIds.current);
+        }
       } else {
-        console.log(`ignoring event from unselected Launchpad group ${id}:`, groupInfo.current[id], " Selected Groups: ", selectedGroupIds.current);
+        console.debug(`ignoring event as it wouldn't change the current ticker (${ticker}) and market (${market})`);
       }
     } else {
-      console.log(`ignoring event as it wouldn't change the current ticker (${ticker}) and market (${market})`);
+      console.debug(`ignoring event as as either the ticker (${ticker}) or market (${tickerMarket}) weren't valid`);
     }
   };
 
@@ -301,9 +317,11 @@ function BloombergBridgeApp() {
     const ticker = ctx?.id?.ticker ?? ctx?.id?.CUSIP ?? ctx?.id?.ISIN ?? instrument;
     const tickerMarket = ctx?.market?.BBG ?? ctx?.market?.COUNTRY_ISOALPHA2 ?? ctx?.market?.MIC ?? "US";
     
-    relayContextToBloomberg(ticker, tickerMarket);
     setInstrument(ticker);
     setMarket(tickerMarket);
+
+    relayContextToBloomberg(ticker, tickerMarket);
+    setSearchValue(`${ticker} ${market}`.trim());
   };
 
   /** Sets up the FDC3 User Channel context listener */
@@ -408,7 +426,7 @@ function BloombergBridgeApp() {
         }}/>
       </div> */}
 
-      <SecuritySearch isConnected={isConnected} maybeSetSecurity={maybeSetSecurity} instrument={instrument} market={market}/>
+      <SecuritySearch isConnected={isConnected} maybeSetSecurity={maybeSetSecurity} searchValue={searchValue} setSearchValue={setSearchValue}/>
 
       <div className="content">
         <div role="tablist">

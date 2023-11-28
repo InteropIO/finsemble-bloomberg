@@ -6,7 +6,7 @@ import Autosuggest, {
 	SuggestionsFetchRequestedParams,
 } from "react-autosuggest";
 
-export const SecuritySearch = ({ isConnected, maybeSetSecurity, instrument, market}) => {
+export const SecuritySearch = ({ isConnected, maybeSetSecurity, searchValue, setSearchValue}) => {
 	const BloombergBridgeClient = (FSBL.Clients as any).BloombergBridgeClient;
 
 	const [isLoading, setIsLoading] = useState(false);
@@ -17,7 +17,7 @@ export const SecuritySearch = ({ isConnected, maybeSetSecurity, instrument, mark
 	 *  the suggestion as the first result).
 	 */
 	const getSuggestionValue = (suggestion: { name: string; type: string }) =>
-		suggestion.name + " " + suggestion.type;
+		`${suggestion.name} ${suggestion.type ? suggestion.type : ""}`.trim();
 
 	/** Render suggestions for display in the suggestions list.
 	*/
@@ -65,6 +65,11 @@ export const SecuritySearch = ({ isConnected, maybeSetSecurity, instrument, mark
 		}
 	};
 
+	const shouldRenderSuggestions = (value: string, reason: string) => {
+		//search string must contain a space and be at least 2 characters long (minus any trailing spaces)
+		return (!!value && (value.trim().length > 2 || (value.length == 2 && value.indexOf(' ') > -1)));
+	};
+
 	const onSuggestionsFetchRequested = (
 		{
 			value,
@@ -74,7 +79,8 @@ export const SecuritySearch = ({ isConnected, maybeSetSecurity, instrument, mark
 		},
 		callback?: () => void
 	) => {
-		loadSuggestions(value, callback);
+		const trimmedValue = value.trim();
+		loadSuggestions(value.trim(), callback);
 	};
 
 	/**
@@ -84,14 +90,25 @@ export const SecuritySearch = ({ isConnected, maybeSetSecurity, instrument, mark
 		setSuggestions([]);
 	};
 
+	const setAndMaybeShareState = (securityStringToSet: string) => {
+		setSearchValue(securityStringToSet);
+
+		//Only set the security and communicate to FDC3 if this actually meets our minimum requirements
+		//  to avoid setting while they type 
+		if (shouldRenderSuggestions(securityStringToSet, "debounce")) {
+			//TODO: actually debounce here, with 500ms threshold
+			maybeSetSecurity(securityStringToSet);
+		}
+	};
+
 	// Autosuggest will pass through all these props to the input.
 	const inputProps: InputProps<any> = {
 		placeholder: "Enter a security...",
-		value: `${instrument} ${market}`,
+		value: searchValue.current,
 		onChange: (
 			event: FormEvent<HTMLElement>,
 			params: Autosuggest.ChangeEvent
-		) => maybeSetSecurity(params.newValue),
+		) => setAndMaybeShareState(params.newValue),
 	};
 
 	// Finally, render it!
@@ -105,7 +122,8 @@ export const SecuritySearch = ({ isConnected, maybeSetSecurity, instrument, mark
 			onSuggestionsClearRequested={() => onSuggestionsClearRequested()}
 			getSuggestionValue={getSuggestionValue}
 			renderSuggestion={renderSuggestion}
-			alwaysRenderSuggestions={true}
+			shouldRenderSuggestions={shouldRenderSuggestions}
+			//alwaysRenderSuggestions={true}
 			highlightFirstSuggestion={true}
 			inputProps={inputProps}
 		/>
