@@ -32,7 +32,8 @@ export const Rule = ({index, link, bbgSecurity, editFunction}: RuleProps) => {
                link.target.id,
                [bbgSecurity],
                link.target.args.panel ?? 1,
-               link.target.args.tails,
+               link.target.args.tails ?? "",
+
                (err) => {
                  if (err) {
                    console.error("Error on running terminal command: ", err);
