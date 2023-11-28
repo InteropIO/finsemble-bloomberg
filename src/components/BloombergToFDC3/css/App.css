@@ -311,14 +311,3 @@ button {
 .finsemble__btn.accent:focus {
   background-color: var(--accent-primary-1);
 }
-
-
-.finsemble__btn.disabled {
-
-}
-
-.finsemble__btn.disabled:hover,
-.finsemble__btn.disabled:focus {
-
-}
-
